@@ -20,7 +20,7 @@ A minimal, offline-first expense tracker built with the same stack as
 - Per-category breakdown with share bars
 - Month picker to browse past months
 - CSV export (download on web, share sheet on Android)
-- Currency switch: ₱ / $ / € / ¥ — defaults to the Philippine peso
+- Philippine peso only for now; the data model stays currency-aware for a later update
 - Erase-all-data control; nothing leaves the device unless you opt in
 - **Optional Google sign-in** for cross-device sync — off by default, app is fully usable without it
 

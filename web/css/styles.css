@@ -955,3 +955,31 @@ textarea.invalid {
 
 .amount-row.big + .field-error,
 .field-pair .field-error { margin-top: 4px; }
+
+/* ============================================================
+   Locked field (feature intentionally not available yet)
+   ============================================================ */
+
+.locked-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.locked-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  color: var(--grey);
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.28);
+  cursor: not-allowed;
+}
+.locked-value b { color: var(--gold); font-size: 1.05rem; }
+.locked-value svg { margin-left: auto; opacity: 0.7; }
+
+.locked-note { font-size: 0.72rem; color: var(--grey-dim); }

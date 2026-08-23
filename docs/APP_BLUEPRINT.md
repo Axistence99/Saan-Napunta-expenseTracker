@@ -26,7 +26,7 @@ data lives on the device and can be exported to CSV or erased outright.
 | In-app / launcher name | Saan Napunta? |
 | Store listing title | Saan Napunta? + Gastos Tracker (exactly 30 characters) |
 | Tagline shown under the header | GASTOS TRACKER |
-| Default currency | Philippine peso (₱) |
+| Currency | Philippine peso (₱) only — other currencies are deferred |
 | Audience | Filipino students, employees and freelancers tracking daily gastos |
 | Personality | Direct, a little self-deprecating, never preachy. Uses light Taglish in marketing copy but plain English inside the app |
 | Promise | Private by design. No account, no sync, no analytics |
@@ -108,7 +108,7 @@ stays on your device." Fields:
 | Province | Grouped dropdown | All 82 Philippine provinces in 18 optgroups by region, plus Metro Manila |
 | Sex at birth | Dropdown | Female · Male · Prefer not to say |
 | Occupation | Dropdown | Student · Employee · Prefer not to say |
-| Currency | Dropdown | ₱ default |
+| Currency | Locked row | Philippine peso only; shows a padlock and "More currencies are coming in a later update." |
 
 Primary button "Continue"; below it a quiet "Skip for now" that completes onboarding with
 no profile and no budget. Region grouping follows the PSGC after the 2024 creation of the
@@ -209,7 +209,7 @@ A second bottom sheet with the same chrome.
 - **Occupation** — Student · Employee · Prefer not to say.
 - **Budget period** — Daily / Weekly / Monthly / Yearly; changing it converts the amount.
 - **Budget** — numeric field, labelled with the active period; 0 or empty disables the meter.
-- **Currency** — ₱ (default), $, €, ¥.
+- **Currency** — locked to the Philippine peso, shown as a dashed read-only row with a padlock and a note that more are coming.
 - **Week starts on** — Monday (default) or Sunday.
 - **Erase all data** — outlined button that turns red on hover, with a confirmation prompt.
 - Footer note: "Everything lives in this browser's local storage. Clearing site data deletes
@@ -240,7 +240,7 @@ Config {
   name         string   legacy display name, mirrors firstName
   budget       number   amount for one budgetPeriod; 0 disables the meter
   budgetPeriod string   "day" | "week" | "month" | "year"
-  currency     string   "₱" | "$" | "€" | "¥"
+  currency     string   always "₱" while other currencies are locked
   weekStart    number   0 = Sunday, 1 = Monday
   onboarded    boolean  false shows the onboarding flow
 }
@@ -321,7 +321,8 @@ storage or arrives from another device.
 | Budget | 0 to 100,000,000 (0 disables the meter) | "That is over the ₱100,000,000.00 limit." |
 | Item / description / merchant | 60 / 200 / 40 characters, whitespace collapsed, control characters stripped | Truncated silently |
 | Photos | Images only, 12 MB each before compression, 3 per expense | "Only image files can be attached." / "That image is too large to attach." / "Only 3 photos per expense." |
-| Province, sex, occupation, currency, period | Must match a known option, otherwise cleared | Silent |
+| Province, sex, occupation, period | Must match a known option, otherwise cleared | Silent |
+| Currency | Forced to ₱ on read, whatever is stored | Silent |
 
 Invalid fields get a red border, an `aria-invalid` flag and a message underneath; the first
 offending field receives focus. Errors clear as soon as the value becomes valid.

@@ -172,6 +172,14 @@ only this object.
 
 `cacheStats` counts hits and misses; the number is surfaced in the big total's tooltip.
 
+#### Currency
+
+`CURRENCY` is a single constant declared above `DEFAULT_CONFIG` (it must stay there —
+`DEFAULT_CONFIG` reads it, and a later `const` would hit the temporal dead zone).
+`CURRENCIES` remains an array so re-enabling more is a one-line change. `sanitiseConfig()`
+forces the stored value to `CURRENCY`, so an old profile carrying `$` is corrected on load.
+`money()` and every formatting path are still currency-aware; only the pickers were removed.
+
 #### Validation
 
 `LIMITS` holds every numeric and length cap. Helpers: `cleanText(value, max)` (collapse

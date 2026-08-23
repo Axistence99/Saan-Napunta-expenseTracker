@@ -123,15 +123,14 @@
           </label>
         </div>
 
-        <label>
-          Currency
-          <select id="profileCurrency">
-            <option value="₱">Philippine peso (₱)</option>
-            <option value="$">US dollar ($)</option>
-            <option value="€">Euro (€)</option>
-            <option value="¥">Yen (¥)</option>
-          </select>
-        </label>
+        <div class="locked-field" aria-label="Currency">
+          <span class="locked-label">Currency</span>
+          <span class="locked-value">
+            <b>₱</b> Philippine peso
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
+          </span>
+          <span class="locked-note">More currencies are coming in a later update.</span>
+        </div>
 
         <button class="primary-button" id="stepOneNext" type="button">Continue</button>
         <button class="text-button center" id="skipOnboarding" type="button">Skip for now</button>
@@ -334,15 +333,14 @@
         <span id="budgetInputLabel">Monthly budget</span>
         <input id="budgetInput" type="number" inputmode="decimal" min="0" step="1" placeholder="e.g. 12000" />
       </label>
-      <label>
-        Currency
-        <select id="currencySelect">
-          <option value="₱">Philippine peso (₱)</option>
-          <option value="$">US dollar ($)</option>
-          <option value="€">Euro (€)</option>
-          <option value="¥">Yen (¥)</option>
-        </select>
-      </label>
+      <div class="locked-field" aria-label="Currency">
+        <span class="locked-label">Currency</span>
+        <span class="locked-value">
+          <b>₱</b> Philippine peso
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
+        </span>
+        <span class="locked-note">More currencies are coming in a later update.</span>
+      </div>
       <label>
         Week starts on
         <select id="weekStartSelect">

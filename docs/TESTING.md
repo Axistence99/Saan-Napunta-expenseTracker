@@ -17,7 +17,7 @@ python3 -m http.server 8080 --directory web
 5. **Delete** — open an entry, Delete this entry → row disappears, totals recompute.
 6. **Budget** — set 1000 in settings; meter fills. Add entries past 1000 → meter turns
    red and the legend reads "… over budget".
-7. **Currency** — switch to `$`; every amount and the entry sheet symbol update.
+7. **Currency** — no picker exists; both the onboarding step and Settings show a locked ₱ row. A profile stored with `"currency":"$"` is corrected to ₱ on load.
 8. **Month picker** — add an entry dated last month, switch months, verify the summary,
    breakdown and list all follow the selection.
 9. **CSV** — Export CSV downloads `saan-napunta-YYYY-MM.csv`; a note containing a quote

@@ -11,6 +11,14 @@
 
 const ENTRIES_KEY = "saan-napunta-entries";
 const CONFIG_KEY = "saan-napunta-config";
+/**
+ * Locked to the Philippine peso for now. The config field and every formatting path stay
+ * currency-aware, so enabling more later means extending this list and restoring the
+ * picker — no changes to storage, sync or the aggregate cache.
+ */
+const CURRENCY = "\u20b1";
+const CURRENCIES = [CURRENCY];
+
 const DEFAULT_CONFIG = {
   firstName: "",
   lastName: "",
@@ -21,7 +29,7 @@ const DEFAULT_CONFIG = {
   name: "", // legacy display name, kept in sync with firstName
   budget: 0,
   budgetPeriod: "month", // day | week | month | year
-  currency: "\u20b1",
+  currency: CURRENCY,
   weekStart: 1,
   onboarded: false
 };
@@ -95,7 +103,6 @@ const PROVINCES = [
 ];
 
 const OCCUPATIONS = { student: "Student", employee: "Employee", undisclosed: "Prefer not to say" };
-const CURRENCIES = ["\u20b1", "$", "\u20ac", "\u00a5"];
 const PROVINCE_SET = new Set(PROVINCES.flatMap(([, list]) => list));
 const SEXES = { female: "Female", male: "Male", undisclosed: "Prefer not to say" };
 
@@ -216,7 +223,7 @@ function sanitiseConfig(raw) {
     province: PROVINCE_SET.has(raw.province) ? raw.province : "",
     sexAtBirth: SEXES[raw.sexAtBirth] ? raw.sexAtBirth : "",
     occupation: OCCUPATIONS[raw.occupation] ? raw.occupation : "",
-    currency: CURRENCIES.includes(raw.currency) ? raw.currency : "\u20b1",
+    currency: CURRENCY,
     budget: clampNumber(raw.budget, 0, LIMITS.maxBudget) ?? 0,
     budgetPeriod: PERIODS[raw.budgetPeriod] ? raw.budgetPeriod : "month",
     weekStart: Number(raw.weekStart) === 0 ? 0 : 1,
@@ -988,7 +995,6 @@ function paint(agg) {
   renderEntries(agg);
   $("amountSymbol").textContent = config.currency;
   $("budgetInput").value = config.budget ? String(config.budget) : "";
-  $("currencySelect").value = config.currency;
   $("weekStartSelect").value = String(config.weekStart);
   $("firstNameInput").value = config.firstName || config.name || "";
   $("lastNameInput").value = config.lastName || "";
@@ -1367,13 +1373,6 @@ $("periodSelect").addEventListener("change", async (event) => {
   if (converted) toast(`Budget converted to ${money(converted)} per ${to}.`);
 });
 
-$("currencySelect").addEventListener("change", async (event) => {
-  config = { ...config, currency: event.target.value };
-  invalidate();
-  render({ allowSkeleton: false });
-  await storage.writeConfig(config);
-});
-
 $("weekStartSelect").addEventListener("change", async (event) => {
   config = { ...config, weekStart: Number(event.target.value) };
   await storage.writeConfig(config);
@@ -1431,7 +1430,7 @@ let draft = {
   province: "",
   sexAtBirth: "",
   occupation: "",
-  currency: "\u20b1",
+  currency: CURRENCY,
   period: "month",
   budget: 0
 };
@@ -1450,7 +1449,7 @@ function showStep(step) {
   }
   if (step === 3) {
     $("amountSub").textContent = `How much can you spend per ${draft.period}?`;
-    $("onboardSymbol").textContent = draft.currency;
+    $("onboardSymbol").textContent = CURRENCY;
     renderPresets();
     renderEquivalent();
     setTimeout(() => $("onboardBudget").focus(), 80);
@@ -1552,7 +1551,7 @@ function wireOnboarding() {
     draft.province = PROVINCE_SET.has($("province").value) ? $("province").value : "";
     draft.sexAtBirth = SEXES[$("sexAtBirth").value] ? $("sexAtBirth").value : "";
     draft.occupation = OCCUPATIONS[$("occupation").value] ? $("occupation").value : "";
-    draft.currency = CURRENCIES.includes($("profileCurrency").value) ? $("profileCurrency").value : "\u20b1";
+    draft.currency = CURRENCY;
     showStep(2);
   });
 
@@ -1633,7 +1632,6 @@ function maybeShowOnboarding() {
   fillProvinces($("province"), draft.province);
   $("sexAtBirth").value = draft.sexAtBirth;
   $("occupation").value = draft.occupation;
-  $("profileCurrency").value = draft.currency;
   $("onboard").hidden = false;
   showStep(1);
   setTimeout(() => $("firstName").focus(), 120);
