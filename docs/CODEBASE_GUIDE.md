@@ -383,7 +383,7 @@ battery in the background.
   `gold #E9C46A`, `brown #6B4A2F`, `brown_deep #3A2618`, `danger #E5484D`,
   `hairline #2A2233`.
 - `strings.xml` — `app_name` is the short **Saan Napunta?** (launcher labels truncate around
-  12 characters); `app_tagline` is **Gastos Tracker**; plus all UI copy.
+  12 characters); `app_tagline` is **Expense Tracker**; plus all UI copy.
 - `themes.xml` — `Theme.Material.NoActionBar`, dark status and navigation bars, accent colour.
 - `drawable/` — `ic_launcher` (vector), `splash_background` (gradient), `card_background`
   (22 dp rounded, hairline stroke), `fab_background` (orange oval gradient), and nine

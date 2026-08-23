@@ -1,26 +1,27 @@
 # Store listing — Saan Napunta?
 
 The product name is **Saan Napunta?** everywhere the user sees it in the app.
-The descriptor **Gastos Tracker** exists only in store metadata (and as a small in-app tagline),
+The descriptor **Expense Tracker** exists only in store metadata (and as a small in-app tagline),
 so the store listing explains what the app does without bloating the launcher label.
 
 ## Names at a glance
 
 | Surface | Value | Chars | Limit |
 | --- | --- | --- | --- |
-| Google Play title | `Saan Napunta? + Gastos Tracker` | 30 | 30 (hard reject above) |
+| Google Play title | `Saan Napunta - Expense Tracker` | 30 | 30 (hard reject above) |
 | Apple App Store name | `Saan Napunta?` | 13 | 30 |
-| Apple subtitle | `Gastos Tracker` | 14 | 30 |
+| Apple subtitle | `Expense Tracker` | 15 | 30 |
 | Play short description | see below | 66 | 80 |
 | Android launcher label (`app_name`) | `Saan Napunta?` | 13 | ~12 visible under the icon |
-| Web page `<title>` | `Saan Napunta - Expense Tracker` | 30 | — (no store limit applies) |
+| Web page `<title>` | `Saan Napunta - Expense Tracker` | 30 | — (matches the store title) |
 
 Notes:
 
-- The separator is a plus sign (`+`) with a space on each side: `Saan Napunta? + Gastos Tracker`
-  lands on exactly 30 characters. A single `+` is fine under Play policy — only excessive or
-  repeating decorative symbols are banned. Watch the budget: `Saan Napunta? + Expense Tracker`
-  is 31 characters and the Play Console will reject it.
+- The separator is a hyphen with a space on each side, and the question mark is dropped:
+  `Saan Napunta - Expense Tracker` lands on exactly 30 characters. Keeping both the question
+  mark and the plus sign — `Saan Napunta? + Expense Tracker` — is 31 characters and the Play
+  Console will reject it. If you want the question mark back, drop the separator instead:
+  `Saan Napunta? Expense Tracker` is 29.
 - Front-load the brand: search results truncate around 23–26 characters, so `Saan Napunta?`
   must come first.
 - One descriptor only. Extra keywords (budget, peso, ipon, kuripot, offline) belong in the

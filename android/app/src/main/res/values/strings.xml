@@ -1,8 +1,8 @@
 <resources>
     <!-- Launcher label: must stay short, Android truncates at ~12 chars under the icon. -->
     <string name="app_name">Saan Napunta?</string>
-    <!-- In-app tagline. The Play Store listing title is "Saan Napunta? + Gastos Tracker" (30 chars). -->
-    <string name="app_tagline">Gastos Tracker</string>
+    <!-- In-app tagline. The Play Store listing title is "Saan Napunta - Expense Tracker" (30 chars). -->
+    <string name="app_tagline">Expense Tracker</string>
     <string name="development_warning">Development build. This app is still being built: features may change and your data can be lost between updates.</string>
     <string name="privacy_note">Private by design. No account, no sync, no analytics.</string>
     <string name="add_expense">Add expense</string>

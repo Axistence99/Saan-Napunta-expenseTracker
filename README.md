@@ -4,7 +4,7 @@
 > and the data format still change between commits, and a stored ledger may not survive an
 > update. Export a CSV before clearing site data or reinstalling.
 
-**In-app / launcher name:** Saan Napunta? · **Store listing title:** Saan Napunta? + Gastos Tracker
+**In-app / launcher name:** Saan Napunta? · **Store listing title:** Saan Napunta - Expense Tracker
 (30 characters, the Play Store maximum — see [docs/STORE_LISTING.md](docs/STORE_LISTING.md)).
 
 A minimal, offline-first expense tracker built with the same stack as

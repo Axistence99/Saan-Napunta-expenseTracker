@@ -24,8 +24,8 @@ data lives on the device and can be exported to CSV or erased outright.
 | Attribute | Value |
 | --- | --- |
 | In-app / launcher name | Saan Napunta? |
-| Store listing title | Saan Napunta? + Gastos Tracker (exactly 30 characters) |
-| Tagline shown under the header | GASTOS TRACKER |
+| Store listing title | Saan Napunta - Expense Tracker (exactly 30 characters) |
+| Tagline shown under the header | EXPENSE TRACKER |
 | Currency | Philippine peso (₱) only — other currencies are deferred |
 | Audience | Filipino students, employees and freelancers tracking daily gastos |
 | Language | Plain English throughout the interface; the product name and merchant presets keep their Filipino terms |
