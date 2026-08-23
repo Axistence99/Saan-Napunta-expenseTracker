@@ -172,6 +172,19 @@ only this object.
 
 `cacheStats` counts hits and misses; the number is surfaced in the big total's tooltip.
 
+#### Validation
+
+`LIMITS` holds every numeric and length cap. Helpers: `cleanText(value, max)` (collapse
+whitespace, strip control characters, truncate), `clampNumber`, `ageFrom(isoDay)`,
+`validateBirthdate`, `validateName`, `validateEntryDate`, `validateAmount`, and the UI pair
+`setFieldError(field, message)` / `clearFieldErrors(scope)`.
+`applyInputLimits()` runs at boot and writes `min`, `max` and `maxLength` onto the live
+inputs so native pickers cannot offer an out-of-range value.
+
+Defence in depth: `sanitiseConfig()` and `normaliseEntry()` re-validate everything read from
+storage or received from sync, and the boot sequence writes a corrected config straight back.
+A hand-edited `localStorage` cannot inject bad amounts, unknown categories or invalid dates.
+
 #### Reference data
 
 `PROVINCES` is an array of `[regionLabel, [province, ...]]` pairs covering all 82 provinces

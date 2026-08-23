@@ -66,6 +66,21 @@ cd android && ./gradlew assembleDebug
 8. Rotate the device and reopen — data is intact (it is read from SharedPreferences).
 9. Erase all data → empty state returns.
 
+## Input limits
+
+1. **Birthdate** — 2030 is refused as future, a 2020 birthdate is refused as under 13, 1880
+   is refused as over 120, a normal date passes. The picker itself is capped to the valid
+   window.
+2. **Names** — "Juan123" is refused; "María-José O'Brien" is accepted.
+3. **Amount** — 0, negative, and anything over 10,000,000 are refused with distinct messages.
+4. **Expense date** — tomorrow and anything older than 10 years are refused.
+5. **Budget** — 0 disables the meter; over 100,000,000 is refused.
+6. **Photos** — a PDF is refused, a >12 MB image is refused, a fourth photo is refused.
+7. **Tampered storage** — paste junk into `localStorage` (unknown province, `budget: 5e12`,
+   `date: "not-a-date"`, a category that does not exist) and reload: the bad entry is
+   dropped, values are clamped, unknown options are cleared, and the corrected config is
+   written back.
+
 ## Regression watch: the hidden attribute
 
 `styles.css` declares `[hidden] { display: none !important; }` near the top. Without it any

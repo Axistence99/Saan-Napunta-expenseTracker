@@ -306,6 +306,29 @@ a preset being chosen.
 - Deleting an expense deletes its photos; erasing all data clears the whole bucket.
 - Entry rows show a small camera badge with the count.
 
+## 7e. Input limits
+
+Every limit is enforced three ways: as a native attribute so the picker cannot offer a bad
+value, as a check on submit with an inline message, and again when data is read back from
+storage or arrives from another device.
+
+| Field | Rule | Message when broken |
+| --- | --- | --- |
+| Birthdate | Not in the future; age 13 to 120 | "Birthdate cannot be in the future." / "You need to be at least 13 to use this app." / "Please check the year — that is over 120 years ago." |
+| First / last name | Letters, marks, spaces, hyphens, apostrophes, periods; 32 chars | "First name can only contain letters, spaces, hyphens and apostrophes." |
+| Expense amount | Greater than 0, at most 10,000,000 | "Enter an amount greater than zero." / "Amount cannot be negative." / "That is over the ₱10,000,000.00 limit." |
+| Expense date | Not in the future, not older than 10 years | "You cannot log an expense in the future." / "Expenses older than 10 years cannot be added." |
+| Budget | 0 to 100,000,000 (0 disables the meter) | "That is over the ₱100,000,000.00 limit." |
+| Item / description / merchant | 60 / 200 / 40 characters, whitespace collapsed, control characters stripped | Truncated silently |
+| Photos | Images only, 12 MB each before compression, 3 per expense | "Only image files can be attached." / "That image is too large to attach." / "Only 3 photos per expense." |
+| Province, sex, occupation, currency, period | Must match a known option, otherwise cleared | Silent |
+
+Invalid fields get a red border, an `aria-invalid` flag and a message underneath; the first
+offending field receives focus. Errors clear as soon as the value becomes valid.
+
+Names accept any script, so "María-José", "Ñoña" and non-Latin names all pass; only digits,
+symbols and markup are rejected.
+
 ## 8. Business rules
 
 1. A month is identified by the first seven characters of `date`.

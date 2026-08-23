@@ -933,3 +933,25 @@ select optgroup {
 select optgroup option { color: #f5efe6; font-weight: 400; }
 
 .greeting[data-tip] { cursor: help; }
+
+/* ============================================================
+   Validation feedback
+   ============================================================ */
+
+input.invalid,
+select.invalid,
+textarea.invalid {
+  border-color: var(--danger);
+  background: rgba(229, 72, 77, 0.08);
+}
+
+.field-error {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.74rem;
+  line-height: 1.3;
+  color: var(--danger);
+}
+
+.amount-row.big + .field-error,
+.field-pair .field-error { margin-top: 4px; }

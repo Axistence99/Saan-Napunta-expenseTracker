@@ -95,6 +95,8 @@ const PROVINCES = [
 ];
 
 const OCCUPATIONS = { student: "Student", employee: "Employee", undisclosed: "Prefer not to say" };
+const CURRENCIES = ["\u20b1", "$", "\u20ac", "\u00a5"];
+const PROVINCE_SET = new Set(PROVINCES.flatMap(([, list]) => list));
 const SEXES = { female: "Female", male: "Male", undisclosed: "Prefer not to say" };
 
 /** Fills a <select> with optgroup-ed provinces. */
@@ -154,7 +156,8 @@ let ready = false;
 const storage = {
   readConfig() {
     try {
-      return { ...DEFAULT_CONFIG, ...JSON.parse(localStorage.getItem(CONFIG_KEY) || "{}") };
+      const raw = { ...DEFAULT_CONFIG, ...JSON.parse(localStorage.getItem(CONFIG_KEY) || "{}") };
+      return sanitiseConfig(raw);
     } catch {
       return { ...DEFAULT_CONFIG };
     }
@@ -166,7 +169,8 @@ const storage = {
       if (!Array.isArray(parsed)) return [];
       return parsed
         .filter((e) => e && e.id && (e.deleted || Number.isFinite(Number(e.amount))))
-        .map(normaliseEntry);
+        .map(normaliseEntry)
+        .filter((e) => e.deleted || /^\d{4}-\d{2}-\d{2}$/.test(e.date));
     } catch {
       return [];
     }
@@ -197,13 +201,48 @@ const storage = {
   }
 };
 
+/** Anything stored can be edited by hand or arrive from another device; re-check it. */
+function sanitiseConfig(raw) {
+  const firstName = cleanText(raw.firstName || raw.name, LIMITS.name);
+  return {
+    ...raw,
+    firstName: validateName(firstName, "x") ? "" : firstName,
+    lastName: (() => {
+      const value = cleanText(raw.lastName, LIMITS.name);
+      return validateName(value, "x") ? "" : value;
+    })(),
+    name: validateName(firstName, "x") ? "" : firstName,
+    birthdate: validateBirthdate(raw.birthdate) ? "" : raw.birthdate || "",
+    province: PROVINCE_SET.has(raw.province) ? raw.province : "",
+    sexAtBirth: SEXES[raw.sexAtBirth] ? raw.sexAtBirth : "",
+    occupation: OCCUPATIONS[raw.occupation] ? raw.occupation : "",
+    currency: CURRENCIES.includes(raw.currency) ? raw.currency : "\u20b1",
+    budget: clampNumber(raw.budget, 0, LIMITS.maxBudget) ?? 0,
+    budgetPeriod: PERIODS[raw.budgetPeriod] ? raw.budgetPeriod : "month",
+    weekStart: Number(raw.weekStart) === 0 ? 0 : 1,
+    onboarded: Boolean(raw.onboarded)
+  };
+}
+
 function stripRuntimeFlags({ pending, failed, ...rest }) {
   return rest;
 }
 
 /** Older records predate sync; give them an updatedAt so the merge can order them. */
 function normaliseEntry(entry) {
-  return { ...entry, updatedAt: Number(entry.updatedAt || entry.created || 0) };
+  if (entry.deleted) {
+    return { ...entry, updatedAt: Number(entry.updatedAt || entry.created || 0) };
+  }
+  return {
+    ...entry,
+    amount: clampNumber(entry.amount, 0, LIMITS.maxAmount) ?? 0,
+    category: catById(entry.category).id,
+    merchant: cleanText(entry.merchant, LIMITS.merchant),
+    item: cleanText(entry.item, LIMITS.item),
+    note: cleanText(entry.note, LIMITS.note),
+    photoCount: clampNumber(entry.photoCount, 0, MAX_PHOTOS) ?? 0,
+    updatedAt: Number(entry.updatedAt || entry.created || 0)
+  };
 }
 
 /** Tombstones stay in storage so deletions propagate to other devices. */
@@ -214,6 +253,149 @@ function tombstone(entry) {
 /** Entries excluding tombstones. */
 function liveEntries() {
   return entries.filter((e) => !e.deleted);
+}
+
+
+/* ============================================================
+   Input limits and validation
+   ============================================================ */
+
+const LIMITS = {
+  minAge: 13,
+  maxAge: 120,
+  maxAmount: 10000000,     // 10M in one expense
+  maxBudget: 100000000,    // 100M for a yearly budget
+  entryPastYears: 10,      // how far back an expense may be dated
+  maxPhotoBytes: 12 * 1024 * 1024,
+  name: 32,
+  item: 60,
+  note: 200,
+  merchant: 40
+};
+
+/** Letters (any script), marks, spaces and the punctuation real names use. */
+const NAME_PATTERN = /^[\p{L}][\p{L}\p{M}'.\-\s]*$/u;
+
+function shiftYears(years) {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - years);
+  return dayKey(date);
+}
+
+/** Collapses whitespace and strips control characters. */
+function cleanText(value, max) {
+  return String(value ?? "")
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, max);
+}
+
+function clampNumber(value, min, max) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return null;
+  return Math.min(max, Math.max(min, number));
+}
+
+/** Whole years between a date string and today; null when unparseable. */
+function ageFrom(isoDay) {
+  if (!isoDay) return null;
+  const [year, month, day] = isoDay.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  const birth = new Date(year, month - 1, day);
+  if (Number.isNaN(birth.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - year;
+  const beforeBirthday =
+    now.getMonth() < month - 1 || (now.getMonth() === month - 1 && now.getDate() < day);
+  if (beforeBirthday) age -= 1;
+  return age;
+}
+
+function validateBirthdate(value) {
+  if (!value) return null; // optional
+  if (value > todayKey()) return "Birthdate cannot be in the future.";
+  const age = ageFrom(value);
+  if (age === null) return "That date does not look right.";
+  if (age > LIMITS.maxAge) return `Please check the year — that is over ${LIMITS.maxAge} years ago.`;
+  if (age < LIMITS.minAge) return `You need to be at least ${LIMITS.minAge} to use this app.`;
+  return null;
+}
+
+function validateName(value, label) {
+  if (!value) return null;
+  if (value.length > LIMITS.name) return `${label} is too long.`;
+  if (!NAME_PATTERN.test(value)) return `${label} can only contain letters, spaces, hyphens and apostrophes.`;
+  return null;
+}
+
+function validateEntryDate(value) {
+  if (!value) return "Pick a date.";
+  if (value > todayKey()) return "You cannot log an expense in the future.";
+  if (value < shiftYears(LIMITS.entryPastYears)) {
+    return `Expenses older than ${LIMITS.entryPastYears} years cannot be added.`;
+  }
+  return null;
+}
+
+function validateAmount(raw, { max = LIMITS.maxAmount, allowZero = false } = {}) {
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return { error: "Enter a number." };
+  if (value < 0) return { error: "Amount cannot be negative." };
+  if (!allowZero && value <= 0) return { error: "Enter an amount greater than zero." };
+  if (value > max) return { error: `That is over the ${money(max)} limit.` };
+  return { value: Math.round(value * 100) / 100 };
+}
+
+/** Marks a field invalid and shows the reason underneath it. */
+function setFieldError(field, message) {
+  const node = typeof field === "string" ? $(field) : field;
+  if (!node) return;
+  node.classList.toggle("invalid", Boolean(message));
+  node.setAttribute("aria-invalid", String(Boolean(message)));
+
+  const holder = node.closest("label") || node.parentElement;
+  let hint = holder?.querySelector(":scope > .field-error");
+  if (message) {
+    if (!hint) {
+      hint = document.createElement("span");
+      hint.className = "field-error";
+      hint.setAttribute("role", "alert");
+      holder.appendChild(hint);
+    }
+    hint.textContent = message;
+  } else if (hint) {
+    hint.remove();
+  }
+}
+
+function clearFieldErrors(scope) {
+  scope.querySelectorAll(".field-error").forEach((node) => node.remove());
+  scope.querySelectorAll(".invalid").forEach((node) => {
+    node.classList.remove("invalid");
+    node.removeAttribute("aria-invalid");
+  });
+}
+
+/** Applies min/max attributes so the native pickers cannot offer bad values. */
+function applyInputLimits() {
+  const birthdate = $("birthdate");
+  birthdate.max = shiftYears(LIMITS.minAge);
+  birthdate.min = shiftYears(LIMITS.maxAge);
+
+  const entryDate = $("dateInput");
+  entryDate.max = todayKey();
+  entryDate.min = shiftYears(LIMITS.entryPastYears);
+
+  $("amountInput").max = String(LIMITS.maxAmount);
+  $("onboardBudget").max = String(LIMITS.maxBudget);
+  $("budgetInput").max = String(LIMITS.maxBudget);
+  $("itemInput").maxLength = LIMITS.item;
+  $("noteInput").maxLength = LIMITS.note;
+  $("merchantInput").maxLength = LIMITS.merchant;
+  [$("firstName"), $("lastName"), $("firstNameInput"), $("lastNameInput")].forEach((node) => {
+    node.maxLength = LIMITS.name;
+  });
 }
 
 /* ============================================================
@@ -912,6 +1094,7 @@ function openEntrySheet(id = null) {
   $("saveEntry").textContent = entry ? "Save changes" : "Save expense";
   $("deleteEntry").hidden = !entry;
 
+  clearFieldErrors($("entryForm"));
   renderChips();
   renderMerchants();
   renderPhotoStrip();
@@ -960,20 +1143,38 @@ async function commit(mutate, { success, failure }) {
 
 $("entryForm").addEventListener("submit", (event) => {
   event.preventDefault();
-  const amount = Math.round(Number($("amountInput").value) * 100) / 100;
-  if (!Number.isFinite(amount) || amount <= 0) {
-    toast("Enter an amount greater than zero.", "error");
+  const form = $("entryForm");
+  clearFieldErrors(form);
+
+  const check = validateAmount($("amountInput").value);
+  if (check.error) {
+    setFieldError("amountInput", check.error);
+    toast(check.error, "error");
+    $("amountInput").focus();
+    return;
+  }
+  const amount = check.value;
+
+  const dateValue = $("dateInput").value || todayKey();
+  const dateError = validateEntryDate(dateValue);
+  if (dateError) {
+    setFieldError("dateInput", dateError);
+    toast(dateError, "error");
+    $("dateInput").focus();
     return;
   }
 
-  const merchant = merchantIsCustom ? $("merchantInput").value.trim() : selectedMerchant;
+  const merchant = cleanText(
+    merchantIsCustom ? $("merchantInput").value : selectedMerchant,
+    LIMITS.merchant
+  );
   const payload = {
     amount,
     category: selectedCategory,
     merchant,
-    item: $("itemInput").value.trim(),
-    note: $("noteInput").value.trim(),
-    date: $("dateInput").value || todayKey(),
+    item: cleanText($("itemInput").value, LIMITS.item),
+    note: cleanText($("noteInput").value, LIMITS.note),
+    date: dateValue,
     photoCount: draftPhotos.length
   };
 
@@ -1070,8 +1271,25 @@ $("toggleMerchant").addEventListener("click", () => {
 });
 
 $("photoInput").addEventListener("change", async (event) => {
-  const files = [...event.target.files].slice(0, MAX_PHOTOS - draftPhotos.length);
+  const picked = [...event.target.files];
   event.target.value = "";
+
+  const rejected = picked.filter(
+    (file) => !file.type.startsWith("image/") || file.size > LIMITS.maxPhotoBytes
+  );
+  if (rejected.length) {
+    toast(
+      rejected.some((f) => !f.type.startsWith("image/"))
+        ? "Only image files can be attached."
+        : "That image is too large to attach.",
+      "error"
+    );
+  }
+
+  const room = MAX_PHOTOS - draftPhotos.length;
+  const usable = picked.filter((file) => !rejected.includes(file));
+  if (usable.length > room) toast(`Only ${MAX_PHOTOS} photos per expense.`);
+  const files = usable.slice(0, room);
   if (!files.length) return;
   try {
     const encoded = await Promise.all(files.map(compressImage));
@@ -1092,7 +1310,14 @@ $("monthPicker").addEventListener("change", (event) => {
 });
 
 $("budgetInput").addEventListener("change", async (event) => {
-  config = { ...config, budget: Math.max(0, Number(event.target.value) || 0) };
+  const check = validateAmount(event.target.value, { max: LIMITS.maxBudget, allowZero: true });
+  if (check.error) {
+    setFieldError(event.target, check.error);
+    toast(check.error, "error");
+    return;
+  }
+  setFieldError(event.target, null);
+  config = { ...config, budget: check.value };
   invalidate();
   render({ allowSkeleton: false });
   await storage.writeConfig(config);
@@ -1100,13 +1325,30 @@ $("budgetInput").addEventListener("change", async (event) => {
 
 ["firstNameInput", "lastNameInput", "provinceInput", "occupationInput"].forEach((id) => {
   $(id).addEventListener("change", async (event) => {
-    const value = event.target.value.trim ? event.target.value.trim() : event.target.value;
     const field = {
       firstNameInput: "firstName",
       lastNameInput: "lastName",
       provinceInput: "province",
       occupationInput: "occupation"
     }[id];
+
+    let value = event.target.value;
+    if (field === "firstName" || field === "lastName") {
+      value = cleanText(value, LIMITS.name);
+      const problem = validateName(value, field === "firstName" ? "First name" : "Last name");
+      if (problem) {
+        setFieldError(event.target, problem);
+        toast(problem, "error");
+        return;
+      }
+      setFieldError(event.target, null);
+      event.target.value = value;
+    } else if (field === "province" && !PROVINCE_SET.has(value)) {
+      value = "";
+    } else if (field === "occupation" && !OCCUPATIONS[value]) {
+      value = "";
+    }
+
     config = { ...config, [field]: value };
     if (field === "firstName") config.name = value;
     render({ allowSkeleton: false });
@@ -1284,20 +1526,44 @@ async function finishOnboarding({ budget }) {
 
 function wireOnboarding() {
   $("stepOneNext").addEventListener("click", () => {
-    const firstName = $("firstName").value.trim();
-    if (!firstName) {
-      toast("Enter at least your first name, or tap Skip for now.", "error");
-      $("firstName").focus();
+    const step = document.querySelector('.step[data-step="1"]');
+    clearFieldErrors(step);
+
+    const firstName = cleanText($("firstName").value, LIMITS.name);
+    const lastName = cleanText($("lastName").value, LIMITS.name);
+    const birthdate = $("birthdate").value;
+
+    const problems = [
+      ["firstName", firstName ? validateName(firstName, "First name") : "Enter your first name, or tap Skip for now."],
+      ["lastName", validateName(lastName, "Last name")],
+      ["birthdate", validateBirthdate(birthdate)]
+    ].filter(([, message]) => message);
+
+    if (problems.length) {
+      problems.forEach(([id, message]) => setFieldError(id, message));
+      $(problems[0][0]).focus();
+      toast(problems[0][1], "error");
       return;
     }
+
     draft.firstName = firstName;
-    draft.lastName = $("lastName").value.trim();
-    draft.birthdate = $("birthdate").value;
-    draft.province = $("province").value;
-    draft.sexAtBirth = $("sexAtBirth").value;
-    draft.occupation = $("occupation").value;
-    draft.currency = $("profileCurrency").value;
+    draft.lastName = lastName;
+    draft.birthdate = birthdate;
+    draft.province = PROVINCE_SET.has($("province").value) ? $("province").value : "";
+    draft.sexAtBirth = SEXES[$("sexAtBirth").value] ? $("sexAtBirth").value : "";
+    draft.occupation = OCCUPATIONS[$("occupation").value] ? $("occupation").value : "";
+    draft.currency = CURRENCIES.includes($("profileCurrency").value) ? $("profileCurrency").value : "\u20b1";
     showStep(2);
+  });
+
+  // Live feedback while typing, so errors clear as soon as they are fixed.
+  $("birthdate").addEventListener("change", (event) =>
+    setFieldError("birthdate", validateBirthdate(event.target.value))
+  );
+  ["firstName", "lastName"].forEach((id) => {
+    $(id).addEventListener("input", (event) =>
+      setFieldError(id, validateName(cleanText(event.target.value, LIMITS.name), "Name"))
+    );
   });
 
   $("skipOnboarding").addEventListener("click", () => finishOnboarding({ budget: 0 }));
@@ -1319,12 +1585,14 @@ function wireOnboarding() {
   });
 
   $("finishOnboarding").addEventListener("click", () => {
-    const amount = Number($("onboardBudget").value);
-    if (!Number.isFinite(amount) || amount <= 0) {
-      toast("Enter a budget, or tap \u201cI\u2019ll set a budget later\u201d.", "error");
+    const check = validateAmount($("onboardBudget").value, { max: LIMITS.maxBudget });
+    if (check.error) {
+      setFieldError("onboardBudget", check.error);
+      toast(check.error, "error");
       return;
     }
-    draft.budget = Math.round(amount * 100) / 100;
+    setFieldError("onboardBudget", null);
+    draft.budget = check.value;
     showStep(4);
   });
 
@@ -1470,6 +1738,11 @@ function wireSync() {
 
   config = loadedConfig;
   entries = loadedEntries;
+
+  // If anything had to be corrected on read, write the clean version straight back.
+  if (localStorage.getItem(CONFIG_KEY) && localStorage.getItem(CONFIG_KEY) !== JSON.stringify(config)) {
+    storage.writeConfig(config);
+  }
   ready = true;
   invalidate();
 
@@ -1478,6 +1751,7 @@ function wireSync() {
     document.body.classList.add("loaded");
     render({ allowSkeleton: false });
     announce("Saan Napunta? ready.");
+    applyInputLimits();
     wireSync();
     wireOnboarding();
     maybeShowOnboarding();
