@@ -1103,7 +1103,7 @@ textarea.invalid {
         <select id="monthPicker" aria-label="Choose month"></select>
       </div>
       <ul class="entries" id="entries"></ul>
-      <p class="empty-note" id="entriesEmpty">Tap + to record your first gastos.</p>
+      <p class="empty-note" id="entriesEmpty">Tap + to record your first expense.</p>
     </section>
 
     <p class="development-warning" role="note">
@@ -1126,7 +1126,7 @@ textarea.invalid {
       </div>
 
       <section class="step" data-step="1">
-        <h2 class="onboard-title">Kumusta!</h2>
+        <h2 class="onboard-title">Create your profile</h2>
         <p class="onboard-sub">Let&rsquo;s set up your profile. Everything here stays on your device.</p>
         <p class="onboard-warning">
           Heads up: this is an early development build. Things will change, and your records
@@ -1215,7 +1215,7 @@ textarea.invalid {
       </section>
 
       <section class="step" data-step="3" hidden>
-        <h2 class="onboard-title">Magkano?</h2>
+        <h2 class="onboard-title">Set your budget</h2>
         <p class="onboard-sub" id="amountSub">How much can you spend per month?</p>
         <div class="amount-row big">
           <span class="peso" id="onboardSymbol">₱</span>
@@ -1232,7 +1232,7 @@ textarea.invalid {
 
       <section class="step" data-step="4" hidden>
         <h2 class="onboard-title">Keep a backup?</h2>
-        <p class="onboard-sub">Optional. Sign in to sync your gastos to your other devices. Everything works offline without it, and you can do this later in Settings.</p>
+        <p class="onboard-sub">Optional. Sign in to sync your expenses to your other devices. Everything works offline without it, and you can do this later in Settings.</p>
         <button class="google-button" id="onboardGoogle" type="button">
           <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true">
             <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.2 17.7 9.5 24 9.5z"/>
@@ -1314,7 +1314,7 @@ textarea.invalid {
       <section class="account" id="accountBlock">
         <div class="account-intro" id="accountIntro">
           <strong>Back up &amp; sync</strong>
-          <p class="panel-note">Optional. Sign in to keep your gastos on every device. The app works completely offline without an account.</p>
+          <p class="panel-note">Optional. Sign in to keep your expenses on every device. The app works completely offline without an account.</p>
         </div>
 
         <button class="google-button" id="googleSignIn" type="button">
@@ -2645,7 +2645,7 @@ function renderSummary(agg) {
   const greeting = $("greeting");
   if (greeting) {
     const who = config.firstName || config.name || "";
-    greeting.innerHTML = who ? `Kumusta, <b>${escapeHtml(who)}</b>` : "";
+    greeting.innerHTML = who ? `Hi, <b>${escapeHtml(who)}</b>` : "";
     greeting.hidden = !who;
     if (who) {
       greeting.setAttribute(
@@ -3546,7 +3546,7 @@ function wireSync() {
     button.disabled = true;
     try {
       const user = await sync.signIn();
-      toast(`Signed in as ${user.email}. Your gastos will sync.`, "ok");
+      toast(`Signed in as ${user.email}. Your expenses will sync.`, "ok");
     } catch {
       toast("Sign-in cancelled.", "error");
     } finally {

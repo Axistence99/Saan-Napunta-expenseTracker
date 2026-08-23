@@ -13,6 +13,6 @@
     <string name="monthly_budget">Monthly budget</string>
     <string name="export_csv">Export CSV</string>
     <string name="erase_all">Erase all data</string>
-    <string name="empty_entries">No expenses yet. Tap + to record your first gastos.</string>
+    <string name="empty_entries">No expenses yet. Tap + to record your first expense.</string>
     <string name="credit">Made by Aleksis Ong</string>
 </resources>

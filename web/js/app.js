@@ -829,7 +829,7 @@ function renderSummary(agg) {
   const greeting = $("greeting");
   if (greeting) {
     const who = config.firstName || config.name || "";
-    greeting.innerHTML = who ? `Kumusta, <b>${escapeHtml(who)}</b>` : "";
+    greeting.innerHTML = who ? `Hi, <b>${escapeHtml(who)}</b>` : "";
     greeting.hidden = !who;
     if (who) {
       greeting.setAttribute(
@@ -1730,7 +1730,7 @@ function wireSync() {
     button.disabled = true;
     try {
       const user = await sync.signIn();
-      toast(`Signed in as ${user.email}. Your gastos will sync.`, "ok");
+      toast(`Signed in as ${user.email}. Your expenses will sync.`, "ok");
     } catch {
       toast("Sign-in cancelled.", "error");
     } finally {

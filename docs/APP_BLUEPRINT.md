@@ -28,6 +28,7 @@ data lives on the device and can be exported to CSV or erased outright.
 | Tagline shown under the header | GASTOS TRACKER |
 | Currency | Philippine peso (₱) only — other currencies are deferred |
 | Audience | Filipino students, employees and freelancers tracking daily gastos |
+| Language | Plain English throughout the interface; the product name and merchant presets keep their Filipino terms |
 | Personality | Direct, a little self-deprecating, never preachy. Uses light Taglish in marketing copy but plain English inside the app |
 | Promise | Private by design. No account, no sync, no analytics |
 | Credit line | Made by Aleksis Ong |
@@ -97,7 +98,7 @@ Everything has a reduced-motion fallback.
 A full-screen card over the animated background, shown once, with three progress dots that
 stretch into a pill as the user advances. Every step animates in from the right.
 
-**Step 1 — Profile.** Title "Kumusta!", subtitle "Let's set up your profile. Everything here
+**Step 1 — Profile.** Title "Create your profile", subtitle "Let's set up your profile. Everything here
 stays on your device." Fields:
 
 | Field | Control | Notes |
@@ -128,7 +129,7 @@ emoji, a label and a one-line rationale:
 
 The selected card gets an orange border, tinted fill and an inner glow. Back / Continue.
 
-**Step 3 — Amount.** Title "Magkano?", subtitle adapts to the choice ("How much can you spend
+**Step 3 — Amount.** Title "Set your budget", subtitle adapts to the choice ("How much can you spend
 per week?"). A very large amount field prefixed with the currency symbol, four preset chips
 scaled to the chosen period (daily 150/250/400/600 · weekly 1000/2000/3500/5000 · monthly
 5000/10000/15000/25000 · yearly 60000/120000/250000/500000), and a live gold conversion line:
@@ -140,7 +141,7 @@ other devices, works offline without it, and can be done later in Settings. Offe
 "Continue with Google" and "Start tracking", plus the note "Photos are never uploaded. Only
 amounts, categories and notes sync."
 
-On completion the profile is saved and the dashboard appears with a "Kumusta, {name}"
+On completion the profile is saved and the dashboard appears with a "Hi, {name}"
 greeting above the month label. Onboarding never appears again unless data is erased.
 
 ## 4. Screen: Dashboard (the only main screen)
@@ -231,7 +232,7 @@ Expense {
 }
 
 Config {
-  firstName    string   shown as "Kumusta, {firstName}"; may be empty
+  firstName    string   shown as "Hi, {firstName}"; may be empty
   lastName     string   may be empty
   birthdate    string   ISO day, may be empty
   province     string   one of the 82 provinces, or "Metro Manila"
