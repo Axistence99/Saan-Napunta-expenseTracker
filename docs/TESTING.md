@@ -81,6 +81,20 @@ cd android && ./gradlew assembleDebug
 6. Save an expense dated last month: the view jumps to that period.
 7. Export CSV: the file covers the visible range and is named after the range key.
 
+## Expense detail
+
+1. Tapping a row opens the detail sheet; the editor must not open.
+2. Category, date, item and description are listed; a record with no description shows a
+   dash. An older record carrying a merchant also shows a Where row.
+3. The footer shows when the expense was added, and an edited time only when it differs.
+4. Photos appear as thumbnails; tapping one opens the viewer. Escape closes the viewer but
+   leaves the detail sheet open; a second Escape closes the sheet.
+5. Edit this expense opens the editor prefilled, including previously attached photos.
+6. Delete asks for confirmation naming the item and amount, then removes the record and its
+   photos from the media bucket.
+7. Storage safety: put a non-image string into `saan-napunta-media` by hand. It must not
+   render, must not execute, and must not survive the next save.
+
 ## Amount steppers
 
 1. The browser's native up/down arrows must not appear on any number field.

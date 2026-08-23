@@ -179,7 +179,7 @@ Vertical scroll, top to bottom:
 
 4. **Recent card** — heading "RECENT" with a month picker dropdown on the right. Entries are
    grouped under day dividers showing the pretty day ("Today", "Yesterday", "Mon, Aug 18")
-   on the left and that day's subtotal on the right. Each entry row: category icon, name
+   on the left and that day's subtotal on the right. Tapping a row opens the detail sheet (4b). Each entry row: category icon, name
    with the note (or "No note") beneath it, and the amount right-aligned. Tapping a row opens
    it for editing. Empty state: "Tap + to record your first gastos."
 
@@ -191,6 +191,24 @@ Vertical scroll, top to bottom:
    rim light, and a soft purple halo behind it so it separates from the warm background.
    The plus is an **SVG icon, never a text glyph** — a typed "+" sits optically high in most
    fonts and cannot be centred reliably. Hover lifts it 2 px, press scales it to 0.93.
+
+## 4b. Screen: Expense detail
+
+Tapping a row in the history opens a read-only detail sheet rather than the editor, because
+the common intent is to check something, not change it.
+
+- Header: the item name (falling back to merchant, then category) and a close button
+- Hero block: the category icon in a tinted tile beside the amount at 2.4 rem
+- Definition rows: Category, Date, Where (only for older records that carry a merchant),
+  Item, Description. An empty description shows an em dash rather than being hidden, so the
+  layout does not jump between entries
+- Photos: a three-column thumbnail grid; tapping one opens a full-screen viewer that closes
+  on backdrop tap, the close button, or Escape. Escape closes only the viewer, leaving the
+  detail sheet open
+- Footer line: "Added 23 Aug 2026, 2:31 PM", plus "Edited …" when the record changed more
+  than a minute after it was created
+- Actions: **Edit this expense** opens the editor prefilled, and **Delete** confirms with the
+  item name and amount before removing the record and its photos
 
 ## 5. Screen: Add / Edit expense
 

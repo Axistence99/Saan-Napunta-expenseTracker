@@ -1387,3 +1387,134 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   .amount-input-wrap input { font-size: 1.7rem; }
   .amount-input-wrap .peso { font-size: 1.4rem; }
 }
+
+/* ============================================================
+   Expense detail sheet
+   ============================================================ */
+
+.detail-card { gap: 16px; }
+
+.detail-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(150deg, rgba(139, 92, 246, 0.14), rgba(255, 126, 0, 0.08));
+}
+
+.detail-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  color: var(--gold);
+  border: 1px solid var(--line-warm);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.detail-amount {
+  font-size: clamp(1.9rem, 8vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.detail-rows { margin: 0; display: flex; flex-direction: column; gap: 1px; }
+
+.detail-rows > div {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 12px;
+  padding: 11px 2px;
+  border-bottom: 1px solid rgba(245, 239, 230, 0.07);
+}
+.detail-rows > div:last-child { border-bottom: none; }
+
+.detail-rows dt {
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--grey-dim);
+}
+.detail-rows dd {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.detail-photos { display: flex; flex-direction: column; gap: 8px; }
+
+.detail-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.detail-photo {
+  padding: 0;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.4);
+  cursor: zoom-in;
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+.detail-photo:hover { border-color: var(--gold); transform: translateY(-1px); }
+.detail-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.detail-meta {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--grey-dim);
+  text-align: center;
+}
+
+/* ============================================================
+   Photo lightbox
+   ============================================================ */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.92);
+  cursor: zoom-out;
+  animation: tipIn 160ms ease;
+}
+
+.lightbox img {
+  max-width: 100%;
+  max-height: 88svh;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top, 0px));
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(20, 14, 26, 0.9);
+  cursor: pointer;
+}
+.lightbox-close:hover { border-color: var(--danger); color: var(--danger); }
+
+.text-button.center { display: block; margin: 0 auto; }

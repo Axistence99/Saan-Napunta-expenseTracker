@@ -242,6 +242,32 @@
     </div>
   </div>
 
+  <div class="sheet" id="detailSheet" hidden>
+    <div class="sheet-card detail-card">
+      <div class="panel-heading">
+        <h2 id="detailTitle">Expense</h2>
+        <button class="close-button" id="closeDetail" type="button" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="detail-hero">
+        <span class="detail-icon" id="detailIcon"></span>
+        <span class="detail-amount" id="detailAmount">₱0.00</span>
+      </div>
+
+      <dl class="detail-rows" id="detailRows"></dl>
+
+      <div class="detail-photos" id="detailPhotos" hidden>
+        <span class="field-label">Photos</span>
+        <div class="detail-photo-grid" id="detailPhotoGrid"></div>
+      </div>
+
+      <p class="detail-meta" id="detailMeta"></p>
+
+      <button class="primary-button" id="editFromDetail" type="button">Edit this expense</button>
+      <button class="text-button danger center" id="deleteFromDetail" type="button">Delete</button>
+    </div>
+  </div>
+
   <div class="sheet" id="entrySheet" hidden>
     <form class="sheet-card" id="entryForm">
       <div class="panel-heading">
@@ -410,6 +436,11 @@
       <button class="secondary-button" id="clearButton" type="button">Erase all data</button>
       <p class="panel-note">Everything lives in this browser's local storage. Clearing site data deletes it permanently.</p>
     </div>
+  </div>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Close photo">&times;</button>
+    <img id="lightboxImage" alt="Expense photo" />
   </div>
 
   <p class="sr-only" id="status" aria-live="polite">Saan Napunta? ready.</p>

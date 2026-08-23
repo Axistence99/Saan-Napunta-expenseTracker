@@ -450,6 +450,11 @@ const MAX_PHOTOS = 3;
 const MAX_EDGE_PX = 1200;
 const JPEG_QUALITY = 0.72;
 
+/** Only inline images are ever accepted, whatever storage happens to contain. */
+function isPhoto(src) {
+  return typeof src === "string" && src.startsWith("data:image/");
+}
+
 const media = {
   all() {
     try {
@@ -459,9 +464,10 @@ const media = {
     }
   },
   get(id) {
-    return this.all()[id] || [];
+    return (this.all()[id] || []).filter(isPhoto);
   },
   set(id, photos) {
+    photos = photos.filter(isPhoto);
     const bucket = this.all();
     if (photos.length) bucket[id] = photos;
     else delete bucket[id];
@@ -1118,7 +1124,7 @@ function renderEntries(agg) {
         ? "Saving to this device…"
         : [prettyDay(entry.date), meta.label, entry.merchant, entry.note]
             .filter(Boolean)
-            .join(" · ") + " — tap to edit"
+            .join(" · ") + " — tap to view"
     );
     button.innerHTML = `
       <span class="glyph">${icon(meta.id)}</span>
@@ -1129,7 +1135,7 @@ function renderEntries(agg) {
       <span class="amount">${money(entry.amount)}${
         entry.photoCount ? `<small class="photo-badge">${PHOTO_ICON}${entry.photoCount}</small>` : ""
       }</span>`;
-    button.addEventListener("click", () => openEntrySheet(entry.id));
+    button.addEventListener("click", () => openDetailSheet(entry.id));
     li.appendChild(button);
     target.appendChild(li);
   });
@@ -1171,6 +1177,124 @@ function paint(agg) {
    Entry sheet
    ============================================================ */
 
+/* ============================================================
+   Expense detail
+   ============================================================ */
+
+let detailId = null;
+
+function formatStamp(ms) {
+  if (!ms) return "";
+  return new Date(ms).toLocaleString(undefined, {
+    month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit"
+  });
+}
+
+function detailRow(term, value) {
+  return `<div><dt>${escapeHtml(term)}</dt><dd>${escapeHtml(value)}</dd></div>`;
+}
+
+function openDetailSheet(id) {
+  const entry = entries.find((e) => e.id === id);
+  if (!entry || entry.deleted) return;
+  if (entry.pending) {
+    toast("Still saving that one — try again in a moment.");
+    return;
+  }
+
+  detailId = id;
+  const meta = catById(entry.category);
+
+  $("detailTitle").textContent = entry.item || entry.merchant || meta.label;
+  $("detailIcon").innerHTML = icon(meta.id, 22);
+  $("detailAmount").textContent = money(entry.amount);
+
+  const rows = [
+    ["Category", meta.label],
+    ["Date", prettyDay(entry.date)]
+  ];
+  if (entry.merchant) rows.push(["Where", entry.merchant]);
+  if (entry.item) rows.push(["Item", entry.item]);
+  rows.push(["Description", entry.note || "—"]);
+  $("detailRows").innerHTML = rows.map(([t, v]) => detailRow(t, v)).join("");
+
+  renderDetailPhotos(id);
+
+  const edited = entry.updatedAt && entry.created && entry.updatedAt - entry.created > 60000;
+  $("detailMeta").textContent = [
+    entry.created ? `Added ${formatStamp(entry.created)}` : "",
+    edited ? `Edited ${formatStamp(entry.updatedAt)}` : ""
+  ].filter(Boolean).join(" · ");
+
+  $("detailSheet").hidden = false;
+}
+
+/**
+ * Photos come from storage, so the src is set as a property and checked for the data:
+ * prefix rather than interpolated into markup, where a crafted value could break out.
+ */
+function renderDetailPhotos(id) {
+  const photos = media.get(id);
+  const wrap = $("detailPhotos");
+  const grid = $("detailPhotoGrid");
+  wrap.hidden = photos.length === 0;
+  grid.innerHTML = "";
+
+  photos.forEach((src, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "detail-photo";
+    button.setAttribute("aria-label", `View photo ${index + 1}`);
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = `Expense photo ${index + 1}`;
+    button.appendChild(img);
+    button.addEventListener("click", () => openLightbox(src));
+    grid.appendChild(button);
+  });
+}
+
+function closeDetailSheet() {
+  $("detailSheet").hidden = true;
+  detailId = null;
+}
+
+function openLightbox(src) {
+  $("lightboxImage").src = src;
+  $("lightbox").hidden = false;
+}
+
+function closeLightbox() {
+  $("lightbox").hidden = true;
+  $("lightboxImage").removeAttribute("src");
+}
+
+$("closeDetail").addEventListener("click", closeDetailSheet);
+$("lightboxClose").addEventListener("click", closeLightbox);
+$("lightbox").addEventListener("click", (event) => {
+  if (event.target !== $("lightboxImage")) closeLightbox();
+});
+
+$("editFromDetail").addEventListener("click", () => {
+  const id = detailId;
+  closeDetailSheet();
+  openEntrySheet(id);
+});
+
+$("deleteFromDetail").addEventListener("click", () => {
+  const id = detailId;
+  if (!id) return;
+  const entry = entries.find((e) => e.id === id);
+  const what = entry?.item || catById(entry?.category).label;
+  if (!confirm(`Delete "${what}" for ${money(entry.amount)}?`)) return;
+  closeDetailSheet();
+  commit(() => {
+    entries = entries.map((e) => (e.id === id ? tombstone(e) : e));
+    media.remove(id);
+    return null;
+  }, { success: "Entry deleted.", failure: "Delete failed — the entry is back." });
+});
+
 function renderChips() {
   const wrap = $("categoryChips");
   wrap.innerHTML = "";
@@ -1197,9 +1321,16 @@ function renderPhotoStrip() {
   draftPhotos.forEach((src, index) => {
     const cell = document.createElement("div");
     cell.className = "photo-thumb";
-    cell.innerHTML = `<img src="${src}" alt="Attached photo ${index + 1}" />` +
-      `<button type="button" class="photo-remove" aria-label="Remove photo ${index + 1}">&times;</button>`;
-    cell.querySelector(".photo-remove").addEventListener("click", () => {
+    const img = document.createElement("img");
+    img.src = src;                       // property, not markup: no escaping hazard
+    img.alt = `Attached photo ${index + 1}`;
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "photo-remove";
+    remove.setAttribute("aria-label", `Remove photo ${index + 1}`);
+    remove.innerHTML = "&times;";
+    cell.append(img, remove);
+    remove.addEventListener("click", () => {
       draftPhotos.splice(index, 1);
       renderPhotoStrip();
     });
@@ -1628,7 +1759,7 @@ $("clearButton").addEventListener("click", () => {
   }, { success: "All data erased.", failure: "Could not erase the data." });
 });
 
-[$("entrySheet"), $("settingsPanel")].forEach((sheet) => {
+[$("entrySheet"), $("settingsPanel"), $("detailSheet")].forEach((sheet) => {
   sheet.addEventListener("click", (event) => {
     if (event.target === sheet) {
       sheet.hidden = true;
@@ -1639,8 +1770,13 @@ $("clearButton").addEventListener("click", () => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    if (!$("lightbox").hidden) {
+      closeLightbox();
+      return;
+    }
     $("entrySheet").hidden = true;
     $("settingsPanel").hidden = true;
+    closeDetailSheet();
     tooltip.hide();
   }
 });

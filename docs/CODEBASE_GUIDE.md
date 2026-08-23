@@ -281,6 +281,15 @@ hides the empty-state notes so they cannot flash during load.
 | `render({ allowSkeleton })` | **The only entry point.** Paints a skeleton when the month is cold, then paints for real on the next animation frame |
 | `paint(agg)` | Runs the three renderers, syncs the settings inputs, kicks off neighbour prefetch |
 
+#### Expense detail
+
+`openDetailSheet(id)` fills the read-only sheet, `renderDetailPhotos(id)` builds the
+thumbnail grid, and `openLightbox(src)` / `closeLightbox()` drive the full-screen viewer.
+`isPhoto(src)` gates everything on a `data:image/` prefix, and both `media.get` and
+`media.set` filter through it. Image sources are assigned with `img.src = …` rather than
+interpolated into `innerHTML`, so a crafted value in storage cannot break out of the
+attribute.
+
 #### Entry sheet
 
 `renderChips()` rebuilds the category chips with `aria-pressed`. `openEntrySheet(id)`
