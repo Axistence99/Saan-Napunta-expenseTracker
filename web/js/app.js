@@ -102,9 +102,28 @@ const PROVINCES = [
   ["BARMM", ["Basilan", "Lanao del Sur", "Maguindanao del Norte", "Maguindanao del Sur", "Sulu", "Tawi-Tawi"]]
 ];
 
-const OCCUPATIONS = { student: "Student", employee: "Employee", undisclosed: "Prefer not to say" };
+/** Insertion order drives the dropdown order in both the profile step and Settings. */
+const OCCUPATIONS = {
+  student: "Student",
+  employee: "Employee",
+  entrepreneur: "Entrepreneur",
+  undisclosed: "Prefer not to say",
+  na: "N/A"
+};
 const PROVINCE_SET = new Set(PROVINCES.flatMap(([, list]) => list));
 const SEXES = { female: "Female", male: "Male", undisclosed: "Prefer not to say" };
+
+/** Fills a <select> from an id-to-label map, with a leading placeholder. */
+function fillOptions(select, map, selected = "", placeholder = "Select") {
+  select.innerHTML = `<option value="">${placeholder}</option>`;
+  Object.entries(map).forEach(([value, label]) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    select.appendChild(option);
+  });
+  select.value = selected;
+}
 
 /** Fills a <select> with optgroup-ed provinces. */
 function fillProvinces(select, selected = "") {
@@ -1000,6 +1019,7 @@ function paint(agg) {
   $("lastNameInput").value = config.lastName || "";
   if (!$("provinceInput").options.length) fillProvinces($("provinceInput"));
   $("provinceInput").value = config.province || "";
+  if (!$("occupationInput").options.length) fillOptions($("occupationInput"), OCCUPATIONS);
   $("occupationInput").value = config.occupation || "";
   $("periodSelect").value = config.budgetPeriod || "month";
   $("budgetInputLabel").textContent = `${PERIODS[config.budgetPeriod || "month"].label} budget`;
@@ -1630,8 +1650,8 @@ function maybeShowOnboarding() {
   $("birthdate").value = draft.birthdate;
   $("birthdate").max = todayKey();
   fillProvinces($("province"), draft.province);
+  fillOptions($("occupation"), OCCUPATIONS, draft.occupation);
   $("sexAtBirth").value = draft.sexAtBirth;
-  $("occupation").value = draft.occupation;
   $("onboard").hidden = false;
   showStep(1);
   setTimeout(() => $("firstName").focus(), 120);

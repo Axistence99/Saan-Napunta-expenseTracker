@@ -107,7 +107,7 @@ stays on your device." Fields:
 | Birthdate | Native date picker | Capped at today |
 | Province | Grouped dropdown | All 82 Philippine provinces in 18 optgroups by region, plus Metro Manila |
 | Sex at birth | Dropdown | Female · Male · Prefer not to say |
-| Occupation | Dropdown | Student · Employee · Prefer not to say |
+| Occupation | Dropdown | Student · Employee · Entrepreneur · Prefer not to say · N/A |
 | Currency | Locked row | Philippine peso only; shows a padlock and "More currencies are coming in a later update." |
 
 Primary button "Continue"; below it a quiet "Skip for now" that completes onboarding with
@@ -206,7 +206,7 @@ A second bottom sheet with the same chrome.
 - **Back up & sync** — account card, described in 10b.
 - **First and last name** — side-by-side text fields.
 - **Province** — the same grouped 82-province dropdown used in onboarding.
-- **Occupation** — Student · Employee · Prefer not to say.
+- **Occupation** — Student · Employee · Entrepreneur · Prefer not to say · N/A.
 - **Budget period** — Daily / Weekly / Monthly / Yearly; changing it converts the amount.
 - **Budget** — numeric field, labelled with the active period; 0 or empty disables the meter.
 - **Currency** — locked to the Philippine peso, shown as a dashed read-only row with a padlock and a note that more are coming.
@@ -236,7 +236,7 @@ Config {
   birthdate    string   ISO day, may be empty
   province     string   one of the 82 provinces, or "Metro Manila"
   sexAtBirth   string   "female" | "male" | "undisclosed" | ""
-  occupation   string   "student" | "employee" | "undisclosed" | ""
+  occupation   string   "student" | "employee" | "entrepreneur" | "undisclosed" | "na" | ""
   name         string   legacy display name, mirrors firstName
   budget       number   amount for one budgetPeriod; 0 disables the meter
   budgetPeriod string   "day" | "week" | "month" | "year"

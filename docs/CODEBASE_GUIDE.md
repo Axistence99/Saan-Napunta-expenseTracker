@@ -198,7 +198,7 @@ A hand-edited `localStorage` cannot inject bad amounts, unknown categories or in
 `PROVINCES` is an array of `[regionLabel, [province, ...]]` pairs covering all 82 provinces
 across the 18 PSGC regions, with Metro Manila listed first as a practical convenience.
 `fillProvinces(select, selected)` builds the `<optgroup>` markup and is used by both the
-onboarding step and Settings. `OCCUPATIONS` and `SEXES` map stored ids to labels.
+onboarding step and Settings. `OCCUPATIONS` and `SEXES` map stored ids to labels, and `fillOptions(select, map, selected)` renders either into a dropdown — the maps are the single source, so the profile step and Settings can never drift apart. Insertion order sets the option order.
 
 #### Media store
 

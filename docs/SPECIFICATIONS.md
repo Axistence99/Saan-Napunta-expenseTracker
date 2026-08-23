@@ -10,8 +10,8 @@
 
 ### Onboarding (first launch)
 1. Profile — first name (required), last name, birthdate, province (82 provinces grouped by
-   region, plus Metro Manila), sex at birth, occupation (Student / Employee / Prefer not to
-   say). Currency is shown but locked to the Philippine peso
+   region, plus Metro Manila), sex at birth, occupation (Student / Employee /
+   Entrepreneur / Prefer not to say / N/A). Currency is shown but locked to the Philippine peso
 2. Budget period — Daily / Weekly / Monthly / Yearly cards
 3. Amount — big field, period-scaled presets, live conversion to the other windows
 4. Backup — optional Google sign-in, skippable
