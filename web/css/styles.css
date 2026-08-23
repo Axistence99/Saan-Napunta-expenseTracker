@@ -1289,3 +1289,101 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
   .photo-add,
   .photo-thumb { width: 68px; height: 68px; }
 }
+
+/* ============================================================
+   Amount steppers
+   ============================================================ */
+
+/* The native number spinners are tiny, low-contrast and almost untappable on a phone. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+.amount-field { display: flex; flex-direction: column; gap: 8px; }
+
+.amount-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.amount-input-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.45);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+.amount-input-wrap:focus-within {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(255, 126, 0, 0.14);
+}
+
+.amount-input-wrap .peso { font-size: 1.7rem; line-height: 1; color: var(--gold); }
+
+.amount-input-wrap input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 0;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  border: none;
+  border-radius: 0;
+  background: none;
+}
+.amount-input-wrap input:focus { outline: none; }
+.amount-input-wrap input.invalid { background: none; }
+
+.stepper {
+  flex: none;
+  width: 52px;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(139, 92, 246, 0.16), rgba(0, 0, 0, 0.45));
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 120ms ease, border-color 140ms ease, background 140ms ease;
+}
+.stepper:hover:not([disabled]) {
+  border-color: var(--purple);
+  background: linear-gradient(160deg, rgba(139, 92, 246, 0.3), rgba(0, 0, 0, 0.4));
+}
+.stepper:active:not([disabled]) { transform: scale(0.94); }
+.stepper[disabled] { opacity: 0.32; cursor: not-allowed; }
+.stepper:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+.stepper svg { display: block; }
+
+.quick-amounts { display: flex; flex-wrap: wrap; gap: 7px; }
+
+.quick-amount {
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold);
+  border: 1px solid var(--line-warm);
+  border-radius: 999px;
+  background: rgba(233, 196, 106, 0.07);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+.quick-amount:hover { background: rgba(233, 196, 106, 0.18); color: var(--yellow); }
+.quick-amount:active { transform: scale(0.96); }
+
+@media (max-width: 400px) {
+  .stepper { width: 46px; }
+  .amount-input-wrap input { font-size: 1.7rem; }
+  .amount-input-wrap .peso { font-size: 1.4rem; }
+}

@@ -1297,6 +1297,104 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
   .photo-thumb { width: 68px; height: 68px; }
 }
 
+/* ============================================================
+   Amount steppers
+   ============================================================ */
+
+/* The native number spinners are tiny, low-contrast and almost untappable on a phone. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+.amount-field { display: flex; flex-direction: column; gap: 8px; }
+
+.amount-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.amount-input-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.45);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+.amount-input-wrap:focus-within {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(255, 126, 0, 0.14);
+}
+
+.amount-input-wrap .peso { font-size: 1.7rem; line-height: 1; color: var(--gold); }
+
+.amount-input-wrap input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 0;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  border: none;
+  border-radius: 0;
+  background: none;
+}
+.amount-input-wrap input:focus { outline: none; }
+.amount-input-wrap input.invalid { background: none; }
+
+.stepper {
+  flex: none;
+  width: 52px;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(139, 92, 246, 0.16), rgba(0, 0, 0, 0.45));
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 120ms ease, border-color 140ms ease, background 140ms ease;
+}
+.stepper:hover:not([disabled]) {
+  border-color: var(--purple);
+  background: linear-gradient(160deg, rgba(139, 92, 246, 0.3), rgba(0, 0, 0, 0.4));
+}
+.stepper:active:not([disabled]) { transform: scale(0.94); }
+.stepper[disabled] { opacity: 0.32; cursor: not-allowed; }
+.stepper:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+.stepper svg { display: block; }
+
+.quick-amounts { display: flex; flex-wrap: wrap; gap: 7px; }
+
+.quick-amount {
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold);
+  border: 1px solid var(--line-warm);
+  border-radius: 999px;
+  background: rgba(233, 196, 106, 0.07);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+.quick-amount:hover { background: rgba(233, 196, 106, 0.18); color: var(--yellow); }
+.quick-amount:active { transform: scale(0.96); }
+
+@media (max-width: 400px) {
+  .stepper { width: 46px; }
+  .amount-input-wrap input { font-size: 1.7rem; }
+  .amount-input-wrap .peso { font-size: 1.4rem; }
+}
+
   </style>
 </head>
 <body>
@@ -1542,13 +1640,22 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
         <button class="close-button" id="closeEntry" type="button" aria-label="Close">×</button>
       </div>
 
-      <label class="amount-field">
-        <span>Amount</span>
+      <div class="amount-field">
+        <span class="field-label">Amount</span>
         <div class="amount-row">
-          <span class="peso" id="amountSymbol">₱</span>
-          <input id="amountInput" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" required />
+          <button type="button" class="stepper" id="amountDown" aria-label="Decrease amount">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+          </button>
+          <div class="amount-input-wrap">
+            <span class="peso" id="amountSymbol">₱</span>
+            <input id="amountInput" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" required aria-label="Amount" />
+          </div>
+          <button type="button" class="stepper" id="amountUp" aria-label="Increase amount">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
         </div>
-      </label>
+        <div class="quick-amounts" id="quickAmounts"></div>
+      </div>
 
       <span class="field-label">Category</span>
       <div class="chips" id="categoryChips"></div>
@@ -3350,6 +3457,8 @@ function openEntrySheet(id = null) {
 
   clearFieldErrors($("entryForm"));
   renderChips();
+  renderQuickAmounts();
+  refreshStepperState();
   renderPhotoStrip();
   $("entrySheet").hidden = false;
   setTimeout(() => $("amountInput").focus(), 60);
@@ -3520,6 +3629,85 @@ $("dismissDevBanner").addEventListener("click", () => {
   $("devBanner").hidden = true;
   sessionStorage.setItem(DEV_BANNER_KEY, "dismissed");
 });
+
+/* ---------- amount steppers ---------- */
+
+const QUICK_AMOUNTS = [20, 50, 100, 500];
+
+/** Steps by a sensible amount for the current value rather than a fixed 0.01. */
+function amountStep(value) {
+  if (value < 100) return 10;
+  if (value < 1000) return 50;
+  if (value < 10000) return 100;
+  return 500;
+}
+
+function nudgeAmount(direction) {
+  const field = $("amountInput");
+  const current = Number(field.value) || 0;
+  // Stepping down uses the band below the current value so 100 goes to 90, not 50.
+  const step = amountStep(direction > 0 ? current : Math.max(0, current - 0.01));
+  const next = Math.max(0, Math.min(LIMITS.maxAmount, Math.round((current + direction * step) * 100) / 100));
+  field.value = next ? String(next) : "";
+  setFieldError(field, null);
+  refreshStepperState();
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+
+function refreshStepperState() {
+  const current = Number($("amountInput").value) || 0;
+  $("amountDown").disabled = current <= 0;
+  $("amountUp").disabled = current >= LIMITS.maxAmount;
+}
+
+/** Press and hold to repeat, accelerating after the first few steps. */
+function bindHold(button, direction) {
+  let timer = null;
+  let delay = 380;
+
+  const stop = () => {
+    clearTimeout(timer);
+    timer = null;
+    delay = 380;
+  };
+  const tick = () => {
+    nudgeAmount(direction);
+    delay = Math.max(70, delay * 0.72);
+    timer = setTimeout(tick, delay);
+  };
+
+  button.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    nudgeAmount(direction);
+    timer = setTimeout(tick, delay);
+  });
+  ["pointerup", "pointerleave", "pointercancel", "blur"].forEach((type) =>
+    button.addEventListener(type, stop)
+  );
+}
+
+bindHold($("amountDown"), -1);
+bindHold($("amountUp"), 1);
+$("amountInput").addEventListener("input", refreshStepperState);
+
+function renderQuickAmounts() {
+  const wrap = $("quickAmounts");
+  wrap.innerHTML = "";
+  QUICK_AMOUNTS.forEach((value) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "quick-amount";
+    chip.textContent = `+${money(value).replace(".00", "")}`;
+    chip.setAttribute("data-tip", `Add ${money(value)} to the amount`);
+    chip.addEventListener("click", () => {
+      const current = Number($("amountInput").value) || 0;
+      $("amountInput").value = String(Math.min(LIMITS.maxAmount, current + value));
+      setFieldError($("amountInput"), null);
+      refreshStepperState();
+    });
+    wrap.appendChild(chip);
+  });
+}
 
 $("addButton").addEventListener("click", () => openEntrySheet());
 

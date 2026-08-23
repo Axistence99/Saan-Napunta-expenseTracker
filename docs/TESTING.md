@@ -81,6 +81,16 @@ cd android && ./gradlew assembleDebug
 6. Save an expense dated last month: the view jumps to that period.
 7. Export CSV: the file covers the visible range and is named after the range key.
 
+## Amount steppers
+
+1. The browser's native up/down arrows must not appear on any number field.
+2. From empty, plus gives 10, then 20 … 100; the next tap gives 150, and from 1,000 it
+   gives 1,100.
+3. Minus from 5 lands on empty, not a negative, and then disables.
+4. Press and hold the plus: the value should accelerate rather than tick at a fixed rate.
+5. Quick-add chips add to the current value rather than replacing it.
+6. Plus stops at ₱10,000,000.
+
 ## Mobile layout
 
 1. At 360 px wide, first/last name, sex/occupation and the four budget fields each stack in

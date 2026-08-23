@@ -198,8 +198,18 @@ A bottom sheet on web, a full screen on Android. Dim, blurred backdrop; tapping 
 pressing Escape closes without saving.
 
 - Title: "Add expense" or "Edit expense", with a circular × close button.
-- **Amount** — large numeric field prefixed by the current currency symbol in orange.
-  Opens the decimal keypad. Autofocused. Required, must be greater than zero.
+- **Amount** — a 52 px minus button, the field itself, and a 52 px plus button in one row.
+  The field shows the currency symbol in gold and the value at 2 rem. Native number
+  spinners are suppressed everywhere: they are a few pixels tall, low contrast on a dark
+  field and effectively untappable on a phone.
+  - Stepping is banded rather than fixed: ±10 below 100, ±50 below 1,000, ±100 below
+    10,000, ±500 above. Stepping down uses the band below the current value, so 100 goes
+    to 90 rather than 50.
+  - Press and hold repeats, accelerating from 380 ms to 70 ms per step.
+  - Minus disables at zero, plus disables at the 10,000,000 ceiling; a short haptic fires
+    on each step.
+  - Beneath the row, quick-add chips (+₱20, +₱50, +₱100, +₱500) add to the current value.
+  - The keyboard remains the fastest path: the field is autofocused with a decimal keypad.
 - **Category** — nine rounded chips in a wrapping grid, single-select, defaulting to Food.
   The selected chip gets an orange border, tinted background and lighter text.
 - **Item** — what was bought, 60 characters, e.g. "Chickenjoy 2pc", "jeep fare".

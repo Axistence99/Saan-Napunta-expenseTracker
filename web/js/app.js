@@ -1233,6 +1233,8 @@ function openEntrySheet(id = null) {
 
   clearFieldErrors($("entryForm"));
   renderChips();
+  renderQuickAmounts();
+  refreshStepperState();
   renderPhotoStrip();
   $("entrySheet").hidden = false;
   setTimeout(() => $("amountInput").focus(), 60);
@@ -1403,6 +1405,85 @@ $("dismissDevBanner").addEventListener("click", () => {
   $("devBanner").hidden = true;
   sessionStorage.setItem(DEV_BANNER_KEY, "dismissed");
 });
+
+/* ---------- amount steppers ---------- */
+
+const QUICK_AMOUNTS = [20, 50, 100, 500];
+
+/** Steps by a sensible amount for the current value rather than a fixed 0.01. */
+function amountStep(value) {
+  if (value < 100) return 10;
+  if (value < 1000) return 50;
+  if (value < 10000) return 100;
+  return 500;
+}
+
+function nudgeAmount(direction) {
+  const field = $("amountInput");
+  const current = Number(field.value) || 0;
+  // Stepping down uses the band below the current value so 100 goes to 90, not 50.
+  const step = amountStep(direction > 0 ? current : Math.max(0, current - 0.01));
+  const next = Math.max(0, Math.min(LIMITS.maxAmount, Math.round((current + direction * step) * 100) / 100));
+  field.value = next ? String(next) : "";
+  setFieldError(field, null);
+  refreshStepperState();
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+
+function refreshStepperState() {
+  const current = Number($("amountInput").value) || 0;
+  $("amountDown").disabled = current <= 0;
+  $("amountUp").disabled = current >= LIMITS.maxAmount;
+}
+
+/** Press and hold to repeat, accelerating after the first few steps. */
+function bindHold(button, direction) {
+  let timer = null;
+  let delay = 380;
+
+  const stop = () => {
+    clearTimeout(timer);
+    timer = null;
+    delay = 380;
+  };
+  const tick = () => {
+    nudgeAmount(direction);
+    delay = Math.max(70, delay * 0.72);
+    timer = setTimeout(tick, delay);
+  };
+
+  button.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    nudgeAmount(direction);
+    timer = setTimeout(tick, delay);
+  });
+  ["pointerup", "pointerleave", "pointercancel", "blur"].forEach((type) =>
+    button.addEventListener(type, stop)
+  );
+}
+
+bindHold($("amountDown"), -1);
+bindHold($("amountUp"), 1);
+$("amountInput").addEventListener("input", refreshStepperState);
+
+function renderQuickAmounts() {
+  const wrap = $("quickAmounts");
+  wrap.innerHTML = "";
+  QUICK_AMOUNTS.forEach((value) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "quick-amount";
+    chip.textContent = `+${money(value).replace(".00", "")}`;
+    chip.setAttribute("data-tip", `Add ${money(value)} to the amount`);
+    chip.addEventListener("click", () => {
+      const current = Number($("amountInput").value) || 0;
+      $("amountInput").value = String(Math.min(LIMITS.maxAmount, current + value));
+      setFieldError($("amountInput"), null);
+      refreshStepperState();
+    });
+    wrap.appendChild(chip);
+  });
+}
 
 $("addButton").addEventListener("click", () => openEntrySheet());
 
