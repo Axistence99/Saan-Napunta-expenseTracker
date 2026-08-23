@@ -57,7 +57,7 @@ WHAT YOU GET
 • Per-category breakdown so you can see what is really eating your sweldo
 • Browse past months and compare
 • Export any month to CSV
-• Peso by default, with dollar, euro and yen available
+• Built around the Philippine peso
 
 PRIVATE BY DESIGN
 No account. No sign-up. No sync. No ads. No analytics. The app requests zero permissions
