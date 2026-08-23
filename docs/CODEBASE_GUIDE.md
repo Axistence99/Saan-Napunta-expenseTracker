@@ -170,6 +170,13 @@ only this object.
 
 `cacheStats` counts hits and misses; the number is surfaced in the big total's tooltip.
 
+#### Reference data
+
+`PROVINCES` is an array of `[regionLabel, [province, ...]]` pairs covering all 82 provinces
+across the 18 PSGC regions, with Metro Manila listed first as a practical convenience.
+`fillProvinces(select, selected)` builds the `<optgroup>` markup and is used by both the
+onboarding step and Settings. `OCCUPATIONS` and `SEXES` map stored ids to labels.
+
 #### Media store
 
 `media` wraps a separate `saan-napunta-media` bucket (`{ entryId: [dataUrl] }`) with

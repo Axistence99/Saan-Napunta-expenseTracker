@@ -9,7 +9,9 @@
 ## Screens
 
 ### Onboarding (first launch)
-1. Profile — name + currency
+1. Profile — first name (required), last name, birthdate, province (82 provinces grouped by
+   region, plus Metro Manila), sex at birth, occupation (Student / Employee / Prefer not to
+   say) and currency
 2. Budget period — Daily / Weekly / Monthly / Yearly cards
 3. Amount — big field, period-scaled presets, live conversion to the other windows
 4. Backup — optional Google sign-in, skippable
@@ -34,7 +36,7 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 - Save; Delete shown only when editing
 
 ### Settings
-- Your name
+- First name, last name, province, occupation
 - Budget period (converts the existing amount when changed)
 - Budget for that period (0 disables the meter)
 - Currency: ₱ (default), $, €, ¥

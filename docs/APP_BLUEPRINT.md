@@ -97,9 +97,23 @@ Everything has a reduced-motion fallback.
 A full-screen card over the animated background, shown once, with three progress dots that
 stretch into a pill as the user advances. Every step animates in from the right.
 
-**Step 1 — Profile.** Title "Kumusta!", subtitle "Ano ang itatawag namin sa'yo? This stays on
-your device." Fields: name (24 chars, optional) and currency (₱ default). Primary button
-"Continue"; below it a quiet "Skip for now" that completes onboarding with no budget.
+**Step 1 — Profile.** Title "Kumusta!", subtitle "Let's set up your profile. Everything here
+stays on your device." Fields:
+
+| Field | Control | Notes |
+| --- | --- | --- |
+| First name | Text, 32 | **Required** to continue; empty shows an inline error |
+| Last name | Text, 32 | Optional, sits beside first name in a two-column pair |
+| Birthdate | Native date picker | Capped at today |
+| Province | Grouped dropdown | All 82 Philippine provinces in 18 optgroups by region, plus Metro Manila |
+| Sex at birth | Dropdown | Female · Male · Prefer not to say |
+| Occupation | Dropdown | Student · Employee · Prefer not to say |
+| Currency | Dropdown | ₱ default |
+
+Primary button "Continue"; below it a quiet "Skip for now" that completes onboarding with
+no profile and no budget. Region grouping follows the PSGC after the 2024 creation of the
+Negros Island Region, so Siquijor sits with the two Negros provinces, Western Visayas has
+five and Central Visayas has two.
 
 **Step 2 — Budget period.** Title "How do you budget?", subtitle "Pick the window you
 actually think in. You can change it anytime." A 2×2 grid of selectable cards, each with an
@@ -189,7 +203,12 @@ pressing Escape closes without saving.
 
 A second bottom sheet with the same chrome.
 
-- **Monthly budget** — numeric field; 0 or empty disables the meter.
+- **Back up & sync** — account card, described in 10b.
+- **First and last name** — side-by-side text fields.
+- **Province** — the same grouped 82-province dropdown used in onboarding.
+- **Occupation** — Student · Employee · Prefer not to say.
+- **Budget period** — Daily / Weekly / Monthly / Yearly; changing it converts the amount.
+- **Budget** — numeric field, labelled with the active period; 0 or empty disables the meter.
 - **Currency** — ₱ (default), $, €, ¥.
 - **Week starts on** — Monday (default) or Sunday.
 - **Erase all data** — outlined button that turns red on hover, with a confirmation prompt.
@@ -212,7 +231,13 @@ Expense {
 }
 
 Config {
-  name         string   shown as "Kumusta, {name}"; may be empty
+  firstName    string   shown as "Kumusta, {firstName}"; may be empty
+  lastName     string   may be empty
+  birthdate    string   ISO day, may be empty
+  province     string   one of the 82 provinces, or "Metro Manila"
+  sexAtBirth   string   "female" | "male" | "undisclosed" | ""
+  occupation   string   "student" | "employee" | "undisclosed" | ""
+  name         string   legacy display name, mirrors firstName
   budget       number   amount for one budgetPeriod; 0 disables the meter
   budgetPeriod string   "day" | "week" | "month" | "year"
   currency     string   "₱" | "$" | "€" | "¥"

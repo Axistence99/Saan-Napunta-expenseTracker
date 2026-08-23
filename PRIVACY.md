@@ -7,6 +7,14 @@ Saan Napunta? is a personal expense tracker that works entirely offline.
 Nothing is collected. There is no account, no server, no analytics, no advertising SDK,
 and no crash reporting.
 
+## What you enter
+
+During setup the app asks for a first name, last name, birthdate, province, sex at birth and
+occupation. Every field except the first name is optional, and the whole step can be skipped.
+This information is used only to personalise the app on your own device. It is never
+transmitted, never used for advertising or profiling, and is not included in the optional
+sync (only expenses sync).
+
 ## Where your data lives
 
 - **Web build:** expenses, budget and currency preference are stored in your browser's

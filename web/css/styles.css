@@ -906,3 +906,26 @@ textarea:focus { outline: none; border-color: var(--orange); }
 }
 
 .entries .amount { display: inline-flex; align-items: center; }
+
+/* ============================================================
+   Profile fields
+   ============================================================ */
+
+.field-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.onboard-card .step > label,
+.onboard-card .field-pair label { gap: 5px; }
+
+select optgroup {
+  color: var(--gold);
+  background: #16101f;
+  font-style: normal;
+  font-weight: 600;
+}
+select optgroup option { color: #f5efe6; font-weight: 400; }
+
+.greeting[data-tip] { cursor: help; }

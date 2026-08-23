@@ -12,7 +12,13 @@
 const ENTRIES_KEY = "saan-napunta-entries";
 const CONFIG_KEY = "saan-napunta-config";
 const DEFAULT_CONFIG = {
-  name: "",
+  firstName: "",
+  lastName: "",
+  birthdate: "",
+  province: "",
+  sexAtBirth: "",
+  occupation: "",
+  name: "", // legacy display name, kept in sync with firstName
   budget: 0,
   budgetPeriod: "month", // day | week | month | year
   currency: "\u20b1",
@@ -60,6 +66,53 @@ const CATEGORIES = [
   { id: "fun", label: "Fun" },
   { id: "other", label: "Other" }
 ];
+
+
+/**
+ * All 82 Philippine provinces grouped by their 18 administrative regions
+ * (PSGC, after the 2024 creation of the Negros Island Region), plus NCR, which is
+ * not a province but is where a large share of users live.
+ */
+const PROVINCES = [
+  ["National Capital Region", ["Metro Manila"]],
+  ["Cordillera Administrative Region", ["Abra", "Apayao", "Benguet", "Ifugao", "Kalinga", "Mountain Province"]],
+  ["Region I — Ilocos", ["Ilocos Norte", "Ilocos Sur", "La Union", "Pangasinan"]],
+  ["Region II — Cagayan Valley", ["Batanes", "Cagayan", "Isabela", "Nueva Vizcaya", "Quirino"]],
+  ["Region III — Central Luzon", ["Aurora", "Bataan", "Bulacan", "Nueva Ecija", "Pampanga", "Tarlac", "Zambales"]],
+  ["Region IV-A — Calabarzon", ["Batangas", "Cavite", "Laguna", "Quezon", "Rizal"]],
+  ["Mimaropa", ["Marinduque", "Occidental Mindoro", "Oriental Mindoro", "Palawan", "Romblon"]],
+  ["Region V — Bicol", ["Albay", "Camarines Norte", "Camarines Sur", "Catanduanes", "Masbate", "Sorsogon"]],
+  ["Region VI — Western Visayas", ["Aklan", "Antique", "Capiz", "Guimaras", "Iloilo"]],
+  ["Negros Island Region", ["Negros Occidental", "Negros Oriental", "Siquijor"]],
+  ["Region VII — Central Visayas", ["Bohol", "Cebu"]],
+  ["Region VIII — Eastern Visayas", ["Biliran", "Eastern Samar", "Leyte", "Northern Samar", "Samar", "Southern Leyte"]],
+  ["Region IX — Zamboanga Peninsula", ["Zamboanga del Norte", "Zamboanga del Sur", "Zamboanga Sibugay"]],
+  ["Region X — Northern Mindanao", ["Bukidnon", "Camiguin", "Lanao del Norte", "Misamis Occidental", "Misamis Oriental"]],
+  ["Region XI — Davao", ["Davao de Oro", "Davao del Norte", "Davao del Sur", "Davao Occidental", "Davao Oriental"]],
+  ["Region XII — Soccsksargen", ["Cotabato", "Sarangani", "South Cotabato", "Sultan Kudarat"]],
+  ["Region XIII — Caraga", ["Agusan del Norte", "Agusan del Sur", "Dinagat Islands", "Surigao del Norte", "Surigao del Sur"]],
+  ["BARMM", ["Basilan", "Lanao del Sur", "Maguindanao del Norte", "Maguindanao del Sur", "Sulu", "Tawi-Tawi"]]
+];
+
+const OCCUPATIONS = { student: "Student", employee: "Employee", undisclosed: "Prefer not to say" };
+const SEXES = { female: "Female", male: "Male", undisclosed: "Prefer not to say" };
+
+/** Fills a <select> with optgroup-ed provinces. */
+function fillProvinces(select, selected = "") {
+  select.innerHTML = '<option value="">Select your province</option>';
+  PROVINCES.forEach(([region, list]) => {
+    const group = document.createElement("optgroup");
+    group.label = region;
+    list.forEach((name) => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      group.appendChild(option);
+    });
+    select.appendChild(group);
+  });
+  select.value = selected;
+}
 
 /** Philippine merchant presets, shown for the selected category. */
 const MERCHANTS = {
@@ -567,10 +620,21 @@ function renderMonthPicker() {
 function renderSummary(agg) {
   const greeting = $("greeting");
   if (greeting) {
-    greeting.innerHTML = config.name
-      ? `Kumusta, <b>${escapeHtml(config.name)}</b>`
-      : "";
-    greeting.hidden = !config.name;
+    const who = config.firstName || config.name || "";
+    greeting.innerHTML = who ? `Kumusta, <b>${escapeHtml(who)}</b>` : "";
+    greeting.hidden = !who;
+    if (who) {
+      greeting.setAttribute(
+        "data-tip",
+        [
+          [config.firstName, config.lastName].filter(Boolean).join(" "),
+          config.province,
+          OCCUPATIONS[config.occupation]
+        ]
+          .filter(Boolean)
+          .join(" · ") + " — edit in Settings"
+      );
+    }
   }
   $("monthLabel").textContent = agg.isCurrentMonth ? "This month" : prettyMonth(agg.key);
   $("monthTotal").textContent = money(agg.total);
@@ -744,7 +808,11 @@ function paint(agg) {
   $("budgetInput").value = config.budget ? String(config.budget) : "";
   $("currencySelect").value = config.currency;
   $("weekStartSelect").value = String(config.weekStart);
-  $("nameInput").value = config.name || "";
+  $("firstNameInput").value = config.firstName || config.name || "";
+  $("lastNameInput").value = config.lastName || "";
+  if (!$("provinceInput").options.length) fillProvinces($("provinceInput"));
+  $("provinceInput").value = config.province || "";
+  $("occupationInput").value = config.occupation || "";
   $("periodSelect").value = config.budgetPeriod || "month";
   $("budgetInputLabel").textContent = `${PERIODS[config.budgetPeriod || "month"].label} budget`;
   prefetchNeighbours(agg.key);
@@ -1030,10 +1098,20 @@ $("budgetInput").addEventListener("change", async (event) => {
   await storage.writeConfig(config);
 });
 
-$("nameInput").addEventListener("change", async (event) => {
-  config = { ...config, name: event.target.value.trim() };
-  render({ allowSkeleton: false });
-  await storage.writeConfig(config);
+["firstNameInput", "lastNameInput", "provinceInput", "occupationInput"].forEach((id) => {
+  $(id).addEventListener("change", async (event) => {
+    const value = event.target.value.trim ? event.target.value.trim() : event.target.value;
+    const field = {
+      firstNameInput: "firstName",
+      lastNameInput: "lastName",
+      provinceInput: "province",
+      occupationInput: "occupation"
+    }[id];
+    config = { ...config, [field]: value };
+    if (field === "firstName") config.name = value;
+    render({ allowSkeleton: false });
+    await storage.writeConfig(config);
+  });
 });
 
 $("periodSelect").addEventListener("change", async (event) => {
@@ -1104,7 +1182,17 @@ const PRESETS = {
   year: [60000, 120000, 250000, 500000]
 };
 
-let draft = { name: "", currency: "\u20b1", period: "month", budget: 0 };
+let draft = {
+  firstName: "",
+  lastName: "",
+  birthdate: "",
+  province: "",
+  sexAtBirth: "",
+  occupation: "",
+  currency: "\u20b1",
+  period: "month",
+  budget: 0
+};
 let onboardStep = 1;
 
 function showStep(step) {
@@ -1170,7 +1258,13 @@ function renderEquivalent() {
 async function finishOnboarding({ budget }) {
   config = {
     ...config,
-    name: draft.name,
+    firstName: draft.firstName,
+    lastName: draft.lastName,
+    birthdate: draft.birthdate,
+    province: draft.province,
+    sexAtBirth: draft.sexAtBirth,
+    occupation: draft.occupation,
+    name: draft.firstName,
     currency: draft.currency,
     budgetPeriod: draft.period,
     budget: Math.max(0, budget || 0),
@@ -1190,7 +1284,18 @@ async function finishOnboarding({ budget }) {
 
 function wireOnboarding() {
   $("stepOneNext").addEventListener("click", () => {
-    draft.name = $("profileName").value.trim();
+    const firstName = $("firstName").value.trim();
+    if (!firstName) {
+      toast("Enter at least your first name, or tap Skip for now.", "error");
+      $("firstName").focus();
+      return;
+    }
+    draft.firstName = firstName;
+    draft.lastName = $("lastName").value.trim();
+    draft.birthdate = $("birthdate").value;
+    draft.province = $("province").value;
+    draft.sexAtBirth = $("sexAtBirth").value;
+    draft.occupation = $("occupation").value;
     draft.currency = $("profileCurrency").value;
     showStep(2);
   });
@@ -1243,16 +1348,27 @@ function wireOnboarding() {
 function maybeShowOnboarding() {
   if (config.onboarded) return false;
   draft = {
-    name: config.name || "",
+    firstName: config.firstName || "",
+    lastName: config.lastName || "",
+    birthdate: config.birthdate || "",
+    province: config.province || "",
+    sexAtBirth: config.sexAtBirth || "",
+    occupation: config.occupation || "",
     currency: config.currency || "\u20b1",
     period: config.budgetPeriod || "month",
     budget: config.budget || 0
   };
-  $("profileName").value = draft.name;
+  $("firstName").value = draft.firstName;
+  $("lastName").value = draft.lastName;
+  $("birthdate").value = draft.birthdate;
+  $("birthdate").max = todayKey();
+  fillProvinces($("province"), draft.province);
+  $("sexAtBirth").value = draft.sexAtBirth;
+  $("occupation").value = draft.occupation;
   $("profileCurrency").value = draft.currency;
   $("onboard").hidden = false;
   showStep(1);
-  setTimeout(() => $("profileName").focus(), 120);
+  setTimeout(() => $("firstName").focus(), 120);
   return true;
 }
 
