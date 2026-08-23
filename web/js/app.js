@@ -28,7 +28,8 @@ const DEFAULT_CONFIG = {
   occupation: "",
   name: "", // legacy display name, kept in sync with firstName
   budget: 0,
-  budgetPeriod: "month", // day | week | month | year
+  budgetPeriod: "month",
+  budgets: {}, // per-period overrides keyed by range key, e.g. "m:2026-08" or "d:2026-08-23" // day | week | month | year
   currency: CURRENCY,
   weekStart: 1,
   onboarded: false
@@ -172,7 +173,7 @@ let selectedMerchant = "";
 let merchantIsCustom = false;
 let draftPhotos = [];
 let editingId = null;
-let viewMonth = monthKey(new Date());
+let view = { scope: "month", anchor: todayKey() };
 let ready = false;
 
 /* ============================================================
@@ -227,6 +228,18 @@ const storage = {
   }
 };
 
+/** Keeps only well-formed override keys with in-range amounts. */
+function sanitiseBudgets(raw) {
+  if (!raw || typeof raw !== "object") return {};
+  const clean = {};
+  Object.entries(raw).forEach(([key, value]) => {
+    if (!/^[dwmy]:[\d-]+$/.test(key)) return;
+    const amount = clampNumber(value, 0, LIMITS.maxBudget);
+    if (amount !== null) clean[key] = amount;
+  });
+  return clean;
+}
+
 /** Anything stored can be edited by hand or arrive from another device; re-check it. */
 function sanitiseConfig(raw) {
   const firstName = cleanText(raw.firstName || raw.name, LIMITS.name);
@@ -245,6 +258,7 @@ function sanitiseConfig(raw) {
     currency: CURRENCY,
     budget: clampNumber(raw.budget, 0, LIMITS.maxBudget) ?? 0,
     budgetPeriod: PERIODS[raw.budgetPeriod] ? raw.budgetPeriod : "month",
+    budgets: sanitiseBudgets(raw.budgets),
     weekStart: Number(raw.weekStart) === 0 ? 0 : 1,
     onboarded: Boolean(raw.onboarded)
   };
@@ -493,6 +507,102 @@ function dayKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
+/* ============================================================
+   View ranges — day / week / month / year
+   ============================================================ */
+
+const SCOPES = ["day", "week", "month", "year"];
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"];
+
+function parseDay(key) {
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function addDays(date, days) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function startOfWeek(date) {
+  const weekStart = Number(config.weekStart) === 0 ? 0 : 1;
+  const shift = (date.getDay() - weekStart + 7) % 7;
+  return addDays(date, -shift);
+}
+
+/**
+ * Describes the window a given scope covers around an anchor day.
+ * `key` doubles as the aggregate-cache key and the budget-override key.
+ */
+function rangeFor(scope, anchorDay) {
+  const anchor = parseDay(anchorDay);
+  let start;
+  let end;
+  let key;
+  let label;
+
+  if (scope === "day") {
+    start = anchor;
+    end = anchor;
+    key = `d:${dayKey(anchor)}`;
+    label = prettyDay(dayKey(anchor));
+  } else if (scope === "week") {
+    start = startOfWeek(anchor);
+    end = addDays(start, 6);
+    key = `w:${dayKey(start)}`;
+    const sameMonth = start.getMonth() === end.getMonth();
+    label = sameMonth
+      ? `${MONTH_NAMES[start.getMonth()].slice(0, 3)} ${start.getDate()}–${end.getDate()}, ${end.getFullYear()}`
+      : `${MONTH_NAMES[start.getMonth()].slice(0, 3)} ${start.getDate()} – ${MONTH_NAMES[end.getMonth()].slice(0, 3)} ${end.getDate()}, ${end.getFullYear()}`;
+  } else if (scope === "year") {
+    start = new Date(anchor.getFullYear(), 0, 1);
+    end = new Date(anchor.getFullYear(), 11, 31);
+    key = `y:${anchor.getFullYear()}`;
+    label = String(anchor.getFullYear());
+  } else {
+    start = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+    end = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0);
+    key = `m:${monthKey(anchor)}`;
+    label = `${MONTH_NAMES[anchor.getMonth()]} ${anchor.getFullYear()}`;
+  }
+
+  const startKey = dayKey(start);
+  const endKey = dayKey(end);
+  const today = todayKey();
+  const totalDays = Math.round((end - start) / 86400000) + 1;
+  const isCurrent = today >= startKey && today <= endKey;
+  const elapsed = isCurrent
+    ? Math.round((parseDay(today) - start) / 86400000) + 1
+    : today > endKey
+      ? totalDays
+      : 0;
+
+  return {
+    scope,
+    key,
+    start: startKey,
+    end: endKey,
+    label,
+    totalDays,
+    elapsed: Math.max(1, elapsed),
+    daysRemaining: Math.max(1, totalDays - Math.max(1, elapsed) + 1),
+    isCurrent,
+    isFuture: startKey > today
+  };
+}
+
+/** Steps the anchor one whole period backwards or forwards. */
+function shiftAnchor(scope, anchorDay, delta) {
+  const anchor = parseDay(anchorDay);
+  if (scope === "day") return dayKey(addDays(anchor, delta));
+  if (scope === "week") return dayKey(addDays(anchor, delta * 7));
+  if (scope === "year") return dayKey(new Date(anchor.getFullYear() + delta, anchor.getMonth(), 1));
+  const shifted = new Date(anchor.getFullYear(), anchor.getMonth() + delta, 1);
+  return dayKey(shifted);
+}
+
 /** Inclusive [start, end] day keys for the active budget window containing `date`. */
 function periodWindow(period = config.budgetPeriod, date = new Date()) {
   const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -549,6 +659,33 @@ function periodStats() {
   };
 }
 
+/**
+ * Budget that applies to a range: an override saved for that exact period if one exists,
+ * otherwise the default budget converted from its own period.
+ */
+function budgetForRange(range) {
+  const override = (config.budgets || {})[range.key];
+  if (Number.isFinite(override) && override >= 0) {
+    return { amount: override, custom: true };
+  }
+  const base = Number(config.budget) || 0;
+  if (!base) return { amount: 0, custom: false };
+  return {
+    amount: convertBudget(base, config.budgetPeriod || "month", range.scope),
+    custom: false
+  };
+}
+
+async function setRangeBudget(rangeKey, amount) {
+  const budgets = { ...(config.budgets || {}) };
+  if (amount === null) delete budgets[rangeKey];
+  else budgets[rangeKey] = amount;
+  config = { ...config, budgets };
+  invalidate();
+  render({ allowSkeleton: false });
+  await storage.writeConfig(config);
+}
+
 /** Convert a budget stated for one period into another period's equivalent. */
 function convertBudget(amount, from, to) {
   if (!amount) return 0;
@@ -568,13 +705,12 @@ function invalidate() {
   aggregateCache.clear();
 }
 
-/** Memoised per (month, dataVersion, currency). Currency affects formatted strings. */
-function aggregatesFor(key) {
-  const cacheKey = `${key}|${dataVersion}|${config.currency}`;
+/** Memoised per (range key, dataVersion). Ranges are day, week, month or year. */
+function aggregatesFor(range) {
+  const cacheKey = `${range.key}|${dataVersion}`;
   if (aggregateCache.has(cacheKey)) {
     cacheStats.hits += 1;
     const cached = aggregateCache.get(cacheKey);
-    // refresh LRU position
     aggregateCache.delete(cacheKey);
     aggregateCache.set(cacheKey, cached);
     return cached;
@@ -582,37 +718,32 @@ function aggregatesFor(key) {
 
   cacheStats.misses += 1;
   const list = liveEntries()
-    .filter((e) => e.date.startsWith(key))
+    .filter((e) => e.date >= range.start && e.date <= range.end)
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.created - a.created));
 
   const total = list.reduce((acc, e) => acc + Number(e.amount), 0);
-
   const byCategory = new Map();
   const byDay = new Map();
+  const byMonth = new Map();
+
   list.forEach((entry) => {
     const amount = Number(entry.amount);
     const cat = byCategory.get(entry.category) || { total: 0, count: 0 };
     byCategory.set(entry.category, { total: cat.total + amount, count: cat.count + 1 });
     byDay.set(entry.date, (byDay.get(entry.date) || 0) + amount);
+    const m = entry.date.slice(0, 7);
+    byMonth.set(m, (byMonth.get(m) || 0) + amount);
   });
 
-  const isCurrentMonth = key === monthKey(new Date());
-  const [year, month] = key.split("-").map(Number);
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const daysElapsed = isCurrentMonth ? new Date().getDate() : daysInMonth;
-
   const value = {
-    key,
+    range,
     list,
     total,
     byCategory: [...byCategory.entries()].sort((a, b) => b[1].total - a[1].total),
     byDay,
+    byMonth,
     today: byDay.get(todayKey()) || 0,
-    dailyAverage: total / Math.max(1, daysElapsed),
-    daysElapsed,
-    daysInMonth,
-    daysLeft: isCurrentMonth ? Math.max(0, daysInMonth - daysElapsed) : 0,
-    isCurrentMonth,
+    dailyAverage: total / Math.max(1, range.isCurrent ? range.elapsed : range.totalDays),
     computedAt: Date.now()
   };
 
@@ -623,18 +754,16 @@ function aggregatesFor(key) {
   return value;
 }
 
-function isCached(key) {
-  return aggregateCache.has(`${key}|${dataVersion}|${config.currency}`);
+function isCached(range) {
+  return aggregateCache.has(`${range.key}|${dataVersion}`);
 }
 
-/** Warms the adjacent months while the browser is idle so month switches hit the cache. */
-function prefetchNeighbours(key) {
+/** Warms the adjacent periods while the browser is idle so stepping through is instant. */
+function prefetchNeighbours(range) {
   const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 200));
   idle(() => {
-    [-1, 1].forEach((offset) => {
-      const [year, month] = key.split("-").map(Number);
-      const date = new Date(year, month - 1 + offset, 1);
-      aggregatesFor(monthKey(date));
+    [-1, 1].forEach((delta) => {
+      aggregatesFor(rangeFor(range.scope, shiftAnchor(range.scope, view.anchor, delta)));
     });
   });
 }
@@ -807,22 +936,22 @@ function paintSkeleton() {
    Rendering
    ============================================================ */
 
-function renderMonthPicker() {
-  const keys = Array.from(
-    new Set([monthKey(new Date()), viewMonth, ...liveEntries().map((e) => e.date.slice(0, 7))])
-  )
-    .sort()
-    .reverse();
-  const picker = $("monthPicker");
-  if (picker.dataset.keys === keys.join(",")) {
-    picker.value = viewMonth;
-    return;
-  }
-  picker.dataset.keys = keys.join(",");
-  picker.innerHTML = keys
-    .map((key) => `<option value="${key}">${escapeHtml(prettyMonth(key))}</option>`)
-    .join("");
-  picker.value = viewMonth;
+function renderRangeNav(range) {
+  document.querySelectorAll("#scopeTabs button").forEach((tab) => {
+    const active = tab.dataset.scope === view.scope;
+    tab.setAttribute("aria-selected", String(active));
+    tab.classList.toggle("on", active);
+  });
+
+  $("monthLabel").textContent = range.isCurrent
+    ? { day: "Today", week: "This week", month: "This month", year: "This year" }[range.scope]
+    : range.label;
+  $("monthLabel").setAttribute("data-tip", `${range.label} · ${range.start} to ${range.end}`);
+
+  // Never navigate into a period that has not started yet.
+  const nextRange = rangeFor(range.scope, shiftAnchor(range.scope, view.anchor, 1));
+  $("rangeNext").disabled = nextRange.isFuture;
+  $("rangeToday").hidden = range.isCurrent;
 }
 
 function renderSummary(agg) {
@@ -834,85 +963,75 @@ function renderSummary(agg) {
     if (who) {
       greeting.setAttribute(
         "data-tip",
-        [
-          [config.firstName, config.lastName].filter(Boolean).join(" "),
-          config.province,
-          OCCUPATIONS[config.occupation]
-        ]
-          .filter(Boolean)
-          .join(" · ") + " — edit in Settings"
+        [[config.firstName, config.lastName].filter(Boolean).join(" "), config.province,
+          OCCUPATIONS[config.occupation]].filter(Boolean).join(" · ") + " — edit in Settings"
       );
     }
   }
-  $("monthLabel").textContent = agg.isCurrentMonth ? "This month" : prettyMonth(agg.key);
+
+  const range = agg.range;
+  renderRangeNav(range);
+
   $("monthTotal").textContent = money(agg.total);
   $("monthTotal").setAttribute(
     "data-tip",
-    `${agg.list.length} ${agg.list.length === 1 ? "entry" : "entries"} in ${prettyMonth(agg.key)} · totals cached (${cacheStats.hits} hits / ${cacheStats.misses} recomputes)`
+    `${agg.list.length} ${agg.list.length === 1 ? "entry" : "entries"} in ${range.label} · cache ${cacheStats.hits} hits / ${cacheStats.misses} recomputes`
   );
+  $("rangeCount").textContent = agg.list.length
+    ? `${agg.list.length} in ${range.label}`
+    : "";
 
   $("todayTotal").textContent = money(agg.today);
   $("avgTotal").textContent = money(agg.dailyAverage);
   $("entryCount").textContent = String(agg.list.length);
-
   $("todayTotal").parentElement.setAttribute("data-tip", `Spent so far on ${prettyDay(todayKey())}`);
   $("avgTotal").parentElement.setAttribute(
     "data-tip",
-    `${money(agg.total)} ÷ ${agg.daysElapsed} ${agg.isCurrentMonth ? "days so far" : "days in the month"}`
+    `${money(agg.total)} ÷ ${range.isCurrent ? range.elapsed : range.totalDays} days in ${range.label}`
   );
-  $("entryCount").parentElement.setAttribute("data-tip", "Number of expenses recorded this month");
+  $("entryCount").parentElement.setAttribute("data-tip", `Expenses recorded in ${range.label}`);
 
-  const budget = Number(config.budget) || 0;
+  const { amount: budget, custom } = budgetForRange(range);
   const fill = $("budgetFill");
   const track = fill.parentElement;
   const meter = $("budgetMeter");
+  const scopeWord = { day: "today", week: "this week", month: "this month", year: "this year" }[range.scope];
+
+  $("editRangeBudget").textContent = custom
+    ? `Custom budget for ${range.label} — change`
+    : `Set a budget just for ${range.label}`;
 
   if (budget <= 0) {
     fill.style.width = "0%";
     track.classList.remove("over");
     $("budgetLeft").textContent = "No budget set";
-    $("budgetCap").textContent = "Add one in settings";
-    meter.setAttribute("data-tip", "Set a budget in Settings to track how much room is left");
+    $("budgetCap").textContent = "Set one below or in Settings";
+    meter.setAttribute("data-tip", `No budget applies to ${range.label}`);
     return;
   }
 
-  // Live period meter while looking at the current month; monthly-equivalent for past months.
-  if (agg.isCurrentMonth) {
-    const p = periodStats();
-    fill.style.width = `${p.ratio * 100}%`;
-    track.classList.toggle("over", p.total > p.budget);
-    $("budgetLeft").innerHTML =
-      p.left >= 0
-        ? `${money(p.left)} left ${p.meta.noun}`
-        : `<span class="over">${money(Math.abs(p.left))} over budget</span>`;
-    $("budgetCap").textContent = `${p.meta.label} ${money(p.budget)}`;
-    meter.setAttribute(
-      "data-tip",
-      p.left >= 0
-        ? `${Math.round((p.total / p.budget) * 100)}% used · ${money(p.total)} of ${money(p.budget)} ${p.meta.noun}` +
-          (p.period === "day"
-            ? ""
-            : p.window.isLastDay
-              ? ` · last day · ${money(Math.max(0, p.left))} to spend`
-              : ` · ${p.window.daysRemaining} days left · ${money(Math.max(0, p.safePerDay))}/day to stay under`)
-        : `You are ${money(Math.abs(p.left))} past your ${p.meta.label.toLowerCase()} budget of ${money(p.budget)}`
-    );
-    return;
-  }
-
-  const monthlyEquivalent = convertBudget(budget, config.budgetPeriod || "month", "month");
-  const ratio = Math.min(1, agg.total / monthlyEquivalent);
+  const ratio = Math.min(1, agg.total / budget);
   fill.style.width = `${ratio * 100}%`;
-  track.classList.toggle("over", agg.total > monthlyEquivalent);
-  const left = monthlyEquivalent - agg.total;
-  $("budgetLeft").innerHTML =
-    left >= 0
-      ? `${money(left)} under`
-      : `<span class="over">${money(Math.abs(left))} over</span>`;
-  $("budgetCap").textContent = `~${money(monthlyEquivalent)} / month`;
+  track.classList.toggle("over", agg.total > budget);
+
+  const left = budget - agg.total;
+  $("budgetLeft").innerHTML = left >= 0
+    ? `${money(left)} left ${range.isCurrent ? scopeWord : ""}`.trim()
+    : `<span class="over">${money(Math.abs(left))} over budget</span>`;
+  $("budgetCap").textContent = `${custom ? "Custom" : "Budget"} ${money(budget)}`;
+
+  const perDay = left / range.daysRemaining;
   meter.setAttribute(
     "data-tip",
-    `${prettyMonth(agg.key)} compared with your ${PERIODS[config.budgetPeriod || "month"].label.toLowerCase()} budget, converted to a monthly equivalent`
+    left >= 0
+      ? `${Math.round((agg.total / budget) * 100)}% used · ${money(agg.total)} of ${money(budget)} for ${range.label}` +
+        (range.isCurrent && range.scope !== "day"
+          ? range.daysRemaining === 1
+            ? ` · last day · ${money(left)} to spend`
+            : ` · ${range.daysRemaining} days left · ${money(Math.max(0, perDay))}/day to stay under`
+          : "") +
+        (custom ? " · custom budget for this period" : "")
+      : `${money(Math.abs(left))} over the ${money(budget)} budget for ${range.label}`
   );
 }
 
@@ -923,7 +1042,7 @@ function renderBreakdown(agg) {
     .map(([id, stat]) => {
       const meta = catById(id);
       const share = agg.total ? Math.round((stat.total / agg.total) * 100) : 0;
-      const tip = `${stat.count} ${stat.count === 1 ? "entry" : "entries"} · ${money(stat.total / stat.count)} average · ${share}% of ${prettyMonth(agg.key)}`;
+      const tip = `${stat.count} ${stat.count === 1 ? "entry" : "entries"} · ${money(stat.total / stat.count)} average · ${share}% of ${agg.range.label}`;
       return `<li data-tip="${escapeHtml(tip)}" tabindex="0">
         <span class="glyph">${icon(meta.id)}</span>
         <span class="cat-name">
@@ -945,15 +1064,23 @@ const PHOTO_ICON =
 function renderEntries(agg) {
   const target = $("entries");
   $("entriesEmpty").hidden = agg.list.length > 0;
+  $("entriesEmpty").textContent = agg.range.isCurrent
+    ? "Tap + to record your first expense."
+    : `No expenses recorded in ${agg.range.label}.`;
   target.innerHTML = "";
 
-  let currentDay = null;
+  const groupByMonth = agg.range.scope === "year";
+  let currentGroup = null;
   agg.list.forEach((entry) => {
-    if (entry.date !== currentDay) {
-      currentDay = entry.date;
+    const groupKey = groupByMonth ? entry.date.slice(0, 7) : entry.date;
+    if (groupKey !== currentGroup) {
+      currentGroup = groupKey;
+      const subtotal = groupByMonth ? agg.byMonth.get(groupKey) : agg.byDay.get(groupKey);
       const divider = document.createElement("li");
       divider.className = "day-divider";
-      divider.innerHTML = `<span>${prettyDay(currentDay)}</span><span>${money(agg.byDay.get(currentDay) || 0)}</span>`;
+      divider.innerHTML =
+        `<span>${groupByMonth ? prettyMonth(groupKey) : prettyDay(groupKey)}</span>` +
+        `<span>${money(subtotal || 0)}</span>`;
       target.appendChild(divider);
     }
 
@@ -993,25 +1120,23 @@ function renderEntries(agg) {
 
 /** Single entry point. Shows skeletons for any month whose aggregates are cold. */
 function render({ allowSkeleton = true } = {}) {
-  renderMonthPicker();
+  const range = rangeFor(view.scope, view.anchor);
 
-  const cold = allowSkeleton && !isCached(viewMonth);
-  if (!ready || cold) {
+  if (!ready || (allowSkeleton && !isCached(range))) {
     paintSkeleton();
-    if (ready) {
-      // Defer the real paint by one frame so the skeleton is rendered at least once.
-      requestAnimationFrame(() => paint(aggregatesFor(viewMonth)));
-    }
+    renderRangeNav(range);
+    if (ready) requestAnimationFrame(() => paint(aggregatesFor(range)));
     return;
   }
 
-  paint(aggregatesFor(viewMonth));
+  paint(aggregatesFor(range));
 }
 
 function paint(agg) {
   renderSummary(agg);
   renderBreakdown(agg);
   renderEntries(agg);
+  syncRangeBudgetField(agg.range);
   $("amountSymbol").textContent = config.currency;
   $("budgetInput").value = config.budget ? String(config.budget) : "";
   $("weekStartSelect").value = String(config.weekStart);
@@ -1022,8 +1147,8 @@ function paint(agg) {
   if (!$("occupationInput").options.length) fillOptions($("occupationInput"), OCCUPATIONS);
   $("occupationInput").value = config.occupation || "";
   $("periodSelect").value = config.budgetPeriod || "month";
-  $("budgetInputLabel").textContent = `${PERIODS[config.budgetPeriod || "month"].label} budget`;
-  prefetchNeighbours(agg.key);
+  $("budgetInputLabel").textContent = `Default ${PERIODS[config.budgetPeriod || "month"].label.toLowerCase()} budget`;
+  prefetchNeighbours(agg.range);
 }
 
 /* ============================================================
@@ -1206,7 +1331,7 @@ $("entryForm").addEventListener("submit", (event) => {
 
   const wasEditing = editingId;
   const photos = draftPhotos.slice();
-  viewMonth = payload.date.slice(0, 7);
+  view = { ...view, anchor: payload.date };
   closeEntrySheet();
 
   commit(
@@ -1262,7 +1387,8 @@ $("deleteEntry").addEventListener("click", () => {
    ============================================================ */
 
 function exportCsv() {
-  const agg = aggregatesFor(viewMonth);
+  const range = rangeFor(view.scope, view.anchor);
+  const agg = aggregatesFor(range);
   if (!agg.list.length) {
     toast("Nothing to export for this month.");
     return;
@@ -1280,7 +1406,7 @@ function exportCsv() {
   const csv = rows.map((row) => row.map((cell) => `"${cell}"`).join(",")).join("\n");
   const link = document.createElement("a");
   link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-  link.download = `saan-napunta-${viewMonth}.csv`;
+  link.download = `saan-napunta-${range.key.replace(":", "-")}.csv`;
   link.click();
   URL.revokeObjectURL(link.href);
   toast("CSV exported.", "ok");
@@ -1338,9 +1464,64 @@ $("exportButton").addEventListener("click", exportCsv);
 $("settingsButton").addEventListener("click", () => { $("settingsPanel").hidden = false; });
 $("closeSettings").addEventListener("click", () => { $("settingsPanel").hidden = true; tooltip.hide(); });
 
-$("monthPicker").addEventListener("change", (event) => {
-  viewMonth = event.target.value;
+$("scopeTabs").addEventListener("click", (event) => {
+  const tab = event.target.closest("button[data-scope]");
+  if (!tab || tab.dataset.scope === view.scope) return;
+  view = { scope: tab.dataset.scope, anchor: view.anchor };
   render();
+});
+
+$("rangePrev").addEventListener("click", () => {
+  view = { ...view, anchor: shiftAnchor(view.scope, view.anchor, -1) };
+  render();
+});
+
+$("rangeNext").addEventListener("click", () => {
+  const next = shiftAnchor(view.scope, view.anchor, 1);
+  if (rangeFor(view.scope, next).isFuture) return;
+  view = { ...view, anchor: next };
+  render();
+});
+
+$("rangeToday").addEventListener("click", () => {
+  view = { ...view, anchor: todayKey() };
+  render();
+});
+
+/* ---------- per-period budget ---------- */
+
+function syncRangeBudgetField(range) {
+  const override = (config.budgets || {})[range.key];
+  $("rangeBudgetInput").value = Number.isFinite(override) ? String(override) : "";
+  $("clearRangeBudget").hidden = !Number.isFinite(override);
+}
+
+$("editRangeBudget").addEventListener("click", () => {
+  const form = $("rangeBudgetForm");
+  form.hidden = !form.hidden;
+  if (!form.hidden) $("rangeBudgetInput").focus();
+});
+
+$("rangeBudgetForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const range = rangeFor(view.scope, view.anchor);
+  const check = validateAmount($("rangeBudgetInput").value, { max: LIMITS.maxBudget });
+  if (check.error) {
+    setFieldError("rangeBudgetInput", check.error);
+    toast(check.error, "error");
+    return;
+  }
+  setFieldError("rangeBudgetInput", null);
+  $("rangeBudgetForm").hidden = true;
+  await setRangeBudget(range.key, check.value);
+  toast(`Budget for ${range.label} set to ${money(check.value)}.`, "ok");
+});
+
+$("clearRangeBudget").addEventListener("click", async () => {
+  const range = rangeFor(view.scope, view.anchor);
+  $("rangeBudgetForm").hidden = true;
+  await setRangeBudget(range.key, null);
+  toast(`${range.label} is back to your default budget.`);
 });
 
 $("budgetInput").addEventListener("change", async (event) => {
@@ -1436,7 +1617,9 @@ document.addEventListener("keydown", (event) => {
 $("settingsButton").setAttribute("data-tip", "Budget, currency and data controls");
 $("addButton").setAttribute("data-tip", "Record a new expense");
 $("exportButton").setAttribute("data-tip", "Download this month as a CSV spreadsheet");
-$("monthPicker").setAttribute("data-tip", "Browse a different month");
+$("rangePrev").setAttribute("data-tip", "Previous period");
+$("rangeNext").setAttribute("data-tip", "Next period");
+$("scopeTabs").setAttribute("data-tip", "View by day, week, month or year");
 
 
 

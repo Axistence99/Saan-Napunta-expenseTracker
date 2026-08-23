@@ -20,9 +20,9 @@ A minimal, offline-first expense tracker built with the same stack as
 - Add, edit and delete expenses (amount, category, date, note)
 - 9 quick categories: Food, Transport, Bills, Load/Data, Groceries, School, Health, Fun, Other
 - Monthly total, today's total, daily average and entry count
-- Optional monthly budget with a progress meter that turns red when you overspend
+- Budget per day, week, month or year, plus per-period overrides for one specific day or month
 - Per-category breakdown with share bars
-- Month picker to browse past months
+- Day / week / month / year views with a period navigator
 - CSV export (download on web, share sheet on Android)
 - Philippine peso only for now; the data model stays currency-aware for a later update
 - Erase-all-data control; nothing leaves the device unless you opt in

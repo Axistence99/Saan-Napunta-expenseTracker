@@ -1032,3 +1032,88 @@ textarea.invalid {
   border-radius: 12px;
   background: rgba(107, 74, 47, 0.28);
 }
+
+/* ============================================================
+   Range navigator + per-period budget
+   ============================================================ */
+
+.scope-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.36);
+}
+
+.scope-tabs button {
+  padding: 7px 4px;
+  font-size: 0.78rem;
+  color: var(--grey);
+  border: none;
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+  transition: color 140ms ease, background 140ms ease;
+}
+.scope-tabs button:hover { color: var(--ink); }
+.scope-tabs button.on {
+  color: #1a0d00;
+  font-weight: 600;
+  background: linear-gradient(140deg, var(--yellow), var(--orange));
+}
+
+.range-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.range-nav .kicker { flex: 1; text-align: center; }
+
+.nav-arrow {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: var(--grey);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+.nav-arrow:hover:not([disabled]) { border-color: var(--purple); color: var(--ink); }
+.nav-arrow[disabled] { opacity: 0.3; cursor: not-allowed; }
+
+.range-count { font-size: 0.72rem; color: var(--grey-dim); }
+
+.budget-edit { margin-top: 8px; }
+.budget-edit .text-button { padding: 0; font-size: 0.74rem; }
+
+.budget-edit-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.budget-edit-form input { padding: 8px 10px; font-size: 0.9rem; }
+.peso-sm { color: var(--gold); font-size: 1rem; }
+
+.mini-button {
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #1a0d00;
+  white-space: nowrap;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(140deg, var(--yellow), var(--orange));
+  cursor: pointer;
+}
+.mini-button.ghost {
+  color: var(--grey);
+  background: none;
+  border: 1px solid var(--line);
+}
+.mini-button.ghost:hover { border-color: var(--danger); color: var(--danger); }

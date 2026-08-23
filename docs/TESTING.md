@@ -66,6 +66,21 @@ cd android && ./gradlew assembleDebug
 8. Rotate the device and reopen — data is intact (it is read from SharedPreferences).
 9. Erase all data → empty state returns.
 
+## View ranges and per-period budgets
+
+1. Switch between Day, Week, Month and Year: the total, breakdown and history all follow,
+   and the label reads "Today" / "This week" / "This month" / "This year".
+2. Step back with the left arrow; the label becomes explicit ("July 2026") and "Back to
+   today" appears. The right arrow is disabled at the current period.
+3. In Year view the history groups by month rather than by day.
+4. With a ₱12,000 monthly default, Day view shows roughly ₱394 and Week roughly ₱2,760 —
+   the default converted, not the raw figure.
+5. Set a custom ₱400 budget for today: the cap reads "Custom ₱400.00", the button changes to
+   "Custom budget for Today — change", and `config.budgets` gains `"d:YYYY-MM-DD": 400`.
+   Step to another day and it is back to the converted default. Clear removes the key.
+6. Save an expense dated last month: the view jumps to that period.
+7. Export CSV: the file covers the visible range and is named after the range key.
+
 ## Input limits
 
 1. **Birthdate** — 2030 is refused as future, a 2020 birthdate is refused as under 13, 1880

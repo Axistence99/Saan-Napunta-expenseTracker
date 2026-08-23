@@ -36,13 +36,39 @@
 
     <section class="summary-card" aria-live="polite">
       <p class="greeting" id="greeting" hidden></p>
-      <span class="kicker" id="monthLabel">This month</span>
+
+      <div class="scope-tabs" id="scopeTabs" role="tablist" aria-label="View by">
+        <button type="button" role="tab" data-scope="day">Day</button>
+        <button type="button" role="tab" data-scope="week">Week</button>
+        <button type="button" role="tab" data-scope="month">Month</button>
+        <button type="button" role="tab" data-scope="year">Year</button>
+      </div>
+
+      <div class="range-nav">
+        <button type="button" id="rangePrev" class="nav-arrow" aria-label="Previous period">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <span class="kicker" id="monthLabel">This month</span>
+        <button type="button" id="rangeNext" class="nav-arrow" aria-label="Next period">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <button type="button" class="text-button center" id="rangeToday" hidden>Back to today</button>
       <strong class="total" id="monthTotal">₱0.00</strong>
       <div class="budget-meter" id="budgetMeter">
         <div class="budget-bar"><span id="budgetFill"></span></div>
         <div class="budget-legend">
           <span id="budgetLeft">No budget set</span>
           <span id="budgetCap"></span>
+        </div>
+        <div class="budget-edit" id="budgetEdit">
+          <button type="button" class="text-button" id="editRangeBudget">Set a budget for this period</button>
+          <form class="budget-edit-form" id="rangeBudgetForm" hidden>
+            <span class="peso-sm">₱</span>
+            <input id="rangeBudgetInput" type="number" inputmode="decimal" min="0" step="1" placeholder="0" />
+            <button type="submit" class="mini-button">Save</button>
+            <button type="button" class="mini-button ghost" id="clearRangeBudget">Clear</button>
+          </form>
         </div>
       </div>
       <div class="mini-stats">
@@ -63,8 +89,8 @@
 
     <section class="panel">
       <div class="panel-heading">
-        <h2>Recent</h2>
-        <select id="monthPicker" aria-label="Choose month"></select>
+        <h2 id="entriesHeading">Recent</h2>
+        <span class="range-count" id="rangeCount"></span>
       </div>
       <ul class="entries" id="entries"></ul>
       <p class="empty-note" id="entriesEmpty">Tap + to record your first expense.</p>

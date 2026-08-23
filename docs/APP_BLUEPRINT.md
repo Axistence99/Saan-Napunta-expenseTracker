@@ -152,7 +152,14 @@ Vertical scroll, top to bottom:
    settings button (gear icon) on the right. Under it, a small uppercase orange tagline
    "GASTOS TRACKER" with wide letter-spacing.
 
-2. **Summary card**
+2. **View controls** — a four-way segmented control (Day · Week · Month · Year) above a
+   navigator: left arrow, the period label, right arrow. The label reads "Today", "This
+   week", "This month" or "This year" while the current period is shown, otherwise the
+   explicit period ("Aug 17–23, 2026", "July 2026", "2025"). The right arrow is disabled at
+   the current period so the user can never page into the future, and a "Back to today"
+   link appears whenever they have navigated away. Every card below follows the selection.
+
+3. **Summary card**
    - Kicker: "This month", or the full month name when viewing a past month.
    - Big total for the selected month.
    - Budget meter, scoped to the user's chosen budget period. Left legend reads
@@ -161,6 +168,9 @@ Vertical scroll, top to bottom:
      reads "No budget set" / "Add one in settings". When browsing a past month the meter
      falls back to comparing that month against the monthly-equivalent of the budget.
    - Three mini-stats separated by a hairline: **Today**, **Daily avg**, **Entries**.
+   - Below the meter, a per-period budget control reading "Set a budget just for {period}",
+     or "Custom budget for {period} — change" when an override exists. It opens an inline
+     amount field with Save and Clear.
 
 3. **By-category card** — heading "BY CATEGORY" with an "Export CSV" text action on the
    right. Each row: emoji glyph, category name above a thin share bar, and the amount with
@@ -241,6 +251,7 @@ Config {
   name         string   legacy display name, mirrors firstName
   budget       number   amount for one budgetPeriod; 0 disables the meter
   budgetPeriod string   "day" | "week" | "month" | "year"
+  budgets      object   per-period overrides, e.g. { "m:2026-08": 15000, "d:2026-08-23": 400 }
   currency     string   always "₱" while other currencies are locked
   weekStart    number   0 = Sunday, 1 = Monday
   onboarded    boolean  false shows the onboarding flow
@@ -266,6 +277,22 @@ Transient, never persisted: `pending` (write in flight) and `failed` (write roll
 Iconography rule: 24x24 line icons, 1.6 px stroke, rounded caps and joins, rendered in the
 current text colour and tinted orange in lists. No emoji anywhere in the product.
 
+## 7a. View ranges
+
+The dashboard shows exactly one range at a time, identified by a key that doubles as the
+aggregate-cache key and the budget-override key:
+
+| Scope | Window | Key | Entry grouping |
+| --- | --- | --- | --- |
+| Day | The single day | `d:2026-08-23` | By day |
+| Week | Week containing the day, honouring the week-start setting | `w:2026-08-17` | By day |
+| Month | Calendar month | `m:2026-08` | By day |
+| Year | Calendar year | `y:2026` | **By month** |
+
+Stepping moves a whole period at a time. Navigation into a period that has not begun is
+blocked. Saving an expense moves the view to the period containing that expense's date.
+CSV export covers the visible range and is named after its key.
+
 ## 7b. Budget period rules
 
 - The active window always contains today: day = today; week = weekStart..+6 days;
@@ -275,6 +302,11 @@ current text colour and tinted orange in lists. No emoji anywhere in the product
 - Safe spend per day = amount left ÷ days remaining.
 - Changing the period in Settings converts the existing amount using 1 day : 7 days :
   30.44 days : 365.25 days, and tells the user the new figure.
+- **Per-period overrides.** Any specific day, week, month or year can carry its own budget,
+  stored under that period's key. The meter uses the override when one exists and otherwise
+  converts the default, so setting ₱400 for one Saturday does not disturb any other day.
+  Clearing an override returns that period to the default. Overrides are shown as
+  "Custom ₱400.00" rather than "Budget ₱394.22".
 - The budget meter is period-scoped; the breakdown and history stay monthly.
 
 ## 7c. Merchant presets

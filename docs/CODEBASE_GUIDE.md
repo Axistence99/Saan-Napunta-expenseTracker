@@ -214,6 +214,20 @@ reach the sync layer.
 returns an inline `<svg>` using `currentColor`. Adding a category means adding one entry to
 `CATEGORIES` and one to `ICONS` (and one vector drawable on Android).
 
+#### View ranges
+
+| Function | Role |
+| --- | --- |
+| `rangeFor(scope, anchorDay)` | Returns `{ scope, key, start, end, label, totalDays, elapsed, daysRemaining, isCurrent, isFuture }` for day, week, month or year |
+| `shiftAnchor(scope, anchorDay, delta)` | Steps the anchor one whole period |
+| `renderRangeNav(range)` | Paints the scope tabs, the label and the arrow states |
+| `budgetForRange(range)` | Override for that exact period if present, otherwise the converted default |
+| `setRangeBudget(key, amount)` | Writes or clears an override (`null` clears) |
+| `sanitiseBudgets(raw)` | Keeps only well-formed `[dwmy]:` keys with in-range amounts |
+
+Module state is `view = { scope, anchor }`. `range.key` is the aggregate-cache key **and**
+the budget-override key, so both stay in step automatically.
+
 #### Budget periods
 
 | Function | Role |
