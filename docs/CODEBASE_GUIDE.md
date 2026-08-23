@@ -416,7 +416,6 @@ migration or existing users lose their ledger.
 
 | Task | Where |
 | --- | --- |
-| Add a merchant preset | `MERCHANTS` in `web/js/app.js` **and** `ExpenseStore.kt` |
 | Change photo limits | `MAX_PHOTOS`, `MAX_EDGE_PX`, `JPEG_QUALITY` in `app.js` |
 | Add a category | `CATEGORIES` + `ICONS` in `web/js/app.js`, `CATEGORIES` in `ExpenseStore.kt`, and a new `res/drawable/ic_cat_*.xml` |
 | Change a colour | `:root` in `styles.css` **and** `colors.xml` (keep the two in sync) |

@@ -36,11 +36,11 @@ python3 -m http.server 8080 --directory web
     category row (entry count and average), and the mini-stats. Tab to a category row and
     confirm the tooltip appears on focus and is announced via `aria-describedby`. On a
     phone, tap a category row to peek.
-16. **Merchant presets** — open the sheet: Food shows Jollibee, McDonald's, Chowking…
-    Switch category to Transport and the row becomes Jeep, Tricycle, Bus, Grab… Tap a preset,
-    then tap it again to clear. "Type it instead" swaps to free text and keeps the value.
-17. **Item and description** — save an expense with item "Chickenjoy 2pc" at Jollibee with a
-    note. The row title reads the item and the subtitle reads "Jollibee · note".
+16. **Entry form** — amount, category, item, description, photos and date. There is no
+    merchant field; a record created before it was retired still shows its merchant in the
+    subtitle and keeps it when edited.
+17. **Item and description** — save an expense with item "Jeep fare" and a note. The row
+    title reads the item and the subtitle reads the note.
 18. **Photos** — attach up to three images; a fourth cannot be added. Remove one and the
     adder returns. The row shows a camera badge with the count. Reopen the entry: the
     thumbnails are still there. Delete the entry and confirm the media bucket shrinks.
@@ -121,6 +121,19 @@ cd android && ./gradlew assembleDebug
    `date: "not-a-date"`, a category that does not exist) and reload: the bad entry is
    dropped, values are clamped, unknown options are cleared, and the corrected config is
    written back.
+
+## Regression watch: duplicated markup
+
+`index.template.html` once ended up with two copies of the entry sheet and the settings
+panel, one of them stale. Nothing looked broken because both were `hidden` and
+`getElementById` silently used the first, but half the settings controls were unreachable.
+After editing the template, check that every id appears exactly once:
+
+```bash
+grep -o 'id="[^"]*"' web/index.template.html | sort | uniq -d
+```
+
+That command should print nothing.
 
 ## Regression watch: the hidden attribute
 

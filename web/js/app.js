@@ -144,34 +144,12 @@ function fillProvinces(select, selected = "") {
   select.value = selected;
 }
 
-/** Philippine merchant presets, shown for the selected category. */
-const MERCHANTS = {
-  food: ["Jollibee", "McDonald's", "Chowking", "Mang Inasal", "Greenwich", "KFC", "Bonchon",
-         "Shakey's", "Max's", "Goldilocks", "Red Ribbon", "Dunkin'", "Starbucks", "Angel's Pizza",
-         "Army Navy", "Potato Corner", "Andok's", "Carinderia", "Milk tea"],
-  groceries: ["SM Supermarket", "Puregold", "Savemore", "Robinsons", "Landers", "S&R",
-              "WalterMart", "Alfamart", "7-Eleven", "Ministop", "Palengke", "Sari-sari store"],
-  transport: ["Jeep", "Tricycle", "Bus", "LRT / MRT", "Grab", "Angkas", "JoyRide", "Taxi",
-              "Gas", "Toll", "Parking", "P2P"],
-  bills: ["Meralco", "Maynilad", "Manila Water", "Converge", "PLDT Home", "Globe At Home",
-          "Sky Cable", "Rent", "Assoc. dues"],
-  load: ["Globe", "Smart", "TNT", "DITO", "GOMO", "Load retailer"],
-  school: ["Tuition", "Books", "School supplies", "Printing", "Uniform", "Project", "Baon"],
-  health: ["Mercury Drug", "Watsons", "Southstar Drug", "Clinic", "Hospital", "Dentist",
-           "Gym", "Vitamins"],
-  fun: ["Netflix", "Spotify", "Steam", "YouTube Premium", "Cinema", "Concert", "Videoke",
-        "Mobile game"],
-  other: ["Gift", "Donation", "Padala", "Repair", "Pet", "Utang payment", "Savings"]
-};
-
 const $ = (id) => document.getElementById(id);
 const catById = (id) => CATEGORIES.find((c) => c.id === id) || CATEGORIES[CATEGORIES.length - 1];
 
 let config = { ...DEFAULT_CONFIG };
 let entries = [];
 let selectedCategory = "food";
-let selectedMerchant = "";
-let merchantIsCustom = false;
 let draftPhotos = [];
 let editingId = null;
 let view = { scope: "month", anchor: todayKey() };
@@ -455,7 +433,6 @@ function applyInputLimits() {
   $("rangeBudgetInput").max = String(LIMITS.maxBudget);
   $("itemInput").maxLength = LIMITS.item;
   $("noteInput").maxLength = LIMITS.note;
-  $("merchantInput").maxLength = LIMITS.merchant;
   [$("firstName"), $("lastName"), $("firstNameInput"), $("lastNameInput")].forEach((node) => {
     node.maxLength = LIMITS.name;
   });
@@ -1206,32 +1183,7 @@ function renderChips() {
     chip.innerHTML = `${icon(cat.id, 16)}${cat.label}`;
     chip.addEventListener("click", () => {
       selectedCategory = cat.id;
-      if (!merchantIsCustom) selectedMerchant = "";
       renderChips();
-      renderMerchants();
-    });
-    wrap.appendChild(chip);
-  });
-}
-
-/** Merchant presets follow the selected category; "Type it instead" switches to free text. */
-function renderMerchants() {
-  const wrap = $("merchantChips");
-  wrap.hidden = merchantIsCustom;
-  $("merchantInput").hidden = !merchantIsCustom;
-  $("toggleMerchant").textContent = merchantIsCustom ? "Pick from list" : "Type it instead";
-  if (merchantIsCustom) return;
-
-  wrap.innerHTML = "";
-  (MERCHANTS[selectedCategory] || []).forEach((name) => {
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.className = "chip small";
-    chip.setAttribute("aria-pressed", String(name === selectedMerchant));
-    chip.textContent = name;
-    chip.addEventListener("click", () => {
-      selectedMerchant = selectedMerchant === name ? "" : name;
-      renderMerchants();
     });
     wrap.appendChild(chip);
   });
@@ -1269,24 +1221,18 @@ function openEntrySheet(id = null) {
   }
 
   selectedCategory = entry ? entry.category : "food";
-  selectedMerchant = entry?.merchant || "";
-  merchantIsCustom = Boolean(
-    selectedMerchant && !(MERCHANTS[selectedCategory] || []).includes(selectedMerchant)
-  );
   draftPhotos = entry ? media.get(entry.id).slice() : [];
 
   $("entryTitle").textContent = entry ? "Edit expense" : "Add expense";
   $("amountInput").value = entry ? entry.amount : "";
   $("itemInput").value = entry?.item || "";
   $("noteInput").value = entry?.note || "";
-  $("merchantInput").value = merchantIsCustom ? selectedMerchant : "";
   $("dateInput").value = entry ? entry.date : todayKey();
   $("saveEntry").textContent = entry ? "Save changes" : "Save expense";
   $("deleteEntry").hidden = !entry;
 
   clearFieldErrors($("entryForm"));
   renderChips();
-  renderMerchants();
   renderPhotoStrip();
   $("entrySheet").hidden = false;
   setTimeout(() => $("amountInput").focus(), 60);
@@ -1354,10 +1300,9 @@ $("entryForm").addEventListener("submit", (event) => {
     return;
   }
 
-  const merchant = cleanText(
-    merchantIsCustom ? $("merchantInput").value : selectedMerchant,
-    LIMITS.merchant
-  );
+  // The merchant field is no longer captured; preserve whatever an existing record carries.
+  const existing = editingId ? entries.find((e) => e.id === editingId) : null;
+  const merchant = cleanText(existing?.merchant, LIMITS.merchant);
   const payload = {
     amount,
     category: selectedCategory,
@@ -1460,14 +1405,6 @@ $("dismissDevBanner").addEventListener("click", () => {
 });
 
 $("addButton").addEventListener("click", () => openEntrySheet());
-
-$("toggleMerchant").addEventListener("click", () => {
-  merchantIsCustom = !merchantIsCustom;
-  if (merchantIsCustom) $("merchantInput").value = selectedMerchant;
-  else selectedMerchant = $("merchantInput").value.trim();
-  renderMerchants();
-  if (merchantIsCustom) $("merchantInput").focus();
-});
 
 $("photoInput").addEventListener("change", async (event) => {
   const picked = [...event.target.files];

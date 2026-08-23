@@ -202,9 +202,6 @@ pressing Escape closes without saving.
   Opens the decimal keypad. Autofocused. Required, must be greater than zero.
 - **Category** — nine rounded chips in a wrapping grid, single-select, defaulting to Food.
   The selected chip gets an orange border, tinted background and lighter text.
-- **Where** — a horizontally scrolling row of merchant presets filtered by the selected
-  category (see 7c). Tapping toggles selection; changing category clears it. A
-  "Type it instead" link swaps the row for a free-text field, and back again.
 - **Item** — what was bought, 60 characters, e.g. "Chickenjoy 2pc", "jeep fare".
 - **Description** — optional 2-row textarea, 200 characters.
 - **Photos** — up to three receipt images from the camera or gallery, shown as 76 px
@@ -241,7 +238,7 @@ Expense {
   id         string   "e" + timestamp + random suffix
   amount     number   > 0, rounded to 2 decimals
   category   string   one of the nine category ids
-  merchant   string   preset or free text, may be empty
+  merchant   string   legacy, only on records created before the field was retired
   item       string   what was bought, may be empty
   note       string   description, may be empty
   date       string   ISO day, "YYYY-MM-DD"
@@ -325,25 +322,12 @@ CSV export covers the visible range and is named after its key.
   `budgetPeriod`; that pair migrates into the matching scope on first read.
 - The budget meter is period-scoped; the breakdown and history stay monthly.
 
-## 7c. Merchant presets
+## 7c. Merchant field (retired)
 
-Each category carries a list of common Philippine merchants so an expense can be logged
-with taps rather than typing:
-
-| Category | Presets |
-| --- | --- |
-| Food | Jollibee, McDonald's, Chowking, Mang Inasal, Greenwich, KFC, Bonchon, Shakey's, Max's, Goldilocks, Red Ribbon, Dunkin', Starbucks, Angel's Pizza, Army Navy, Potato Corner, Andok's, Carinderia, Milk tea |
-| Groceries | SM Supermarket, Puregold, Savemore, Robinsons, Landers, S&R, WalterMart, Alfamart, 7-Eleven, Ministop, Palengke, Sari-sari store |
-| Transport | Jeep, Tricycle, Bus, LRT / MRT, Grab, Angkas, JoyRide, Taxi, Gas, Toll, Parking, P2P |
-| Bills | Meralco, Maynilad, Manila Water, Converge, PLDT Home, Globe At Home, Sky Cable, Rent, Assoc. dues |
-| Load / Data | Globe, Smart, TNT, DITO, GOMO, Load retailer |
-| School | Tuition, Books, School supplies, Printing, Uniform, Project, Baon |
-| Health | Mercury Drug, Watsons, Southstar Drug, Clinic, Hospital, Dentist, Gym, Vitamins |
-| Fun | Netflix, Spotify, Steam, YouTube Premium, Cinema, Concert, Videoke, Mobile game |
-| Other | Gift, Donation, Padala, Repair, Pet, Utang payment, Savings |
-
-Any merchant not listed can be typed. The list is presentation only — nothing depends on
-a preset being chosen.
+The entry form no longer asks where the money was spent; item and description cover it.
+The `merchant` field stays in the data model so records created earlier keep their value:
+it is still shown in entry subtitles and exported to CSV, and editing an old record
+preserves it rather than blanking it. Nothing writes a new merchant.
 
 ## 7d. Photos
 

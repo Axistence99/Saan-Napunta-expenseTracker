@@ -156,23 +156,3 @@ fun prettyDay(dayKey: String): String {
 }
 
 fun money(currency: String, value: Double): String = currency + "%,.2f".format(value)
-
-/** Merchant presets, mirroring the web build. */
-val MERCHANTS: Map<String, List<String>> = mapOf(
-    "food" to listOf("Jollibee", "McDonald's", "Chowking", "Mang Inasal", "Greenwich", "KFC",
-        "Bonchon", "Shakey's", "Max's", "Goldilocks", "Red Ribbon", "Dunkin'", "Starbucks",
-        "Angel's Pizza", "Army Navy", "Potato Corner", "Andok's", "Carinderia", "Milk tea"),
-    "groceries" to listOf("SM Supermarket", "Puregold", "Savemore", "Robinsons", "Landers",
-        "S&R", "WalterMart", "Alfamart", "7-Eleven", "Ministop", "Palengke", "Sari-sari store"),
-    "transport" to listOf("Jeep", "Tricycle", "Bus", "LRT / MRT", "Grab", "Angkas", "JoyRide",
-        "Taxi", "Gas", "Toll", "Parking", "P2P"),
-    "bills" to listOf("Meralco", "Maynilad", "Manila Water", "Converge", "PLDT Home",
-        "Globe At Home", "Sky Cable", "Rent", "Assoc. dues"),
-    "load" to listOf("Globe", "Smart", "TNT", "DITO", "GOMO", "Load retailer"),
-    "school" to listOf("Tuition", "Books", "School supplies", "Printing", "Uniform", "Project", "Baon"),
-    "health" to listOf("Mercury Drug", "Watsons", "Southstar Drug", "Clinic", "Hospital",
-        "Dentist", "Gym", "Vitamins"),
-    "fun" to listOf("Netflix", "Spotify", "Steam", "YouTube Premium", "Cinema", "Concert",
-        "Videoke", "Mobile game"),
-    "other" to listOf("Gift", "Donation", "Padala", "Repair", "Pet", "Utang payment", "Savings")
-)
