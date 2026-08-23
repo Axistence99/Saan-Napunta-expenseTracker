@@ -1,0 +1,19 @@
+# Android / Gradle
+.gradle/
+**/build/
+local.properties
+*.iml
+.idea/
+
+# Generated APKs and mapping files
+*.apk
+*.aab
+**/outputs/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Local secrets / generated config
+web/js/firebase-config.js

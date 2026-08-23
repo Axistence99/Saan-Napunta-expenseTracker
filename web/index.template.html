@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Saan Napunta? + Gastos Tracker</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="live-gradient" aria-hidden="true"></div>
+
+  <main class="shell">
+    <div class="heading-row">
+      <h1>Saan Napunta?</h1>
+      <button class="icon-button" id="settingsButton" type="button" aria-label="Open settings">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m19.4 14.6.9.5a1.5 1.5 0 0 1 .6 2l-1 1.7a1.5 1.5 0 0 1-2 .6l-.9-.5a7.6 7.6 0 0 1-1.8 1v1a1.5 1.5 0 0 1-1.5 1.5h-2A1.5 1.5 0 0 1 10.2 21v-1a7.6 7.6 0 0 1-1.8-1l-.9.5a1.5 1.5 0 0 1-2-.6l-1-1.7a1.5 1.5 0 0 1 .6-2l.9-.5a7.6 7.6 0 0 1 0-2.1l-.9-.5a1.5 1.5 0 0 1-.6-2l1-1.7a1.5 1.5 0 0 1 2-.6l.9.5a7.6 7.6 0 0 1 1.8-1V3a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 15.3 3v1a7.6 7.6 0 0 1 1.8 1l.9-.5a1.5 1.5 0 0 1 2 .6l1 1.7a1.5 1.5 0 0 1-.6 2l-.9.5a7.6 7.6 0 0 1 0 2.1Z"/></svg>
+      </button>
+    </div>
+
+    <div class="tagline-row">
+      <p class="tagline">Gastos Tracker</p>
+      <button class="sync-pill" id="syncPill" type="button" hidden>
+        <span class="sync-dot" id="syncPillDot" aria-hidden="true"></span>
+        <span id="syncPillText">Synced</span>
+      </button>
+    </div>
+
+    <section class="summary-card" aria-live="polite">
+      <p class="greeting" id="greeting" hidden></p>
+      <span class="kicker" id="monthLabel">This month</span>
+      <strong class="total" id="monthTotal">₱0.00</strong>
+      <div class="budget-meter" id="budgetMeter">
+        <div class="budget-bar"><span id="budgetFill"></span></div>
+        <div class="budget-legend">
+          <span id="budgetLeft">No budget set</span>
+          <span id="budgetCap"></span>
+        </div>
+      </div>
+      <div class="mini-stats">
+        <div><span>Today</span><strong id="todayTotal">₱0.00</strong></div>
+        <div><span>Daily avg</span><strong id="avgTotal">₱0.00</strong></div>
+        <div><span>Entries</span><strong id="entryCount">0</strong></div>
+      </div>
+    </section>
+
+    <section class="panel" id="breakdownPanel">
+      <div class="panel-heading">
+        <h2>By category</h2>
+        <button class="text-button" id="exportButton" type="button">Export CSV</button>
+      </div>
+      <ul class="breakdown" id="breakdown"></ul>
+      <p class="empty-note" id="breakdownEmpty">No spending recorded for this month yet.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Recent</h2>
+        <select id="monthPicker" aria-label="Choose month"></select>
+      </div>
+      <ul class="entries" id="entries"></ul>
+      <p class="empty-note" id="entriesEmpty">Tap + to record your first gastos.</p>
+    </section>
+
+    <p class="development-warning" role="note">Development build: data is stored only in this browser.</p>
+    <p class="privacy-note">Private by design. No account, no sync, no analytics.</p>
+    <p class="credit">Made by Aleksis Ong</p>
+  </main>
+
+  <button class="fab" id="addButton" type="button" aria-label="Add expense">+</button>
+
+  <div class="onboard" id="onboard" hidden>
+    <div class="onboard-card">
+      <div class="onboard-progress" aria-hidden="true">
+        <span class="dot on" data-step="1"></span>
+        <span class="dot" data-step="2"></span>
+        <span class="dot" data-step="3"></span>
+        <span class="dot" data-step="4"></span>
+      </div>
+
+      <section class="step" data-step="1">
+        <h2 class="onboard-title">Kumusta!</h2>
+        <p class="onboard-sub">Ano ang itatawag namin sa&rsquo;yo? This stays on your device.</p>
+        <label>
+          Your name
+          <input id="profileName" type="text" maxlength="24" placeholder="Juan" autocomplete="given-name" />
+        </label>
+        <label>
+          Currency
+          <select id="profileCurrency">
+            <option value="₱">Philippine peso (₱)</option>
+            <option value="$">US dollar ($)</option>
+            <option value="€">Euro (€)</option>
+            <option value="¥">Yen (¥)</option>
+          </select>
+        </label>
+        <button class="primary-button" id="stepOneNext" type="button">Continue</button>
+        <button class="text-button center" id="skipOnboarding" type="button">Skip for now</button>
+      </section>
+
+      <section class="step" data-step="2" hidden>
+        <h2 class="onboard-title">How do you budget?</h2>
+        <p class="onboard-sub">Pick the window you actually think in. You can change it anytime.</p>
+        <div class="period-grid" id="periodGrid">
+          <button class="period-card" type="button" data-period="day">
+            <span class="period-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span>
+            <b>Daily</b>
+            <small>Baon or allowance per day</small>
+          </button>
+          <button class="period-card" type="button" data-period="week">
+            <span class="period-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M7 15h10"/></svg></span>
+            <b>Weekly</b>
+            <small>Good for weekly cash-outs</small>
+          </button>
+          <button class="period-card" type="button" data-period="month">
+            <span class="period-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M7 14h2M11 14h2M15 14h2M7 17.5h2M11 17.5h2"/></svg></span>
+            <b>Monthly</b>
+            <small>Matches your sweldo</small>
+          </button>
+          <button class="period-card" type="button" data-period="year">
+            <span class="period-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg></span>
+            <b>Yearly</b>
+            <small>Big-picture target</small>
+          </button>
+        </div>
+        <div class="onboard-actions">
+          <button class="text-button" id="stepTwoBack" type="button">Back</button>
+          <button class="primary-button grow" id="stepTwoNext" type="button">Continue</button>
+        </div>
+      </section>
+
+      <section class="step" data-step="3" hidden>
+        <h2 class="onboard-title">Magkano?</h2>
+        <p class="onboard-sub" id="amountSub">How much can you spend per month?</p>
+        <div class="amount-row big">
+          <span class="peso" id="onboardSymbol">₱</span>
+          <input id="onboardBudget" type="number" inputmode="decimal" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="presets" id="budgetPresets"></div>
+        <p class="equivalent" id="budgetEquivalent"></p>
+        <div class="onboard-actions">
+          <button class="text-button" id="stepThreeBack" type="button">Back</button>
+          <button class="primary-button grow" id="finishOnboarding" type="button">Start tracking</button>
+        </div>
+        <button class="text-button center" id="noBudget" type="button">I&rsquo;ll set a budget later</button>
+      </section>
+
+      <section class="step" data-step="4" hidden>
+        <h2 class="onboard-title">Keep a backup?</h2>
+        <p class="onboard-sub">Optional. Sign in to sync your gastos to your other devices. Everything works offline without it, and you can do this later in Settings.</p>
+        <button class="google-button" id="onboardGoogle" type="button">
+          <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.2 17.7 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.2-.4-4.6H24v9.1h12.4c-.5 2.9-2.1 5.3-4.6 6.9l7.1 5.5c4.2-3.9 6.6-9.6 6.6-16.4z"/>
+            <path fill="#FBBC05" d="M10.4 28.7c-.5-1.4-.8-2.9-.8-4.7s.3-3.3.8-4.7l-7.8-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.8-6.1z"/>
+            <path fill="#34A853" d="M24 48c6.2 0 11.5-2 15.3-5.5l-7.1-5.5c-2 1.4-4.7 2.3-8.2 2.3-6.3 0-11.7-3.7-13.6-9.1l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/>
+          </svg>
+          Continue with Google
+        </button>
+        <p class="panel-note">Photos are never uploaded. Only amounts, categories and notes sync.</p>
+        <button class="primary-button" id="finishNoSync" type="button">Start tracking</button>
+      </section>
+    </div>
+  </div>
+
+  <div class="sheet" id="entrySheet" hidden>
+    <form class="sheet-card" id="entryForm">
+      <div class="panel-heading">
+        <h2 id="entryTitle">Add expense</h2>
+        <button class="close-button" id="closeEntry" type="button" aria-label="Close">×</button>
+      </div>
+
+      <label class="amount-field">
+        <span>Amount</span>
+        <div class="amount-row">
+          <span class="peso" id="amountSymbol">₱</span>
+          <input id="amountInput" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" required />
+        </div>
+      </label>
+
+      <span class="field-label">Category</span>
+      <div class="chips" id="categoryChips"></div>
+
+      <div class="field-head">
+        <span class="field-label">Where</span>
+        <button class="text-button" id="toggleMerchant" type="button">Type it instead</button>
+      </div>
+      <div class="chips scroller" id="merchantChips"></div>
+      <input id="merchantInput" type="text" maxlength="40" placeholder="Store or place" hidden />
+
+      <label>
+        Item
+        <input id="itemInput" type="text" maxlength="60" placeholder="Chickenjoy 2pc, load, jeep fare" />
+      </label>
+
+      <label>
+        Description <em>(optional)</em>
+        <textarea id="noteInput" rows="2" maxlength="200" placeholder="Lunch with the team, shared with Ana&hellip;"></textarea>
+      </label>
+
+      <div class="field-head">
+        <span class="field-label">Photos</span>
+        <span class="field-hint" id="photoHint">Receipts stay on this device</span>
+      </div>
+      <div class="photo-strip" id="photoStrip">
+        <label class="photo-add" for="photoInput">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L8 6H4.5A1.5 1.5 0 0 0 3 7.5v11A1.5 1.5 0 0 0 4.5 20h15a1.5 1.5 0 0 0 1.5-1.5v-11A1.5 1.5 0 0 0 19.5 6H16Z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          <span>Add</span>
+        </label>
+        <input id="photoInput" type="file" accept="image/*" capture="environment" multiple hidden />
+      </div>
+
+      <label>
+        Date
+        <input id="dateInput" type="date" required />
+      </label>
+
+      <button class="primary-button" id="saveEntry" type="submit">Save expense</button>
+      <button class="text-button danger" id="deleteEntry" type="button" hidden>Delete this entry</button>
+    </form>
+  </div>
+
+  <div class="sheet" id="settingsPanel" hidden>
+    <div class="sheet-card">
+      <div class="panel-heading">
+        <h2>Settings</h2>
+        <button class="close-button" id="closeSettings" type="button" aria-label="Close settings">×</button>
+      </div>
+      <section class="account" id="accountBlock">
+        <div class="account-intro" id="accountIntro">
+          <strong>Back up &amp; sync</strong>
+          <p class="panel-note">Optional. Sign in to keep your gastos on every device. The app works completely offline without an account.</p>
+        </div>
+
+        <button class="google-button" id="googleSignIn" type="button">
+          <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.2 17.7 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.2-.4-4.6H24v9.1h12.4c-.5 2.9-2.1 5.3-4.6 6.9l7.1 5.5c4.2-3.9 6.6-9.6 6.6-16.4z"/>
+            <path fill="#FBBC05" d="M10.4 28.7c-.5-1.4-.8-2.9-.8-4.7s.3-3.3.8-4.7l-7.8-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.8-6.1z"/>
+            <path fill="#34A853" d="M24 48c6.2 0 11.5-2 15.3-5.5l-7.1-5.5c-2 1.4-4.7 2.3-8.2 2.3-6.3 0-11.7-3.7-13.6-9.1l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <div class="account-card" id="accountCard" hidden>
+          <span class="avatar" id="accountAvatar" aria-hidden="true">D</span>
+          <span class="account-meta">
+            <b id="accountName">Signed in</b>
+            <span id="accountEmail"></span>
+          </span>
+        </div>
+
+        <div class="sync-row" id="syncRow" hidden>
+          <span class="sync-dot" id="syncDot" aria-hidden="true"></span>
+          <span id="syncDetail">Synced</span>
+          <button class="text-button" id="syncNow" type="button">Sync now</button>
+        </div>
+
+        <button class="secondary-button ghost" id="signOutButton" type="button" hidden>Sign out</button>
+      </section>
+
+      <label>
+        Your name
+        <input id="nameInput" type="text" maxlength="24" placeholder="Juan" />
+      </label>
+      <label>
+        Budget period
+        <select id="periodSelect">
+          <option value="day">Daily</option>
+          <option value="week">Weekly</option>
+          <option value="month">Monthly</option>
+          <option value="year">Yearly</option>
+        </select>
+      </label>
+      <label>
+        <span id="budgetInputLabel">Monthly budget</span>
+        <input id="budgetInput" type="number" inputmode="decimal" min="0" step="1" placeholder="e.g. 12000" />
+      </label>
+      <label>
+        Currency
+        <select id="currencySelect">
+          <option value="₱">Philippine peso (₱)</option>
+          <option value="$">US dollar ($)</option>
+          <option value="€">Euro (€)</option>
+          <option value="¥">Yen (¥)</option>
+        </select>
+      </label>
+      <label>
+        Week starts on
+        <select id="weekStartSelect">
+          <option value="1">Monday</option>
+          <option value="0">Sunday</option>
+        </select>
+      </label>
+      <button class="secondary-button" id="clearButton" type="button">Erase all data</button>
+      <p class="panel-note">Everything lives in this browser's local storage. Clearing site data deletes it permanently.</p>
+    </div>
+  </div>
+
+  <p class="sr-only" id="status" aria-live="polite">Saan Napunta? ready.</p>
+  <script src="js/sync.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

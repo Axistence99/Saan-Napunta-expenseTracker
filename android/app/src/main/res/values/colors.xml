@@ -1,0 +1,10 @@
+<resources>
+    <color name="background">#14110E</color>
+    <color name="surface">#1E1913</color>
+    <color name="text_primary">#F4ECE2</color>
+    <color name="text_muted">#A79C90</color>
+    <color name="accent">#E85D04</color>
+    <color name="accent_light">#FF7E00</color>
+    <color name="gold">#E9C46A</color>
+    <color name="danger">#FF5F56</color>
+</resources>
