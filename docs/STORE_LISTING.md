@@ -13,7 +13,7 @@ so the store listing explains what the app does without bloating the launcher la
 | Apple subtitle | `Gastos Tracker` | 14 | 30 |
 | Play short description | see below | 66 | 80 |
 | Android launcher label (`app_name`) | `Saan Napunta?` | 13 | ~12 visible under the icon |
-| Web page `<title>` | `Saan Napunta? + Gastos Tracker` | 30 | — |
+| Web page `<title>` | `Saan Napunta - Expense Tracker` | 30 | — (no store limit applies) |
 
 Notes:
 
