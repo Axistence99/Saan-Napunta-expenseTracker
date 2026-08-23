@@ -1117,3 +1117,58 @@ textarea.invalid {
   border: 1px solid var(--line);
 }
 .mini-button.ghost:hover { border-color: var(--danger); color: var(--danger); }
+
+/* ============================================================
+   Budget settings grid + override list
+   ============================================================ */
+
+.budget-grid-wrap { display: flex; flex-direction: column; gap: 6px; }
+.budget-grid-wrap .panel-note { margin-bottom: 2px; }
+
+.budget-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.budget-grid label { gap: 4px; font-size: 0.78rem; }
+.budget-grid input { padding: 10px 12px; }
+.budget-grid input::placeholder { color: var(--grey-dim); font-size: 0.82rem; }
+
+.overrides { display: flex; flex-direction: column; gap: 6px; }
+
+.override-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.override-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  font-size: 0.82rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.3);
+}
+.override-list li span { flex: 1; color: var(--grey); }
+.override-list li b { color: var(--gold); font-variant-numeric: tabular-nums; }
+
+.override-remove {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--grey-dim);
+  border: none;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+.override-remove:hover { color: var(--danger); background: rgba(229, 72, 77, 0.12); }

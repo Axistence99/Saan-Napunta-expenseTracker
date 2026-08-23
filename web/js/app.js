@@ -27,8 +27,9 @@ const DEFAULT_CONFIG = {
   sexAtBirth: "",
   occupation: "",
   name: "", // legacy display name, kept in sync with firstName
-  budget: 0,
+  budget: 0,          // legacy single budget, migrated into budgetDefaults on read
   budgetPeriod: "month",
+  budgetDefaults: { day: 0, week: 0, month: 0, year: 0 }, // one standing budget per scope
   budgets: {}, // per-period overrides keyed by range key, e.g. "m:2026-08" or "d:2026-08-23" // day | week | month | year
   currency: CURRENCY,
   weekStart: 1,
@@ -228,6 +229,24 @@ const storage = {
   }
 };
 
+/**
+ * Clamps the four standing budgets. Profiles written before per-scope budgets existed
+ * carried a single `budget` plus `budgetPeriod`; that pair is migrated into the matching
+ * scope so nobody loses their figure.
+ */
+function sanitiseDefaults(raw) {
+  const source = raw.budgetDefaults && typeof raw.budgetDefaults === "object" ? raw.budgetDefaults : {};
+  const clean = { day: 0, week: 0, month: 0, year: 0 };
+  SCOPES.forEach((scope) => {
+    clean[scope] = clampNumber(source[scope], 0, LIMITS.maxBudget) ?? 0;
+  });
+
+  const legacy = clampNumber(raw.budget, 0, LIMITS.maxBudget) ?? 0;
+  const legacyScope = PERIODS[raw.budgetPeriod] ? raw.budgetPeriod : "month";
+  if (legacy > 0 && !SCOPES.some((scope) => clean[scope] > 0)) clean[legacyScope] = legacy;
+  return clean;
+}
+
 /** Keeps only well-formed override keys with in-range amounts. */
 function sanitiseBudgets(raw) {
   if (!raw || typeof raw !== "object") return {};
@@ -258,6 +277,7 @@ function sanitiseConfig(raw) {
     currency: CURRENCY,
     budget: clampNumber(raw.budget, 0, LIMITS.maxBudget) ?? 0,
     budgetPeriod: PERIODS[raw.budgetPeriod] ? raw.budgetPeriod : "month",
+    budgetDefaults: sanitiseDefaults(raw),
     budgets: sanitiseBudgets(raw.budgets),
     weekStart: Number(raw.weekStart) === 0 ? 0 : 1,
     onboarded: Boolean(raw.onboarded)
@@ -429,7 +449,10 @@ function applyInputLimits() {
 
   $("amountInput").max = String(LIMITS.maxAmount);
   $("onboardBudget").max = String(LIMITS.maxBudget);
-  $("budgetInput").max = String(LIMITS.maxBudget);
+  Object.values(BUDGET_FIELDS).forEach((id) => {
+    $(id).max = String(LIMITS.maxBudget);
+  });
+  $("rangeBudgetInput").max = String(LIMITS.maxBudget);
   $("itemInput").maxLength = LIMITS.item;
   $("noteInput").maxLength = LIMITS.note;
   $("merchantInput").maxLength = LIMITS.merchant;
@@ -659,20 +682,32 @@ function periodStats() {
   };
 }
 
+/** Scopes are consulted in this order when nothing is set for the one being viewed. */
+const FALLBACK_ORDER = ["month", "week", "day", "year"];
+
 /**
- * Budget that applies to a range: an override saved for that exact period if one exists,
- * otherwise the default budget converted from its own period.
+ * Resolves the budget for a range in three steps:
+ *   1. an override saved for that exact period (this Saturday, this December)
+ *   2. the standing budget for that scope (every day, every week...)
+ *   3. the closest scope the user did set, converted
+ * Any of them may be absent, in which case the meter simply shows no budget.
  */
 function budgetForRange(range) {
   const override = (config.budgets || {})[range.key];
-  if (Number.isFinite(override) && override >= 0) {
-    return { amount: override, custom: true };
+  if (Number.isFinite(override) && override > 0) {
+    return { amount: override, source: "custom" };
   }
-  const base = Number(config.budget) || 0;
-  if (!base) return { amount: 0, custom: false };
+
+  const defaults = config.budgetDefaults || {};
+  const own = Number(defaults[range.scope]) || 0;
+  if (own > 0) return { amount: own, source: "default" };
+
+  const from = FALLBACK_ORDER.find((scope) => Number(defaults[scope]) > 0);
+  if (!from) return { amount: 0, source: "none" };
   return {
-    amount: convertBudget(base, config.budgetPeriod || "month", range.scope),
-    custom: false
+    amount: convertBudget(Number(defaults[from]), from, range.scope),
+    source: "derived",
+    from
   };
 }
 
@@ -991,13 +1026,13 @@ function renderSummary(agg) {
   );
   $("entryCount").parentElement.setAttribute("data-tip", `Expenses recorded in ${range.label}`);
 
-  const { amount: budget, custom } = budgetForRange(range);
+  const { amount: budget, source, from } = budgetForRange(range);
   const fill = $("budgetFill");
   const track = fill.parentElement;
   const meter = $("budgetMeter");
   const scopeWord = { day: "today", week: "this week", month: "this month", year: "this year" }[range.scope];
 
-  $("editRangeBudget").textContent = custom
+  $("editRangeBudget").textContent = source === "custom"
     ? `Custom budget for ${range.label} — change`
     : `Set a budget just for ${range.label}`;
 
@@ -1018,7 +1053,8 @@ function renderSummary(agg) {
   $("budgetLeft").innerHTML = left >= 0
     ? `${money(left)} left ${range.isCurrent ? scopeWord : ""}`.trim()
     : `<span class="over">${money(Math.abs(left))} over budget</span>`;
-  $("budgetCap").textContent = `${custom ? "Custom" : "Budget"} ${money(budget)}`;
+  const capWord = { custom: "Custom", default: `${PERIODS[range.scope].label} budget`, derived: "Budget" }[source];
+  $("budgetCap").textContent = `${capWord} ${money(budget)}`;
 
   const perDay = left / range.daysRemaining;
   meter.setAttribute(
@@ -1030,7 +1066,11 @@ function renderSummary(agg) {
             ? ` · last day · ${money(left)} to spend`
             : ` · ${range.daysRemaining} days left · ${money(Math.max(0, perDay))}/day to stay under`
           : "") +
-        (custom ? " · custom budget for this period" : "")
+        (source === "custom"
+          ? " · custom budget for this period"
+          : source === "derived"
+            ? ` · derived from your ${PERIODS[from].label.toLowerCase()} budget`
+            : "")
       : `${money(Math.abs(left))} over the ${money(budget)} budget for ${range.label}`
   );
 }
@@ -1138,7 +1178,7 @@ function paint(agg) {
   renderEntries(agg);
   syncRangeBudgetField(agg.range);
   $("amountSymbol").textContent = config.currency;
-  $("budgetInput").value = config.budget ? String(config.budget) : "";
+  renderBudgetSettings();
   $("weekStartSelect").value = String(config.weekStart);
   $("firstNameInput").value = config.firstName || config.name || "";
   $("lastNameInput").value = config.lastName || "";
@@ -1146,8 +1186,7 @@ function paint(agg) {
   $("provinceInput").value = config.province || "";
   if (!$("occupationInput").options.length) fillOptions($("occupationInput"), OCCUPATIONS);
   $("occupationInput").value = config.occupation || "";
-  $("periodSelect").value = config.budgetPeriod || "month";
-  $("budgetInputLabel").textContent = `Default ${PERIODS[config.budgetPeriod || "month"].label.toLowerCase()} budget`;
+
   prefetchNeighbours(agg.range);
 }
 
@@ -1524,20 +1563,6 @@ $("clearRangeBudget").addEventListener("click", async () => {
   toast(`${range.label} is back to your default budget.`);
 });
 
-$("budgetInput").addEventListener("change", async (event) => {
-  const check = validateAmount(event.target.value, { max: LIMITS.maxBudget, allowZero: true });
-  if (check.error) {
-    setFieldError(event.target, check.error);
-    toast(check.error, "error");
-    return;
-  }
-  setFieldError(event.target, null);
-  config = { ...config, budget: check.value };
-  invalidate();
-  render({ allowSkeleton: false });
-  await storage.writeConfig(config);
-});
-
 ["firstNameInput", "lastNameInput", "provinceInput", "occupationInput"].forEach((id) => {
   $(id).addEventListener("change", async (event) => {
     const field = {
@@ -1569,17 +1594,6 @@ $("budgetInput").addEventListener("change", async (event) => {
     render({ allowSkeleton: false });
     await storage.writeConfig(config);
   });
-});
-
-$("periodSelect").addEventListener("change", async (event) => {
-  const from = config.budgetPeriod || "month";
-  const to = event.target.value;
-  const converted = config.budget ? Math.round(convertBudget(config.budget, from, to)) : 0;
-  config = { ...config, budgetPeriod: to, budget: converted };
-  invalidate();
-  render({ allowSkeleton: false });
-  await storage.writeConfig(config);
-  if (converted) toast(`Budget converted to ${money(converted)} per ${to}.`);
 });
 
 $("weekStartSelect").addEventListener("change", async (event) => {
@@ -1719,7 +1733,11 @@ async function finishOnboarding({ budget }) {
     name: draft.firstName,
     currency: draft.currency,
     budgetPeriod: draft.period,
-    budget: Math.max(0, budget || 0),
+    budget: 0,
+    budgetDefaults: {
+      ...(config.budgetDefaults || { day: 0, week: 0, month: 0, year: 0 }),
+      [draft.period]: Math.max(0, budget || 0)
+    },
     onboarded: true
   };
   await storage.writeConfig(config);
@@ -1848,6 +1866,95 @@ function maybeShowOnboarding() {
   setTimeout(() => $("firstName").focus(), 120);
   return true;
 }
+
+/* ============================================================
+   Budget settings
+   ============================================================ */
+
+const BUDGET_FIELDS = { day: "budgetDay", week: "budgetWeek", month: "budgetMonth", year: "budgetYear" };
+
+function renderBudgetSettings() {
+  const defaults = config.budgetDefaults || {};
+  SCOPES.forEach((scope) => {
+    const field = $(BUDGET_FIELDS[scope]);
+    const own = Number(defaults[scope]) || 0;
+    field.value = own > 0 ? String(own) : "";
+    if (own > 0) {
+      field.placeholder = "—";
+      return;
+    }
+    // Show what this scope would work out to from the other budgets.
+    const derived = budgetForRange({ scope, key: `${scope}:preview` });
+    field.placeholder = derived.amount > 0 ? `${money(derived.amount)} (auto)` : "—";
+  });
+
+  renderOverrideList();
+}
+
+/** Lists every period that carries its own budget, newest key first. */
+function renderOverrideList() {
+  const entries = Object.entries(config.budgets || {}).sort((a, b) => (a[0] < b[0] ? 1 : -1));
+  $("overridesBlock").hidden = entries.length === 0;
+  const list = $("overrideList");
+  list.innerHTML = "";
+
+  entries.forEach(([key, amount]) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span>${escapeHtml(describeRangeKey(key))}</span>
+      <b>${money(amount)}</b>
+      <button type="button" class="override-remove" aria-label="Remove custom budget">&times;</button>`;
+    li.querySelector("button").addEventListener("click", async () => {
+      await setRangeBudget(key, null);
+      toast(`${describeRangeKey(key)} is back to your standing budget.`);
+    });
+    list.appendChild(li);
+  });
+}
+
+/** Turns "d:2026-08-23" into "Sun, Aug 23" and so on. */
+function describeRangeKey(key) {
+  const [prefix, value] = key.split(":");
+  const scope = { d: "day", w: "week", m: "month", y: "year" }[prefix];
+  if (!scope) return key;
+  const anchor = scope === "month" ? `${value}-01` : scope === "year" ? `${value}-01-01` : value;
+  return rangeFor(scope, anchor).label;
+}
+
+SCOPES.forEach((scope) => {
+  $(BUDGET_FIELDS[scope]).addEventListener("change", async (event) => {
+    const raw = event.target.value.trim();
+    const check = validateAmount(raw === "" ? 0 : raw, { max: LIMITS.maxBudget, allowZero: true });
+    if (check.error) {
+      setFieldError(event.target, check.error);
+      toast(check.error, "error");
+      return;
+    }
+    setFieldError(event.target, null);
+    config = {
+      ...config,
+      budget: 0,
+      budgetDefaults: { ...(config.budgetDefaults || {}), [scope]: check.value }
+    };
+    invalidate();
+    render({ allowSkeleton: false });
+    await storage.writeConfig(config);
+    toast(
+      check.value > 0
+        ? `${PERIODS[scope].label} budget set to ${money(check.value)}.`
+        : `${PERIODS[scope].label} budget cleared.`,
+      "ok"
+    );
+  });
+});
+
+$("clearAllOverrides").addEventListener("click", async () => {
+  if (!confirm("Remove every custom period budget? Your standing budgets stay.")) return;
+  config = { ...config, budgets: {} };
+  invalidate();
+  render({ allowSkeleton: false });
+  await storage.writeConfig(config);
+  toast("Custom period budgets cleared.");
+});
 
 /* ============================================================
    Sync + account UI  (optional — the app is fully usable signed out)

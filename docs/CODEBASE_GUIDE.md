@@ -221,9 +221,13 @@ returns an inline `<svg>` using `currentColor`. Adding a category means adding o
 | `rangeFor(scope, anchorDay)` | Returns `{ scope, key, start, end, label, totalDays, elapsed, daysRemaining, isCurrent, isFuture }` for day, week, month or year |
 | `shiftAnchor(scope, anchorDay, delta)` | Steps the anchor one whole period |
 | `renderRangeNav(range)` | Paints the scope tabs, the label and the arrow states |
-| `budgetForRange(range)` | Override for that exact period if present, otherwise the converted default |
+| `budgetForRange(range)` | Three-step resolution: override for that exact period, then the standing budget for that scope, then the closest set scope converted. Returns `{ amount, source, from }` where source is custom, default, derived or none |
 | `setRangeBudget(key, amount)` | Writes or clears an override (`null` clears) |
 | `sanitiseBudgets(raw)` | Keeps only well-formed `[dwmy]:` keys with in-range amounts |
+| `sanitiseDefaults(raw)` | Clamps the four standing budgets and migrates a legacy `budget` + `budgetPeriod` pair into the matching scope |
+| `renderBudgetSettings()` | Fills the four fields; an empty one shows the derived figure as its placeholder |
+| `renderOverrideList()` | Lists every period carrying its own budget, with remove buttons |
+| `describeRangeKey(key)` | Turns `d:2026-08-23` back into a human label |
 
 Module state is `view = { scope, anchor }`. `range.key` is the aggregate-cache key **and**
 the budget-override key, so both stay in step automatically.

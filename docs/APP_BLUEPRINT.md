@@ -218,8 +218,12 @@ A second bottom sheet with the same chrome.
 - **First and last name** — side-by-side text fields.
 - **Province** — the same grouped 82-province dropdown used in onboarding.
 - **Occupation** — Student · Employee · Entrepreneur · Prefer not to say · N/A.
-- **Budget period** — Daily / Weekly / Monthly / Yearly; changing it converts the amount.
-- **Budget** — numeric field, labelled with the active period; 0 or empty disables the meter.
+- **Budgets** — four independent fields in a 2x2 grid: Daily, Weekly, Monthly, Yearly. Any
+  subset may be filled. A field left empty shows what it would work out to from the others,
+  greyed as "₱394.22 (auto)". Clearing a field removes that standing budget.
+- **Custom periods** — appears only when overrides exist. Lists each one ("Today ₱1,200.00")
+  with a remove button, plus Clear all. Removing an override returns that period to the
+  standing budget.
 - **Currency** — locked to the Philippine peso, shown as a dashed read-only row with a padlock and a note that more are coming.
 - **Week starts on** — Monday (default) or Sunday.
 - **Erase all data** — outlined button that turns red on hover, with a confirmation prompt.
@@ -250,8 +254,9 @@ Config {
   occupation   string   "student" | "employee" | "entrepreneur" | "undisclosed" | "na" | ""
   name         string   legacy display name, mirrors firstName
   budget       number   amount for one budgetPeriod; 0 disables the meter
-  budgetPeriod string   "day" | "week" | "month" | "year"
-  budgets      object   per-period overrides, e.g. { "m:2026-08": 15000, "d:2026-08-23": 400 }
+  budgetPeriod   string  legacy, kept for migration only
+  budgetDefaults object  standing budget per scope, e.g. { day: 500, week: 3000, month: 12000, year: 0 }
+  budgets        object  per-period overrides, e.g. { "m:2026-08": 15000, "d:2026-08-23": 1200 }
   currency     string   always "₱" while other currencies are locked
   weekStart    number   0 = Sunday, 1 = Monday
   onboarded    boolean  false shows the onboarding flow
@@ -302,11 +307,18 @@ CSV export covers the visible range and is named after its key.
 - Safe spend per day = amount left ÷ days remaining.
 - Changing the period in Settings converts the existing amount using 1 day : 7 days :
   30.44 days : 365.25 days, and tells the user the new figure.
-- **Per-period overrides.** Any specific day, week, month or year can carry its own budget,
-  stored under that period's key. The meter uses the override when one exists and otherwise
-  converts the default, so setting ₱400 for one Saturday does not disturb any other day.
-  Clearing an override returns that period to the default. Overrides are shown as
-  "Custom ₱400.00" rather than "Budget ₱394.22".
+- **Standing budgets per scope.** Daily, weekly, monthly and yearly budgets are independent
+  values, not one figure converted. Setting a ₱500 daily budget does not touch the ₱12,000
+  monthly one.
+- **Resolution order** for any period on screen:
+  1. an override saved for that exact period, shown as "Custom ₱1,200.00"
+  2. the standing budget for that scope, shown as "Daily budget ₱500.00"
+  3. the closest scope that is set, converted, shown as "Budget ₱394.22"
+  4. nothing, in which case the meter reads "No budget set"
+- **Per-period overrides.** Any single day, week, month or year can carry its own budget, so
+  no two days need the same figure. A ₱1,200 Saturday leaves every other day on ₱500.
+- Profiles written before per-scope budgets existed carried one `budget` plus a
+  `budgetPeriod`; that pair migrates into the matching scope on first read.
 - The budget meter is period-scoped; the breakdown and history stay monthly.
 
 ## 7c. Merchant presets

@@ -81,6 +81,20 @@ cd android && ./gradlew assembleDebug
 6. Save an expense dated last month: the view jumps to that period.
 7. Export CSV: the file covers the visible range and is named after the range key.
 
+## Budgets per scope
+
+1. **Migration** — load a profile holding only `budget: 12000` and `budgetPeriod: "month"`;
+   it becomes `budgetDefaults: { day: 0, week: 0, month: 12000, year: 0 }`.
+2. **Derived figures** — with only a monthly budget set, Day reads about ₱394 and Week about
+   ₱2,760, and the empty Settings fields show those as "(auto)" placeholders.
+3. **Independence** — set Daily ₱500, Weekly ₱3,000, Yearly ₱200,000. Each scope now shows
+   its own figure and none of them disturb the monthly ₱12,000.
+4. **One day differs** — give today a ₱1,200 custom budget. Today reads "Custom ₱1,200.00";
+   step back a day and it still reads "Daily budget ₱500.00".
+5. **Manager** — Settings lists "Today ₱1,200.00" under Custom periods; removing it returns
+   today to ₱500 and hides the section. Clear all empties the list.
+6. **Fallback** — clear the Daily field and Day view drops back to the derived ₱394.22.
+
 ## Input limits
 
 1. **Birthdate** — 2030 is refused as future, a 2020 birthdate is refused as under 13, 1880
