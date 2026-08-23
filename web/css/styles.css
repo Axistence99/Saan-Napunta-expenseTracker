@@ -26,6 +26,10 @@
 
 * { box-sizing: border-box; }
 
+/* The hidden attribute must beat any display rule below, otherwise elements that are
+   flex/grid containers stay visible when toggled off in JavaScript. */
+[hidden] { display: none !important; }
+
 html { min-height: 100%; }
 
 body {

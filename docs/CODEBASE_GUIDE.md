@@ -121,7 +121,9 @@ Ordered top to bottom:
    `--grey`, `--grey-dim`, `--muted`), accents (`--purple`, `--purple-deep`, `--orange`,
    `--orange-dark`, `--yellow`, `--gold`, `--brown`, `--brown-deep`, `--danger`) and
    surfaces (`--line`, `--line-warm`, `--panel`, `--surface`).
-2. **Reset** — border-box, body background, inherited fonts on controls.
+2. **Reset** — border-box, `[hidden] { display: none !important; }` (required: every
+   toggled element is a flex or grid container and would otherwise ignore `hidden`), body
+   background, inherited fonts on controls.
 3. **`.live-gradient`** — fixed full-bleed layer; `::before` and `::after` are two 82 vmax
    blurred radial circles animated by `gradientDrift` (18–30 s, alternating). Reduced-motion
    slows them rather than stopping them.

@@ -66,6 +66,17 @@ cd android && ./gradlew assembleDebug
 8. Rotate the device and reopen — data is intact (it is read from SharedPreferences).
 9. Erase all data → empty state returns.
 
+## Regression watch: the hidden attribute
+
+`styles.css` declares `[hidden] { display: none !important; }` near the top. Without it any
+element that is also a flex or grid container — onboarding steps, both bottom sheets, the
+account card, the merchant chip row, the photo adder, the sync pill — stays on screen when
+JavaScript toggles `hidden`, and the whole onboarding stacks into one long page.
+
+Do not remove that rule, and when testing visibility assert on
+`getComputedStyle(el).display`, not on `el.hidden`. The property can be true while the
+element is still painted.
+
 ## Known limitations
 
 - Both builds are single-device; there is no backup or sync.
