@@ -43,7 +43,7 @@ class GradientBackgroundView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawColor(Color.parseColor("#0B0906"))
+        canvas.drawColor(Color.parseColor("#07050B"))
 
         val drift = Math.sin(phase * 2 * Math.PI).toFloat()
         val radius = maxOf(width, height) * 0.95f
@@ -52,7 +52,7 @@ class GradientBackgroundView @JvmOverloads constructor(
             width * (0.18f + drift * 0.08f),
             height * (0.06f + drift * 0.04f),
             radius,
-            intArrayOf(Color.parseColor("#B3FF7E00"), Color.parseColor("#40E85D04"), Color.TRANSPARENT),
+            intArrayOf(Color.parseColor("#9E8B5CF6"), Color.parseColor("#404C1D95"), Color.TRANSPARENT),
             floatArrayOf(0f, 0.35f, 1f),
             Shader.TileMode.CLAMP
         )
@@ -62,7 +62,7 @@ class GradientBackgroundView @JvmOverloads constructor(
             width * (0.86f - drift * 0.06f),
             height * (0.96f - drift * 0.05f),
             radius * 0.9f,
-            intArrayOf(Color.parseColor("#8CF55B00"), Color.parseColor("#30B43700"), Color.TRANSPARENT),
+            intArrayOf(Color.parseColor("#99FF7E00"), Color.parseColor("#38E9C46A"), Color.TRANSPARENT),
             floatArrayOf(0f, 0.32f, 1f),
             Shader.TileMode.CLAMP
         )

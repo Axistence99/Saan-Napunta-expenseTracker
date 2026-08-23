@@ -5,7 +5,8 @@
         <item name="android:statusBarColor">@color/background</item>
         <item name="android:navigationBarColor">@color/background</item>
         <item name="android:windowBackground">@drawable/splash_background</item>
-        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:colorAccent">@color/accent_light</item>
+        <item name="android:textColorSecondary">@color/text_muted</item>
         <item name="android:textColorPrimary">@color/text_primary</item>
     </style>
 </resources>

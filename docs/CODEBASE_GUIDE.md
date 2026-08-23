@@ -117,8 +117,10 @@ Both sheets start with the `hidden` attribute; JS toggles `.hidden` rather than 
 
 Ordered top to bottom:
 
-1. **Tokens** — `:root` custom properties: `--black`, `--ink`, `--muted`, `--orange`,
-   `--orange-dark`, `--gold`, `--danger`, `--line`, `--panel`.
+1. **Tokens** — `:root` custom properties in three groups: base (`--black`, `--ink`,
+   `--grey`, `--grey-dim`, `--muted`), accents (`--purple`, `--purple-deep`, `--orange`,
+   `--orange-dark`, `--yellow`, `--gold`, `--brown`, `--brown-deep`, `--danger`) and
+   surfaces (`--line`, `--line-warm`, `--panel`, `--surface`).
 2. **Reset** — border-box, body background, inherited fonts on controls.
 3. **`.live-gradient`** — fixed full-bleed layer; `::before` and `::after` are two 82 vmax
    blurred radial circles animated by `gradientDrift` (18–30 s, alternating). Reduced-motion
@@ -331,9 +333,11 @@ battery in the background.
 
 ### 4.7 Resources
 
-- `colors.xml` — `background #14110E`, `surface #1E1913`, `text_primary #F4ECE2`,
-  `text_muted #A79C90`, `accent #E85D04`, `accent_light #FF7E00`, `gold #E9C46A`,
-  `danger #FF5F56`.
+- `colors.xml` — mirrors the web tokens: `background #07050B`, `surface #16101F`,
+  `text_primary #F5EFE6`, `text_muted #9A93A6`, `grey_dim #6F6878`, `purple #8B5CF6`,
+  `purple_deep #4C1D95`, `accent #C2410C`, `accent_light #FF7E00`, `yellow #FFC53D`,
+  `gold #E9C46A`, `brown #6B4A2F`, `brown_deep #3A2618`, `danger #E5484D`,
+  `hairline #2A2233`.
 - `strings.xml` — `app_name` is the short **Saan Napunta?** (launcher labels truncate around
   12 characters); `app_tagline` is **Gastos Tracker**; plus all UI copy.
 - `themes.xml` — `Theme.Material.NoActionBar`, dark status and navigation bars, accent colour.
@@ -367,7 +371,7 @@ migration or existing users lose their ledger.
 | Add a merchant preset | `MERCHANTS` in `web/js/app.js` **and** `ExpenseStore.kt` |
 | Change photo limits | `MAX_PHOTOS`, `MAX_EDGE_PX`, `JPEG_QUALITY` in `app.js` |
 | Add a category | `CATEGORIES` + `ICONS` in `web/js/app.js`, `CATEGORIES` in `ExpenseStore.kt`, and a new `res/drawable/ic_cat_*.xml` |
-| Change a colour | `:root` in `styles.css` **and** `colors.xml` |
+| Change a colour | `:root` in `styles.css` **and** `colors.xml` (keep the two in sync) |
 | Add a tooltip | Set `data-tip="…"` on any element — no other wiring |
 | Add a new stat | Compute it inside `aggregatesFor()`, render in `renderSummary()` |
 | Change save behaviour | `commit()` in `app.js`; `ExpenseStore.save()` on Android |

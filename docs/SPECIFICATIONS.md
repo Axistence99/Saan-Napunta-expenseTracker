@@ -73,6 +73,6 @@ receipt photos, shared wallets.
 
 ## Visual language
 
-Inherited from Bawal Scroll: pure black base, drifting orange radial gradients, ink `#F4ECE2`,
-accent `#FF7E00`, gold `#E9C46A` for warnings, danger `#FF5F56`, 22 px rounded cards on a
-translucent panel with backdrop blur.
+Violet-black base (`#07050B`) with drifting purple and orange gradients. Ink `#F5EFE6`,
+grey `#9A93A6`, purple `#8B5CF6`, orange `#FF7E00`, yellow `#FFC53D`, gold `#E9C46A`,
+brown `#6B4A2F`, danger `#E5484D`. 22 px rounded cards on a translucent panel with blur.

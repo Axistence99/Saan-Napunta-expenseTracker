@@ -38,21 +38,31 @@ data lives on the device and can be exported to CSV or erased outright.
 
 | Token | Hex | Used for |
 | --- | --- | --- |
-| Base black | `#000000` | Page background behind the gradient |
-| Surface | `#14110E` / `#1E1913` | Card fills (translucent on web: `rgba(13,10,7,0.78)`) |
-| Ink | `#F4ECE2` | Primary text |
-| Muted | `rgba(244,236,226,0.68)` / `#A79C90` | Labels, secondary text |
-| Orange | `#FF7E00` | Primary accent, progress fills, tagline |
-| Orange dark | `#C94A00` / `#E85D04` | Gradient ends, secondary accent |
-| Gold | `#E9C46A` | Warnings, non-destructive secondary actions |
-| Danger | `#FF5F56` | Over-budget state, destructive actions |
-| Hairline | `rgba(244,236,226,0.16)` | 1 px card and control borders |
+| Base black | `#07050B` | Page background, slightly violet-shifted |
+| Surface | `#16101F` | Card fills (translucent `rgba(22,15,30,0.8)` on web) |
+| Ink | `#F5EFE6` | Primary text, warm off-white |
+| Grey | `#9A93A6` | Secondary text, stat labels |
+| Grey dim | `#6F6878` | Disabled and tertiary text |
+| Purple | `#8B5CF6` | Secondary accent: selection, progress, tooltip edges |
+| Purple deep | `#4C1D95` | Gradient anchor |
+| Orange | `#FF7E00` | Primary accent |
+| Orange dark | `#C2410C` | Gradient end |
+| Yellow | `#FFC53D` | Highlights, gradient tips, FAB |
+| Gold | `#E9C46A` | Category icons, tagline, synced state, warnings |
+| Brown | `#6B4A2F` | Warm neutral: bar bases, queued state |
+| Brown deep | `#3A2618` | Over-budget gradient base |
+| Danger | `#E5484D` | Over budget, destructive actions |
+| Hairline | `rgba(245,239,230,0.14)` | 1 px borders |
+
+Ordering rule: purple and black carry the structure, grey carries the quiet text, and the
+orange to yellow to gold warm ramp carries anything that represents money. Brown sits under
+the warm ramp as its darker base. No greens or blues anywhere.
 
 ### Background
 
-A full-bleed animated backdrop: pure black with two large blurred orange radial circles,
-one anchored top-left and one bottom-right, drifting and scaling slowly on alternating
-18–30 second loops. It is decorative, never interactive, and slows down (never stops) under
+A full-bleed animated backdrop: near-black with a violet vignette, a large blurred purple
+radial circle anchored top-left and a warm orange-to-gold one bottom-right, drifting and
+scaling slowly on alternating 18–30 second loops. It is decorative, never interactive, and slows down (never stops) under
 reduced-motion settings. On mobile it runs at a deliberately low frame rate (~2 fps native)
 to protect battery.
 

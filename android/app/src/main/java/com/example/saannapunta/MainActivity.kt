@@ -273,7 +273,7 @@ class MainActivity : Activity() {
                     ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
                         max = 100
                         progress = share
-                        progressTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.accent))
+                        progressTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.purple))
                     },
                     LinearLayout.LayoutParams(MATCH, dp(6)).apply { topMargin = dp(4) }
                 )
@@ -466,7 +466,7 @@ class MainActivity : Activity() {
     /** Monochrome vector icon tinted with the accent colour. */
     private fun categoryIcon(category: Category, sizeDp: Int) = ImageView(this).apply {
         setImageResource(category.iconRes)
-        imageTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.accent_light))
+        imageTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.gold))
         layoutParams = LinearLayout.LayoutParams(dp(sizeDp), dp(sizeDp))
         contentDescription = category.label
     }
