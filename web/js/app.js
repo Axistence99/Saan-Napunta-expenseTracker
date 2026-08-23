@@ -1286,6 +1286,14 @@ function exportCsv() {
   toast("CSV exported.", "ok");
 }
 
+/* The development warning stays dismissed for the session only, never permanently. */
+const DEV_BANNER_KEY = "saan-napunta-dev-banner";
+if (sessionStorage.getItem(DEV_BANNER_KEY) === "dismissed") $("devBanner").hidden = true;
+$("dismissDevBanner").addEventListener("click", () => {
+  $("devBanner").hidden = true;
+  sessionStorage.setItem(DEV_BANNER_KEY, "dismissed");
+});
+
 $("addButton").addEventListener("click", () => openEntrySheet());
 
 $("toggleMerchant").addEventListener("click", () => {

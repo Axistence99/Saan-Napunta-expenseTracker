@@ -3,7 +3,7 @@
     <string name="app_name">Saan Napunta?</string>
     <!-- In-app tagline. The Play Store listing title is "Saan Napunta? + Gastos Tracker" (30 chars). -->
     <string name="app_tagline">Gastos Tracker</string>
-    <string name="development_warning">Development build: expenses are stored on this device only.</string>
+    <string name="development_warning">Development build. This app is still being built: features may change and your data can be lost between updates.</string>
     <string name="privacy_note">Private by design. No account, no sync, no analytics.</string>
     <string name="add_expense">Add expense</string>
     <string name="edit_expense">Edit expense</string>

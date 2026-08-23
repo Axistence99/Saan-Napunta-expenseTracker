@@ -991,10 +991,68 @@ textarea.invalid {
 
 .locked-note { font-size: 0.72rem; color: var(--grey-dim); }
 
+/* ============================================================
+   Development warning
+   ============================================================ */
+
+.dev-banner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: min(100%, 460px);
+  margin: 0 auto;
+  padding: 11px 14px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #ffe9bd;
+  border: 1px solid rgba(233, 196, 106, 0.4);
+  border-radius: 0 0 16px 16px;
+  border-top: none;
+  background: linear-gradient(180deg, rgba(107, 74, 47, 0.55), rgba(58, 38, 24, 0.5));
+}
+
+.dev-banner svg { flex: none; margin-top: 1px; color: var(--yellow); }
+.dev-banner b { color: var(--yellow); }
+
+.dev-banner button {
+  flex: none;
+  margin: -4px -4px 0 auto;
+  padding: 2px 6px;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--gold);
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.dev-banner button:hover { color: var(--ink); }
+
+.onboard-warning {
+  margin: 0;
+  padding: 9px 11px;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: #ffe9bd;
+  border: 1px solid rgba(233, 196, 106, 0.32);
+  border-radius: 12px;
+  background: rgba(107, 74, 47, 0.28);
+}
+
   </style>
 </head>
 <body>
   <div class="live-gradient" aria-hidden="true"></div>
+
+  <div class="dev-banner" id="devBanner" role="status">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
+      <path d="M12 9v4M12 17h.01"/>
+    </svg>
+    <span><b>Development build.</b> This app is still being built. Features may change and your data can be lost between updates.</span>
+    <button type="button" id="dismissDevBanner" aria-label="Dismiss warning">&times;</button>
+  </div>
 
   <main class="shell">
     <div class="heading-row">
@@ -1048,7 +1106,10 @@ textarea.invalid {
       <p class="empty-note" id="entriesEmpty">Tap + to record your first gastos.</p>
     </section>
 
-    <p class="development-warning" role="note">Development build: data is stored only in this browser.</p>
+    <p class="development-warning" role="note">
+      Work in progress &middot; not a finished product. Data lives only in this browser, so
+      export a CSV before clearing site data.
+    </p>
     <p class="privacy-note">Private by design. No account, no sync, no analytics.</p>
     <p class="credit">Made by Aleksis Ong</p>
   </main>
@@ -1067,6 +1128,10 @@ textarea.invalid {
       <section class="step" data-step="1">
         <h2 class="onboard-title">Kumusta!</h2>
         <p class="onboard-sub">Let&rsquo;s set up your profile. Everything here stays on your device.</p>
+        <p class="onboard-warning">
+          Heads up: this is an early development build. Things will change, and your records
+          may not survive future updates.
+        </p>
 
         <div class="field-pair">
           <label>
@@ -3036,6 +3101,14 @@ function exportCsv() {
   URL.revokeObjectURL(link.href);
   toast("CSV exported.", "ok");
 }
+
+/* The development warning stays dismissed for the session only, never permanently. */
+const DEV_BANNER_KEY = "saan-napunta-dev-banner";
+if (sessionStorage.getItem(DEV_BANNER_KEY) === "dismissed") $("devBanner").hidden = true;
+$("dismissDevBanner").addEventListener("click", () => {
+  $("devBanner").hidden = true;
+  sessionStorage.setItem(DEV_BANNER_KEY, "dismissed");
+});
 
 $("addButton").addEventListener("click", () => openEntrySheet());
 

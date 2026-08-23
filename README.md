@@ -1,5 +1,9 @@
 # Saan Napunta?
 
+> **Status: in active development.** This is a prototype, not a finished product. Features
+> and the data format still change between commits, and a stored ledger may not survive an
+> update. Export a CSV before clearing site data or reinstalling.
+
 **In-app / launcher name:** Saan Napunta? · **Store listing title:** Saan Napunta? + Gastos Tracker
 (30 characters, the Play Store maximum — see [docs/STORE_LISTING.md](docs/STORE_LISTING.md)).
 

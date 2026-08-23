@@ -46,6 +46,8 @@ Saan napunta ang sweldo mo? Track gastos, set budget, walang internet. (70)
 ```
 Saan napunta ang pera mo?
 
+NOTE: This app is in active development. Features may change between updates.
+
 Saan Napunta? is a simple, offline expense tracker built for Philippine pesos.
 Log a gastos in under five seconds, then see exactly where your money went this month.
 

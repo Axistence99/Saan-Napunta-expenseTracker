@@ -983,3 +983,52 @@ textarea.invalid {
 .locked-value svg { margin-left: auto; opacity: 0.7; }
 
 .locked-note { font-size: 0.72rem; color: var(--grey-dim); }
+
+/* ============================================================
+   Development warning
+   ============================================================ */
+
+.dev-banner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: min(100%, 460px);
+  margin: 0 auto;
+  padding: 11px 14px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #ffe9bd;
+  border: 1px solid rgba(233, 196, 106, 0.4);
+  border-radius: 0 0 16px 16px;
+  border-top: none;
+  background: linear-gradient(180deg, rgba(107, 74, 47, 0.55), rgba(58, 38, 24, 0.5));
+}
+
+.dev-banner svg { flex: none; margin-top: 1px; color: var(--yellow); }
+.dev-banner b { color: var(--yellow); }
+
+.dev-banner button {
+  flex: none;
+  margin: -4px -4px 0 auto;
+  padding: 2px 6px;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--gold);
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.dev-banner button:hover { color: var(--ink); }
+
+.onboard-warning {
+  margin: 0;
+  padding: 9px 11px;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: #ffe9bd;
+  border: 1px solid rgba(233, 196, 106, 0.32);
+  border-radius: 12px;
+  background: rgba(107, 74, 47, 0.28);
+}

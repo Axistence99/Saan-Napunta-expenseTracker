@@ -9,6 +9,15 @@
 <body>
   <div class="live-gradient" aria-hidden="true"></div>
 
+  <div class="dev-banner" id="devBanner" role="status">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
+      <path d="M12 9v4M12 17h.01"/>
+    </svg>
+    <span><b>Development build.</b> This app is still being built. Features may change and your data can be lost between updates.</span>
+    <button type="button" id="dismissDevBanner" aria-label="Dismiss warning">&times;</button>
+  </div>
+
   <main class="shell">
     <div class="heading-row">
       <h1>Saan Napunta?</h1>
@@ -61,7 +70,10 @@
       <p class="empty-note" id="entriesEmpty">Tap + to record your first gastos.</p>
     </section>
 
-    <p class="development-warning" role="note">Development build: data is stored only in this browser.</p>
+    <p class="development-warning" role="note">
+      Work in progress &middot; not a finished product. Data lives only in this browser, so
+      export a CSV before clearing site data.
+    </p>
     <p class="privacy-note">Private by design. No account, no sync, no analytics.</p>
     <p class="credit">Made by Aleksis Ong</p>
   </main>
@@ -80,6 +92,10 @@
       <section class="step" data-step="1">
         <h2 class="onboard-title">Kumusta!</h2>
         <p class="onboard-sub">Let&rsquo;s set up your profile. Everything here stays on your device.</p>
+        <p class="onboard-warning">
+          Heads up: this is an early development build. Things will change, and your records
+          may not survive future updates.
+        </p>
 
         <div class="field-pair">
           <label>
