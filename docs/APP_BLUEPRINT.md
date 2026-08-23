@@ -185,8 +185,12 @@ Vertical scroll, top to bottom:
 
 5. **Footer** — a gold development-build warning, the privacy line, and the credit line.
 
-6. **Floating action button** — a 62 px orange gradient circle with a "+", pinned to the
-   bottom-right of the content column with a soft orange glow shadow.
+7. **Floating action button** — a 60 px circle pinned to the bottom-right of the content
+   column, 18 px from the edge on phones and clear of the home indicator. Warm gradient
+   (yellow into orange into a darker orange) with a top-left specular highlight, an inset
+   rim light, and a soft purple halo behind it so it separates from the warm background.
+   The plus is an **SVG icon, never a text glyph** — a typed "+" sits optically high in most
+   fonts and cannot be centred reliably. Hover lifts it 2 px, press scales it to 0.93.
 
 ## 5. Screen: Add / Edit expense
 
@@ -435,6 +439,21 @@ peeks the tooltip for about two seconds. Required hints:
 | Add button | "Record a new expense" |
 | Export | "Download this month as a CSV spreadsheet" |
 | Month picker | "Browse a different month" |
+
+## 9b. Small-screen rules
+
+- Content column is 460 px maximum and centred; below that it is fluid with 16–20 px gutters.
+- Paired fields (first/last name, sex/occupation, the four budget inputs) collapse to a
+  single column below 400 px.
+- Inputs are at least 16 px on phones, otherwise iOS zooms the page on focus.
+- Native date inputs need explicit `width: 100%`, `min-width: 0` and `appearance: none`;
+  they carry an intrinsic width and will otherwise overflow a grid cell. Their picker icon
+  is filtered to gold, since the default is near-black on a dark field.
+- Every grid child that holds text sets `min-width: 0`, otherwise long merchant names widen
+  the row instead of ellipsising.
+- Bottom spacing, the sheet and the action button all respect `env(safe-area-inset-bottom)`.
+- The onboarding card scrolls internally and is capped to the visible viewport height, so
+  the profile step stays usable on short screens.
 
 ## 10. Accessibility
 

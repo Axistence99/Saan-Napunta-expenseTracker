@@ -281,23 +281,49 @@ h2 { margin: 0; font-size: 0.95rem; letter-spacing: 0.02em; text-transform: uppe
 .fab {
   position: fixed;
   z-index: 3;
-  left: 50%;
-  bottom: 24px;
-  transform: translateX(calc(-50% + min(46vw, 190px)));
-  width: 62px;
-  height: 62px;
+  /* Hugs the 460px content column on wide screens, 18px from the edge on phones. */
+  right: max(18px, calc(50vw - 230px + 6px));
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  width: 60px;
+  height: 60px;
   display: grid;
   place-items: center;
-  font-size: 2rem;
-  line-height: 1;
-  color: #1a0d00;
+  padding: 0;
+  color: #24120a;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(140deg, var(--yellow), var(--orange));
-  box-shadow: 0 14px 34px rgba(255, 126, 0, 0.3), 0 4px 14px rgba(76, 29, 149, 0.4);
+  background:
+    radial-gradient(120% 120% at 30% 20%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 45%),
+    linear-gradient(145deg, var(--yellow) 0%, var(--orange) 62%, #d2560a 100%);
+  box-shadow:
+    0 10px 26px rgba(255, 126, 0, 0.34),
+    0 3px 10px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
   cursor: pointer;
+  transition: transform 140ms cubic-bezier(0.2, 0.9, 0.3, 1.3), box-shadow 140ms ease;
 }
-.fab:active { transform: translateX(calc(-50% + min(46vw, 190px))) scale(0.94); }
+
+/* Soft purple halo so the button reads against the warm gradient background. */
+.fab::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.34) 0%, rgba(139, 92, 246, 0) 70%);
+  z-index: -1;
+}
+
+.fab svg { display: block; }
+
+.fab:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 30px rgba(255, 126, 0, 0.42),
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.fab:active { transform: scale(0.93); }
+.fab:focus-visible { outline: 2px solid var(--purple); outline-offset: 4px; }
 
 .sheet {
   position: fixed;
@@ -1180,6 +1206,97 @@ textarea.invalid {
 }
 .override-remove:hover { color: var(--danger); background: rgba(229, 72, 77, 0.12); }
 
+/* ============================================================
+   Mobile layout corrections
+   ============================================================ */
+
+/* Native date and time inputs are the worst offenders on phones: they carry an intrinsic
+   width, refuse to shrink inside a grid cell, and render a black picker icon on our dark
+   background. */
+input[type="date"] {
+  width: 100%;
+  min-width: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  min-height: 1.2em;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(78%) sepia(38%) saturate(560%) hue-rotate(345deg) brightness(102%);
+  cursor: pointer;
+  opacity: 0.9;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+
+/* Grid children default to min-width:auto, which lets long content force overflow. */
+.field-pair > label,
+.budget-grid > label,
+.mini-stats > div { min-width: 0; }
+
+.field-pair > label input,
+.field-pair > label select,
+.budget-grid > label input { width: 100%; min-width: 0; }
+
+/* iOS zooms the page when a focused input is under 16px. */
+@media (max-width: 480px) {
+  input,
+  select,
+  textarea { font-size: 16px; }
+
+  .budget-grid input,
+  .budget-edit-form input { padding: 11px 12px; }
+}
+
+/* Narrow phones: stop pairing fields side by side. */
+@media (max-width: 400px) {
+  .field-pair,
+  .budget-grid { grid-template-columns: minmax(0, 1fr); }
+
+  .shell { padding-left: 16px; padding-right: 16px; }
+  .onboard { padding: 12px; }
+  .onboard-card { padding: 22px 18px 18px; }
+  .amount-row.big input { font-size: 2.1rem; }
+  .amount-row.big .peso { font-size: 1.8rem; }
+  .scope-tabs button { font-size: 0.72rem; padding: 7px 2px; }
+  .period-grid { gap: 8px; }
+  .period-card { padding: 12px 10px; }
+  .mini-stats strong { font-size: 0.92rem; }
+}
+
+/* The budget editor must wrap instead of squeezing its buttons off screen. */
+.budget-edit-form { flex-wrap: wrap; }
+.budget-edit-form input { flex: 1 1 90px; min-width: 0; }
+
+/* Keep the onboarding card scrollable on short screens, and clear of the notch. */
+.onboard { align-items: flex-start; padding-top: max(16px, env(safe-area-inset-top, 0px)); }
+.onboard-card {
+  max-height: calc(100svh - 32px);
+  overflow-y: auto;
+  margin: auto 0;
+}
+
+.sheet { padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)); }
+.shell { padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)); }
+
+/* Long merchant names and notes should ellipsis, never widen the row. */
+.entries .meta,
+.breakdown .cat-name { min-width: 0; }
+.entries .meta b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Photo tiles should fill the row evenly on small screens. */
+@media (max-width: 360px) {
+  .photo-add,
+  .photo-thumb { width: 68px; height: 68px; }
+}
+
   </style>
 </head>
 <body>
@@ -1280,7 +1397,11 @@ textarea.invalid {
     <p class="credit">Made by Aleksis Ong</p>
   </main>
 
-  <button class="fab" id="addButton" type="button" aria-label="Add expense">+</button>
+  <button class="fab" id="addButton" type="button" aria-label="Add expense">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" focusable="false">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>
+  </button>
 
   <div class="onboard" id="onboard" hidden>
     <div class="onboard-card">
@@ -4063,7 +4184,6 @@ function maybeShowOnboarding() {
   $("firstName").value = draft.firstName;
   $("lastName").value = draft.lastName;
   $("birthdate").value = draft.birthdate;
-  $("birthdate").max = todayKey();
   fillProvinces($("province"), draft.province);
   fillOptions($("occupation"), OCCUPATIONS, draft.occupation);
   $("sexAtBirth").value = draft.sexAtBirth;

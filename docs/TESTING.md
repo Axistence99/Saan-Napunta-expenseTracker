@@ -81,6 +81,18 @@ cd android && ./gradlew assembleDebug
 6. Save an expense dated last month: the view jumps to that period.
 7. Export CSV: the file covers the visible range and is named after the range key.
 
+## Mobile layout
+
+1. At 360 px wide, first/last name, sex/occupation and the four budget fields each stack in
+   one column; nothing overflows horizontally.
+2. The birthdate and expense date fields fill their cell, and the calendar icon is visible
+   against the dark background.
+3. Tapping any input on iOS must not zoom the page.
+4. The action button sits inside the content column on a tablet and 18 px from the edge on a
+   phone, above the home indicator. Its plus is an SVG and is optically centred.
+5. A long merchant plus note ellipsises rather than widening the row.
+6. On a short screen, the profile step scrolls inside its card.
+
 ## Budgets per scope
 
 1. **Migration** — load a profile holding only `budget: 12000` and `budgetPeriod: "month"`;

@@ -1857,7 +1857,6 @@ function maybeShowOnboarding() {
   $("firstName").value = draft.firstName;
   $("lastName").value = draft.lastName;
   $("birthdate").value = draft.birthdate;
-  $("birthdate").max = todayKey();
   fillProvinces($("province"), draft.province);
   fillOptions($("occupation"), OCCUPATIONS, draft.occupation);
   $("sexAtBirth").value = draft.sexAtBirth;
