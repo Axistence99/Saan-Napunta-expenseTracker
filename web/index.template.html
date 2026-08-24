@@ -108,24 +108,41 @@
     <section class="app-view records-view" id="recordsView" data-view="records" hidden>
       <div class="view-heading">
         <div>
-          <p class="view-kicker">Analytics &amp; records</p>
-          <h1>Spending calendar</h1>
+          <p class="view-kicker">Data &amp; records</p>
+          <h1>Spending analytics</h1>
         </div>
         <button class="calendar-today" id="recordsToday" type="button">Today</button>
       </div>
+
+      <section class="analytics-overview">
+        <div><span>Total spent</span><strong id="analyticsMonthTotal">₱0.00</strong></div>
+        <div><span>Daily average</span><strong id="analyticsDailyAverage">₱0.00</strong></div>
+        <div><span>Transactions</span><strong id="analyticsTransactionCount">0</strong></div>
+      </section>
+
+      <section class="panel category-analytics">
+        <div class="panel-heading">
+          <h2>Spending per category</h2>
+          <span class="range-count" id="analyticsPeriodLabel"></span>
+        </div>
+        <ul class="analytics-categories" id="analyticsCategories"></ul>
+        <p class="empty-note" id="analyticsEmpty">No spending data for this month.</p>
+      </section>
 
       <section class="panel calendar-panel">
         <div class="calendar-nav">
           <button type="button" id="calendarPrev" class="nav-arrow" aria-label="Previous month">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
           </button>
-          <strong id="calendarMonth">Month</strong>
+          <span><small>Choose a date</small><strong id="calendarMonth">Month</strong></span>
           <button type="button" id="calendarNext" class="nav-arrow" aria-label="Next month">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
           </button>
         </div>
-        <div class="calendar-weekdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
-        <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Expense calendar"></div>
+        <div class="calendar-body">
+          <div class="calendar-weekdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+          <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Expense calendar"></div>
+        </div>
       </section>
 
       <section class="records-summary">
@@ -134,7 +151,7 @@
       </section>
 
       <section class="panel">
-        <div class="panel-heading"><h2>Records</h2><span class="range-count" id="recordsCategoryCount"></span></div>
+        <div class="panel-heading"><h2>Records for selected date</h2><span class="range-count" id="recordsCategoryCount"></span></div>
         <ul class="entries" id="recordsEntries"></ul>
         <p class="empty-note" id="recordsEmpty">No expenses recorded on this date.</p>
       </section>

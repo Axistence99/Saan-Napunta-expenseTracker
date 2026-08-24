@@ -1827,11 +1827,45 @@ function renderRecordsView() {
   const [year, month] = recordsMonth.split("-").map(Number);
   const first = new Date(year, month - 1, 1);
   const gridStart = addDays(first, -first.getDay());
+  const allEntries = liveEntries();
   const totals = new Map();
 
-  liveEntries().forEach((entry) => {
+  allEntries.forEach((entry) => {
     totals.set(entry.date, (totals.get(entry.date) || 0) + entry.amount);
   });
+
+  const monthEntries = allEntries.filter((entry) => entry.date.startsWith(`${recordsMonth}-`));
+  const monthTotal = monthEntries.reduce((sum, entry) => sum + entry.amount, 0);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const averageDays = recordsMonth === todayKey().slice(0, 7)
+    ? Number(todayKey().slice(8, 10))
+    : daysInMonth;
+  const byCategory = new Map();
+  monthEntries.forEach((entry) => {
+    const current = byCategory.get(entry.category) || { total: 0, count: 0 };
+    current.total += entry.amount;
+    current.count += 1;
+    byCategory.set(entry.category, current);
+  });
+  const categoryRows = [...byCategory.entries()].sort((a, b) => b[1].total - a[1].total);
+
+  $("analyticsMonthTotal").textContent = money(monthTotal);
+  $("analyticsDailyAverage").textContent = money(monthTotal / Math.max(1, averageDays));
+  $("analyticsTransactionCount").textContent = String(monthEntries.length);
+  $("analyticsPeriodLabel").textContent = `${MONTH_NAMES[month - 1].slice(0, 3)} ${year}`;
+  $("analyticsEmpty").hidden = categoryRows.length > 0;
+  $("analyticsCategories").innerHTML = categoryRows.map(([categoryId, stat]) => {
+    const category = catById(categoryId);
+    const share = monthTotal ? Math.round((stat.total / monthTotal) * 100) : 0;
+    return `<li>
+      <span class="analytics-category-icon">${icon(category.id)}</span>
+      <span class="analytics-category-main">
+        <span><b>${escapeHtml(category.label)}</b><small>${stat.count} ${stat.count === 1 ? "expense" : "expenses"}</small></span>
+        <span class="analytics-bar"><i style="width:${share}%"></i></span>
+      </span>
+      <span class="analytics-category-value"><b>${money(stat.total)}</b><small>${share}%</small></span>
+    </li>`;
+  }).join("");
 
   $("calendarMonth").textContent = `${MONTH_NAMES[month - 1]} ${year}`;
   const nextMonth = new Date(year, month, 1);
@@ -1862,7 +1896,7 @@ function renderRecordsView() {
     grid.appendChild(button);
   }
 
-  const selected = liveEntries()
+  const selected = allEntries
     .filter((entry) => entry.date === recordsDay)
     .sort((a, b) => b.createdAt - a.createdAt);
   const total = selected.reduce((sum, entry) => sum + entry.amount, 0);

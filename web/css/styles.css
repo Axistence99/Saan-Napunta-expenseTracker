@@ -1747,3 +1747,101 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   .calendar-weekdays, .calendar-grid { gap: 2px; }
   .calendar-day { border-radius: 9px; }
 }
+
+/* ============================================================
+   Records analytics — category data first, compact calendar second
+   ============================================================ */
+
+.analytics-overview {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 0.8fr;
+  gap: 8px;
+}
+
+.analytics-overview > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 12px;
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  background: linear-gradient(145deg, rgba(139, 92, 246, 0.16), rgba(22, 15, 30, 0.9));
+}
+
+.analytics-overview > div:first-child {
+  border-color: var(--line-warm);
+  background: linear-gradient(145deg, rgba(255, 126, 0, 0.16), rgba(76, 29, 149, 0.18));
+}
+
+.analytics-overview span {
+  overflow: hidden;
+  color: var(--grey);
+  font-size: 0.66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analytics-overview strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: clamp(0.9rem, 3.5vw, 1.15rem);
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-analytics { padding: 16px; }
+.analytics-categories { display: flex; flex-direction: column; gap: 14px; margin: 16px 0 0; padding: 0; list-style: none; }
+.analytics-categories li {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+.analytics-category-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: rgba(139, 92, 246, 0.09);
+}
+.analytics-category-main { min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+.analytics-category-main > span:first-child { min-width: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.analytics-category-main b { overflow: hidden; font-size: 0.82rem; text-overflow: ellipsis; white-space: nowrap; }
+.analytics-category-main small,
+.analytics-category-value small { color: var(--grey-dim); font-size: 0.64rem; white-space: nowrap; }
+.analytics-bar { height: 6px; overflow: hidden; border-radius: 99px; background: rgba(245, 239, 230, 0.09); }
+.analytics-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--purple), var(--orange), var(--yellow)); }
+.analytics-category-value { min-width: 66px; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.analytics-category-value b { font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+
+/* The calendar is a date filter, not the main feature of this tab. */
+.calendar-panel { padding: 11px 14px 13px; }
+.calendar-nav { width: min(100%, 304px); margin: 0 auto 7px; }
+.calendar-nav > span { display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center; }
+.calendar-nav small { color: var(--grey-dim); font-size: 0.58rem; font-weight: 650; letter-spacing: 0.09em; text-transform: uppercase; }
+.calendar-nav strong { font-size: 0.82rem; }
+.calendar-body { width: min(100%, 304px); margin: 0 auto; }
+.calendar-weekdays { margin-bottom: 2px; }
+.calendar-weekdays span { padding: 1px 0; font-size: 0.52rem; }
+.calendar-grid { gap: 2px; }
+.calendar-day {
+  height: 31px;
+  aspect-ratio: auto;
+  border-radius: 8px;
+  font-size: 0.68rem;
+}
+.calendar-day.has-spend:not(.selected)::after { bottom: 2px; width: 3px; height: 3px; }
+
+@media (max-width: 360px) {
+  .analytics-overview { grid-template-columns: 1fr 1fr; }
+  .analytics-overview > div:first-child { grid-column: 1 / -1; }
+  .analytics-categories li { grid-template-columns: 32px minmax(0, 1fr) auto; gap: 8px; }
+  .analytics-category-icon { width: 32px; height: 32px; }
+  .calendar-body, .calendar-nav { width: min(100%, 280px); }
+  .calendar-day { height: 29px; }
+}

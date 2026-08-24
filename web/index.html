@@ -1755,6 +1755,104 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   .calendar-day { border-radius: 9px; }
 }
 
+/* ============================================================
+   Records analytics — category data first, compact calendar second
+   ============================================================ */
+
+.analytics-overview {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 0.8fr;
+  gap: 8px;
+}
+
+.analytics-overview > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 12px;
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  background: linear-gradient(145deg, rgba(139, 92, 246, 0.16), rgba(22, 15, 30, 0.9));
+}
+
+.analytics-overview > div:first-child {
+  border-color: var(--line-warm);
+  background: linear-gradient(145deg, rgba(255, 126, 0, 0.16), rgba(76, 29, 149, 0.18));
+}
+
+.analytics-overview span {
+  overflow: hidden;
+  color: var(--grey);
+  font-size: 0.66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analytics-overview strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: clamp(0.9rem, 3.5vw, 1.15rem);
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-analytics { padding: 16px; }
+.analytics-categories { display: flex; flex-direction: column; gap: 14px; margin: 16px 0 0; padding: 0; list-style: none; }
+.analytics-categories li {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+.analytics-category-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: rgba(139, 92, 246, 0.09);
+}
+.analytics-category-main { min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+.analytics-category-main > span:first-child { min-width: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.analytics-category-main b { overflow: hidden; font-size: 0.82rem; text-overflow: ellipsis; white-space: nowrap; }
+.analytics-category-main small,
+.analytics-category-value small { color: var(--grey-dim); font-size: 0.64rem; white-space: nowrap; }
+.analytics-bar { height: 6px; overflow: hidden; border-radius: 99px; background: rgba(245, 239, 230, 0.09); }
+.analytics-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--purple), var(--orange), var(--yellow)); }
+.analytics-category-value { min-width: 66px; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.analytics-category-value b { font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+
+/* The calendar is a date filter, not the main feature of this tab. */
+.calendar-panel { padding: 11px 14px 13px; }
+.calendar-nav { width: min(100%, 304px); margin: 0 auto 7px; }
+.calendar-nav > span { display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center; }
+.calendar-nav small { color: var(--grey-dim); font-size: 0.58rem; font-weight: 650; letter-spacing: 0.09em; text-transform: uppercase; }
+.calendar-nav strong { font-size: 0.82rem; }
+.calendar-body { width: min(100%, 304px); margin: 0 auto; }
+.calendar-weekdays { margin-bottom: 2px; }
+.calendar-weekdays span { padding: 1px 0; font-size: 0.52rem; }
+.calendar-grid { gap: 2px; }
+.calendar-day {
+  height: 31px;
+  aspect-ratio: auto;
+  border-radius: 8px;
+  font-size: 0.68rem;
+}
+.calendar-day.has-spend:not(.selected)::after { bottom: 2px; width: 3px; height: 3px; }
+
+@media (max-width: 360px) {
+  .analytics-overview { grid-template-columns: 1fr 1fr; }
+  .analytics-overview > div:first-child { grid-column: 1 / -1; }
+  .analytics-categories li { grid-template-columns: 32px minmax(0, 1fr) auto; gap: 8px; }
+  .analytics-category-icon { width: 32px; height: 32px; }
+  .calendar-body, .calendar-nav { width: min(100%, 280px); }
+  .calendar-day { height: 29px; }
+}
+
   </style>
 </head>
 <body>
@@ -1859,24 +1957,41 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
     <section class="app-view records-view" id="recordsView" data-view="records" hidden>
       <div class="view-heading">
         <div>
-          <p class="view-kicker">Analytics &amp; records</p>
-          <h1>Spending calendar</h1>
+          <p class="view-kicker">Data &amp; records</p>
+          <h1>Spending analytics</h1>
         </div>
         <button class="calendar-today" id="recordsToday" type="button">Today</button>
       </div>
+
+      <section class="analytics-overview">
+        <div><span>Total spent</span><strong id="analyticsMonthTotal">₱0.00</strong></div>
+        <div><span>Daily average</span><strong id="analyticsDailyAverage">₱0.00</strong></div>
+        <div><span>Transactions</span><strong id="analyticsTransactionCount">0</strong></div>
+      </section>
+
+      <section class="panel category-analytics">
+        <div class="panel-heading">
+          <h2>Spending per category</h2>
+          <span class="range-count" id="analyticsPeriodLabel"></span>
+        </div>
+        <ul class="analytics-categories" id="analyticsCategories"></ul>
+        <p class="empty-note" id="analyticsEmpty">No spending data for this month.</p>
+      </section>
 
       <section class="panel calendar-panel">
         <div class="calendar-nav">
           <button type="button" id="calendarPrev" class="nav-arrow" aria-label="Previous month">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
           </button>
-          <strong id="calendarMonth">Month</strong>
+          <span><small>Choose a date</small><strong id="calendarMonth">Month</strong></span>
           <button type="button" id="calendarNext" class="nav-arrow" aria-label="Next month">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
           </button>
         </div>
-        <div class="calendar-weekdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
-        <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Expense calendar"></div>
+        <div class="calendar-body">
+          <div class="calendar-weekdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+          <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Expense calendar"></div>
+        </div>
       </section>
 
       <section class="records-summary">
@@ -1885,7 +2000,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
       </section>
 
       <section class="panel">
-        <div class="panel-heading"><h2>Records</h2><span class="range-count" id="recordsCategoryCount"></span></div>
+        <div class="panel-heading"><h2>Records for selected date</h2><span class="range-count" id="recordsCategoryCount"></span></div>
         <ul class="entries" id="recordsEntries"></ul>
         <p class="empty-note" id="recordsEmpty">No expenses recorded on this date.</p>
       </section>
@@ -4514,11 +4629,45 @@ function renderRecordsView() {
   const [year, month] = recordsMonth.split("-").map(Number);
   const first = new Date(year, month - 1, 1);
   const gridStart = addDays(first, -first.getDay());
+  const allEntries = liveEntries();
   const totals = new Map();
 
-  liveEntries().forEach((entry) => {
+  allEntries.forEach((entry) => {
     totals.set(entry.date, (totals.get(entry.date) || 0) + entry.amount);
   });
+
+  const monthEntries = allEntries.filter((entry) => entry.date.startsWith(`${recordsMonth}-`));
+  const monthTotal = monthEntries.reduce((sum, entry) => sum + entry.amount, 0);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const averageDays = recordsMonth === todayKey().slice(0, 7)
+    ? Number(todayKey().slice(8, 10))
+    : daysInMonth;
+  const byCategory = new Map();
+  monthEntries.forEach((entry) => {
+    const current = byCategory.get(entry.category) || { total: 0, count: 0 };
+    current.total += entry.amount;
+    current.count += 1;
+    byCategory.set(entry.category, current);
+  });
+  const categoryRows = [...byCategory.entries()].sort((a, b) => b[1].total - a[1].total);
+
+  $("analyticsMonthTotal").textContent = money(monthTotal);
+  $("analyticsDailyAverage").textContent = money(monthTotal / Math.max(1, averageDays));
+  $("analyticsTransactionCount").textContent = String(monthEntries.length);
+  $("analyticsPeriodLabel").textContent = `${MONTH_NAMES[month - 1].slice(0, 3)} ${year}`;
+  $("analyticsEmpty").hidden = categoryRows.length > 0;
+  $("analyticsCategories").innerHTML = categoryRows.map(([categoryId, stat]) => {
+    const category = catById(categoryId);
+    const share = monthTotal ? Math.round((stat.total / monthTotal) * 100) : 0;
+    return `<li>
+      <span class="analytics-category-icon">${icon(category.id)}</span>
+      <span class="analytics-category-main">
+        <span><b>${escapeHtml(category.label)}</b><small>${stat.count} ${stat.count === 1 ? "expense" : "expenses"}</small></span>
+        <span class="analytics-bar"><i style="width:${share}%"></i></span>
+      </span>
+      <span class="analytics-category-value"><b>${money(stat.total)}</b><small>${share}%</small></span>
+    </li>`;
+  }).join("");
 
   $("calendarMonth").textContent = `${MONTH_NAMES[month - 1]} ${year}`;
   const nextMonth = new Date(year, month, 1);
@@ -4549,7 +4698,7 @@ function renderRecordsView() {
     grid.appendChild(button);
   }
 
-  const selected = liveEntries()
+  const selected = allEntries
     .filter((entry) => entry.date === recordsDay)
     .sort((a, b) => b.createdAt - a.createdAt);
   const total = selected.reduce((sum, entry) => sum + entry.amount, 0);
