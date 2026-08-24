@@ -1017,7 +1017,9 @@ function renderSummary(agg) {
   $("budgetLeft").innerHTML = left >= 0
     ? `${money(left)} left ${range.isCurrent ? scopeWord : ""}`.trim()
     : `<span class="over">${money(Math.abs(left))} over budget</span>`;
-  $("budgetCap").textContent = `${source === "custom" ? "Custom" : "Default"} ${money(budget)}`;
+  // Keep the meter clean: default amounts are configured in Profile and do not need a
+  // repeated "Default ₱…" label on every Home view. Exact custom amounts stay visible.
+  $("budgetCap").textContent = source === "custom" ? `Custom ${money(budget)}` : "";
 
   const perDay = left / range.daysRemaining;
   meter.setAttribute(
