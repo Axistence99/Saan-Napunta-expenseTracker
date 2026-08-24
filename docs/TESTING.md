@@ -120,8 +120,8 @@ cd android && ./gradlew assembleDebug
 
 1. **Profile defaults** — set Daily ₱500, Weekly ₱3,000 and Monthly ₱12,000 in Profile.
    Each matching Home scope uses its own value.
-2. **No cross-scope conversion** — leave Yearly blank. Year must show the missing-default
-   indicator and must not derive a value from Daily, Weekly or Monthly.
+2. **No cross-scope conversion** — leave Yearly blank. Year must show the highlighted
+   “SET A BUDGET FOR THIS YEAR” action and must not derive a value from other scopes.
 3. **Custom priority** — set today to ₱700 on Home. Today uses ₱700 while another day uses
    the ₱500 daily default.
 4. **Clear** — clearing today's custom key makes the ₱500 daily default apply again and does

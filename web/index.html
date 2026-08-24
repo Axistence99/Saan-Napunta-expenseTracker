@@ -1870,26 +1870,6 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 .profile-form select { width: 100%; min-width: 0; }
 .profile-form .primary-button { margin-top: 2px; }
 
-/* Scope defaults are visible at a glance without opening another screen. */
-.scope-budget-indicator {
-  margin: -5px 0 0;
-  padding: 7px 10px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  font-size: 0.68rem;
-  text-align: center;
-}
-.scope-budget-indicator.set {
-  color: var(--gold);
-  border-color: var(--line-warm);
-  background: rgba(233, 196, 106, 0.06);
-}
-.scope-budget-indicator.missing {
-  color: var(--grey);
-  border-style: dashed;
-  background: rgba(154, 147, 166, 0.04);
-}
-
 .calendar-selection-hint {
   width: min(100%, 304px);
   margin: 7px auto 0;
@@ -1924,6 +1904,28 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   max-width: 230px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Strong call to action shown only when neither a custom nor default budget exists. */
+#editRangeBudget.budget-cta {
+  width: 100%;
+  margin-top: 3px;
+  padding: 11px 14px;
+  color: #211107;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: center;
+  border: 1px solid rgba(255, 197, 61, 0.72);
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--yellow), var(--orange));
+  box-shadow: 0 7px 20px rgba(255, 126, 0, 0.2);
+}
+#editRangeBudget.budget-cta:hover {
+  color: #160b05;
+  border-color: var(--yellow);
+  box-shadow: 0 9px 24px rgba(255, 126, 0, 0.3);
+  transform: translateY(-1px);
 }
 
   </style>
@@ -1963,7 +1965,6 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
         <button type="button" role="tab" data-scope="month">Month</button>
         <button type="button" role="tab" data-scope="year">Year</button>
       </div>
-      <p class="scope-budget-indicator" id="scopeBudgetIndicator"></p>
 
       <div class="range-nav">
         <button type="button" id="rangePrev" class="nav-arrow" aria-label="Previous period">
@@ -3867,18 +3868,13 @@ function renderSummary(agg) {
   const track = fill.parentElement;
   const meter = $("budgetMeter");
   const scopeWord = { day: "today", week: "this week", month: "this month", year: "this year" }[range.scope];
-  const scopeLabel = PERIODS[range.scope].label.toLowerCase();
-  const defaultAmount = Number((config.budgetDefaults || {})[range.scope]) || 0;
-  const indicator = $("scopeBudgetIndicator");
-  indicator.classList.toggle("missing", defaultAmount <= 0);
-  indicator.classList.toggle("set", defaultAmount > 0);
-  indicator.textContent = defaultAmount > 0
-    ? `Default ${scopeLabel} budget: ${money(defaultAmount)}`
-    : `No default ${scopeLabel} budget — set one in Profile`;
-
-  $("editRangeBudget").textContent = source === "custom"
+  const budgetButton = $("editRangeBudget");
+  budgetButton.classList.toggle("budget-cta", source === "none");
+  budgetButton.textContent = source === "custom"
     ? `Custom budget for ${range.label} — change`
-    : `Set a custom budget for ${range.label}`;
+    : source === "default"
+      ? `Set a custom budget for ${range.label}`
+      : `SET A BUDGET FOR THIS ${range.scope.toUpperCase()}`;
 
   if (budget <= 0) {
     fill.style.width = "0%";

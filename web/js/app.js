@@ -992,18 +992,13 @@ function renderSummary(agg) {
   const track = fill.parentElement;
   const meter = $("budgetMeter");
   const scopeWord = { day: "today", week: "this week", month: "this month", year: "this year" }[range.scope];
-  const scopeLabel = PERIODS[range.scope].label.toLowerCase();
-  const defaultAmount = Number((config.budgetDefaults || {})[range.scope]) || 0;
-  const indicator = $("scopeBudgetIndicator");
-  indicator.classList.toggle("missing", defaultAmount <= 0);
-  indicator.classList.toggle("set", defaultAmount > 0);
-  indicator.textContent = defaultAmount > 0
-    ? `Default ${scopeLabel} budget: ${money(defaultAmount)}`
-    : `No default ${scopeLabel} budget — set one in Profile`;
-
-  $("editRangeBudget").textContent = source === "custom"
+  const budgetButton = $("editRangeBudget");
+  budgetButton.classList.toggle("budget-cta", source === "none");
+  budgetButton.textContent = source === "custom"
     ? `Custom budget for ${range.label} — change`
-    : `Set a custom budget for ${range.label}`;
+    : source === "default"
+      ? `Set a custom budget for ${range.label}`
+      : `SET A BUDGET FOR THIS ${range.scope.toUpperCase()}`;
 
   if (budget <= 0) {
     fill.style.width = "0%";

@@ -327,7 +327,8 @@ CSV export covers the visible range and is named after its key.
   "0 days left".
 - Safe spend per day = amount left ÷ days remaining.
 - **Independent defaults.** Profile contains separate Daily, Weekly, Monthly and Yearly
-  defaults. Empty values are allowed and shown on Home with a missing-default indicator.
+  defaults. Empty values are allowed; Home then shows a highlighted “SET A BUDGET FOR THIS
+  DAY/WEEK/MONTH/YEAR” action instead of a persistent missing-default message.
 - Defaults never convert across scopes: a daily default cannot create a weekly, monthly or
   yearly value.
 - **Resolution order:** an exact-period custom budget set on Home, then the default for that

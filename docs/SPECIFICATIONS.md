@@ -20,7 +20,7 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 
 ### Dashboard
 - Header: centered app title; Settings is available only from the bottom navigation
-- Summary card: active-period label, big total, budget meter, default-budget indicator, Today and Entries
+- Summary card: active-period label, big total, budget meter, Today and Entries; a highlighted set-budget action appears when neither a custom nor matching default budget exists
 - By-category card: share bars sorted high → low, CSV export action
 - Recent card: entries grouped by day with a per-day subtotal
 - Floating action button: add expense
