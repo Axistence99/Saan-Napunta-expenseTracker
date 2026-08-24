@@ -420,6 +420,9 @@ function applyInputLimits() {
   const birthdate = $("birthdate");
   birthdate.max = shiftYears(LIMITS.minAge);
   birthdate.min = shiftYears(LIMITS.maxAge);
+  const profileBirthdate = $("birthdateProfileInput");
+  profileBirthdate.max = shiftYears(LIMITS.minAge);
+  profileBirthdate.min = shiftYears(LIMITS.maxAge);
 
   const entryDate = $("dateInput");
   entryDate.max = todayKey();
@@ -1169,6 +1172,8 @@ function paint(agg) {
   $("provinceInput").value = config.province || "";
   if (!$("occupationInput").options.length) fillOptions($("occupationInput"), OCCUPATIONS);
   $("occupationInput").value = config.occupation || "";
+  $("birthdateProfileInput").value = config.birthdate || "";
+  $("sexAtBirthInput").value = config.sexAtBirth || "";
   renderRecordsView();
   renderProfileView();
 
@@ -1714,37 +1719,43 @@ $("clearRangeBudget").addEventListener("click", async () => {
   toast(`${range.label} is back to your default budget.`);
 });
 
-["firstNameInput", "lastNameInput", "provinceInput", "occupationInput"].forEach((id) => {
-  $(id).addEventListener("change", async (event) => {
-    const field = {
-      firstNameInput: "firstName",
-      lastNameInput: "lastName",
-      provinceInput: "province",
-      occupationInput: "occupation"
-    }[id];
+$("profileForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  clearFieldErrors(event.currentTarget);
 
-    let value = event.target.value;
-    if (field === "firstName" || field === "lastName") {
-      value = cleanText(value, LIMITS.name);
-      const problem = validateName(value, field === "firstName" ? "First name" : "Last name");
-      if (problem) {
-        setFieldError(event.target, problem);
-        toast(problem, "error");
-        return;
-      }
-      setFieldError(event.target, null);
-      event.target.value = value;
-    } else if (field === "province" && !PROVINCE_SET.has(value)) {
-      value = "";
-    } else if (field === "occupation" && !OCCUPATIONS[value]) {
-      value = "";
-    }
+  const firstName = cleanText($("firstNameInput").value, LIMITS.name);
+  const lastName = cleanText($("lastNameInput").value, LIMITS.name);
+  const birthdate = $("birthdateProfileInput").value;
+  const province = PROVINCE_SET.has($("provinceInput").value) ? $("provinceInput").value : "";
+  const sexAtBirth = SEXES[$("sexAtBirthInput").value] ? $("sexAtBirthInput").value : "";
+  const occupation = OCCUPATIONS[$("occupationInput").value] ? $("occupationInput").value : "";
 
-    config = { ...config, [field]: value };
-    if (field === "firstName") config.name = value;
-    render({ allowSkeleton: false });
-    await storage.writeConfig(config);
-  });
+  const checks = [
+    [$("firstNameInput"), !firstName ? "Enter your first name." : validateName(firstName, "First name")],
+    [$("lastNameInput"), validateName(lastName, "Last name")],
+    [$("birthdateProfileInput"), validateBirthdate(birthdate)]
+  ];
+  const invalid = checks.find(([, problem]) => problem);
+  checks.forEach(([field, problem]) => setFieldError(field, problem));
+  if (invalid) {
+    invalid[0].focus();
+    toast(invalid[1], "error");
+    return;
+  }
+
+  config = {
+    ...config,
+    name: firstName,
+    firstName,
+    lastName,
+    birthdate,
+    province,
+    sexAtBirth,
+    occupation
+  };
+  await storage.writeConfig(config);
+  render({ allowSkeleton: false });
+  toast("Profile saved.", "ok");
 });
 
 $("weekStartSelect").addEventListener("change", async (event) => {
@@ -1934,15 +1945,10 @@ function renderProfileView() {
   const fullName = [first, config.lastName].filter(Boolean).join(" ");
   $("profileAvatar").textContent = (first || config.lastName || "?").charAt(0).toUpperCase();
   $("profileName").textContent = fullName || "Your profile";
-  $("profileSubtitle").textContent = config.occupation && OCCUPATIONS[config.occupation]
-    ? OCCUPATIONS[config.occupation]
-    : "Stored privately on this device";
-  $("profileBirthdate").textContent = config.birthdate
-    ? parseDay(config.birthdate).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
-    : "Not provided";
-  $("profileProvince").textContent = config.province || "Not provided";
-  $("profileSex").textContent = SEXES[config.sexAtBirth] || "Not provided";
-  $("profileOccupation").textContent = OCCUPATIONS[config.occupation] || "Not provided";
+  $("profileSubtitle").textContent = [
+    OCCUPATIONS[config.occupation],
+    config.province
+  ].filter(Boolean).join(" · ") || "Stored privately on this device";
 }
 
 document.querySelectorAll("#bottomNav [data-nav]").forEach((button) => {
@@ -1968,7 +1974,6 @@ $("recordsToday").addEventListener("click", () => {
   recordsMonth = recordsDay.slice(0, 7);
   renderRecordsView();
 });
-$("editProfileButton").addEventListener("click", openSettingsFromNav);
 $("closeSettings").addEventListener("click", restoreBottomNavState);
 $("settingsPanel").addEventListener("click", (event) => {
   if (event.target === $("settingsPanel")) restoreBottomNavState();

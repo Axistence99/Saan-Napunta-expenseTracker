@@ -1845,3 +1845,21 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   .calendar-body, .calendar-nav { width: min(100%, 280px); }
   .calendar-day { height: 29px; }
 }
+
+/* Profile fields live in the Profile tab, separate from app settings. */
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.profile-form > label,
+.profile-form .field-pair > label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.profile-form input,
+.profile-form select { width: 100%; min-width: 0; }
+.profile-form .primary-button { margin-top: 2px; }
