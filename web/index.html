@@ -116,13 +116,12 @@ button { -webkit-tap-highlight-color: transparent; }
 
 .heading-row {
   width: 100%;
-  display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) 42px;
+  display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
 }
 
-.heading-row h1 { grid-column: 2; grid-row: 1; min-width: 0; text-align: center; white-space: nowrap; }
+.heading-row h1 { min-width: 0; text-align: center; white-space: nowrap; }
 
 h1 {
   margin: 0;
@@ -219,7 +218,7 @@ h2 { margin: 0; font-size: 0.95rem; letter-spacing: 0.02em; text-transform: uppe
 
 .mini-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   padding-top: 4px;
   border-top: 1px solid var(--line);
@@ -1889,9 +1888,6 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
     <section class="app-view" id="homeView" data-view="home">
     <div class="heading-row">
       <h1>Saan Napunta?</h1>
-      <button class="icon-button" id="settingsButton" type="button" aria-label="Open settings">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m19.4 14.6.9.5a1.5 1.5 0 0 1 .6 2l-1 1.7a1.5 1.5 0 0 1-2 .6l-.9-.5a7.6 7.6 0 0 1-1.8 1v1a1.5 1.5 0 0 1-1.5 1.5h-2A1.5 1.5 0 0 1 10.2 21v-1a7.6 7.6 0 0 1-1.8-1l-.9.5a1.5 1.5 0 0 1-2-.6l-1-1.7a1.5 1.5 0 0 1 .6-2l.9-.5a7.6 7.6 0 0 1 0-2.1l-.9-.5a1.5 1.5 0 0 1-.6-2l1-1.7a1.5 1.5 0 0 1 2-.6l.9.5a7.6 7.6 0 0 1 1.8-1V3a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 15.3 3v1a7.6 7.6 0 0 1 1.8 1l.9-.5a1.5 1.5 0 0 1 2 .6l1 1.7a1.5 1.5 0 0 1-.6 2l-.9.5a7.6 7.6 0 0 1 0 2.1Z"/></svg>
-      </button>
     </div>
 
     <div class="tagline-row">
@@ -1941,7 +1937,6 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
       </div>
       <div class="mini-stats">
         <div><span>Today</span><strong id="todayTotal">₱0.00</strong></div>
-        <div><span>Daily avg</span><strong id="avgTotal">₱0.00</strong></div>
         <div><span>Entries</span><strong id="entryCount">0</strong></div>
       </div>
     </section>
@@ -3765,7 +3760,7 @@ function paintSkeleton() {
   $("budgetLeft").innerHTML = bar("120px", 11);
   $("budgetCap").innerHTML = bar("90px", 11);
   $("budgetFill").style.width = "0%";
-  ["todayTotal", "avgTotal", "entryCount"].forEach((id) => {
+  ["todayTotal", "entryCount"].forEach((id) => {
     $(id).innerHTML = bar("70%", 16);
   });
 
@@ -3824,7 +3819,7 @@ function renderSummary(agg) {
       greeting.setAttribute(
         "data-tip",
         [[config.firstName, config.lastName].filter(Boolean).join(" "), config.province,
-          OCCUPATIONS[config.occupation]].filter(Boolean).join(" · ") + " — edit in Settings"
+          OCCUPATIONS[config.occupation]].filter(Boolean).join(" · ") + " — edit in Profile"
       );
     }
   }
@@ -3842,13 +3837,8 @@ function renderSummary(agg) {
     : "";
 
   $("todayTotal").textContent = money(agg.today);
-  $("avgTotal").textContent = money(agg.dailyAverage);
   $("entryCount").textContent = String(agg.list.length);
   $("todayTotal").parentElement.setAttribute("data-tip", `Spent so far on ${prettyDay(todayKey())}`);
-  $("avgTotal").parentElement.setAttribute(
-    "data-tip",
-    `${money(agg.total)} ÷ ${range.isCurrent ? range.elapsed : range.totalDays} days in ${range.label}`
-  );
   $("entryCount").parentElement.setAttribute("data-tip", `Expenses recorded in ${range.label}`);
 
   const { amount: budget, source, from } = budgetForRange(range);
@@ -4495,7 +4485,6 @@ $("photoInput").addEventListener("change", async (event) => {
 });
 $("closeEntry").addEventListener("click", closeEntrySheet);
 $("exportButton").addEventListener("click", exportCsv);
-$("settingsButton").addEventListener("click", () => { $("settingsPanel").hidden = false; });
 $("closeSettings").addEventListener("click", () => { $("settingsPanel").hidden = true; tooltip.hide(); });
 
 $("scopeTabs").addEventListener("click", (event) => {
@@ -4819,7 +4808,6 @@ $("settingsPanel").addEventListener("click", (event) => {
 });
 
 /* Static tooltips that never change */
-$("settingsButton").setAttribute("data-tip", "Budget, currency and data controls");
 $("addButton").setAttribute("data-tip", "Record a new expense");
 $("exportButton").setAttribute("data-tip", "Download this month as a CSV spreadsheet");
 $("rangePrev").setAttribute("data-tip", "Previous period");

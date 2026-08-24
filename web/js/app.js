@@ -926,7 +926,7 @@ function paintSkeleton() {
   $("budgetLeft").innerHTML = bar("120px", 11);
   $("budgetCap").innerHTML = bar("90px", 11);
   $("budgetFill").style.width = "0%";
-  ["todayTotal", "avgTotal", "entryCount"].forEach((id) => {
+  ["todayTotal", "entryCount"].forEach((id) => {
     $(id).innerHTML = bar("70%", 16);
   });
 
@@ -985,7 +985,7 @@ function renderSummary(agg) {
       greeting.setAttribute(
         "data-tip",
         [[config.firstName, config.lastName].filter(Boolean).join(" "), config.province,
-          OCCUPATIONS[config.occupation]].filter(Boolean).join(" · ") + " — edit in Settings"
+          OCCUPATIONS[config.occupation]].filter(Boolean).join(" · ") + " — edit in Profile"
       );
     }
   }
@@ -1003,13 +1003,8 @@ function renderSummary(agg) {
     : "";
 
   $("todayTotal").textContent = money(agg.today);
-  $("avgTotal").textContent = money(agg.dailyAverage);
   $("entryCount").textContent = String(agg.list.length);
   $("todayTotal").parentElement.setAttribute("data-tip", `Spent so far on ${prettyDay(todayKey())}`);
-  $("avgTotal").parentElement.setAttribute(
-    "data-tip",
-    `${money(agg.total)} ÷ ${range.isCurrent ? range.elapsed : range.totalDays} days in ${range.label}`
-  );
   $("entryCount").parentElement.setAttribute("data-tip", `Expenses recorded in ${range.label}`);
 
   const { amount: budget, source, from } = budgetForRange(range);
@@ -1656,7 +1651,6 @@ $("photoInput").addEventListener("change", async (event) => {
 });
 $("closeEntry").addEventListener("click", closeEntrySheet);
 $("exportButton").addEventListener("click", exportCsv);
-$("settingsButton").addEventListener("click", () => { $("settingsPanel").hidden = false; });
 $("closeSettings").addEventListener("click", () => { $("settingsPanel").hidden = true; tooltip.hide(); });
 
 $("scopeTabs").addEventListener("click", (event) => {
@@ -1980,7 +1974,6 @@ $("settingsPanel").addEventListener("click", (event) => {
 });
 
 /* Static tooltips that never change */
-$("settingsButton").setAttribute("data-tip", "Budget, currency and data controls");
 $("addButton").setAttribute("data-tip", "Record a new expense");
 $("exportButton").setAttribute("data-tip", "Download this month as a CSV spreadsheet");
 $("rangePrev").setAttribute("data-tip", "Previous period");
