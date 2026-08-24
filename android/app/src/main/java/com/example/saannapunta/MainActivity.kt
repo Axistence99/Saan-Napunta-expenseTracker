@@ -20,7 +20,6 @@ import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.TextView
-import android.widget.Toast
 import java.util.Calendar
 
 /** Dashboard: monthly total, budget meter, category breakdown and recent entries. */
@@ -143,12 +142,6 @@ class MainActivity : Activity() {
         val card = card()
         val heading = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         heading.addView(sectionTitle("By category"), LinearLayout.LayoutParams(0, WRAP, 1f))
-        heading.addView(TextView(this).apply {
-            text = getString(R.string.export_csv)
-            textSize = 13f
-            setTextColor(getColor(R.color.gold))
-            setOnClickListener { shareCsv() }
-        })
         breakdownList = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         card.addView(heading)
         card.addView(breakdownList, LinearLayout.LayoutParams(MATCH, WRAP).apply { topMargin = dp(8) })
@@ -429,36 +422,6 @@ class MainActivity : Activity() {
             }
             .setNegativeButton("Cancel", null)
             .show()
-    }
-
-    private fun shareCsv() {
-        val items = store.forMonth(viewMonth)
-        if (items.isEmpty()) {
-            Toast.makeText(this, "Nothing to export for this month.", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val csv = buildString {
-            appendLine("date,category,note,amount")
-            items.forEach { entry ->
-                val safeNote = entry.note.replace("\"", "\"\"")
-                val safeMerchant = entry.merchant.replace("\"", "\"\"")
-                val safeItem = entry.item.replace("\"", "\"\"")
-                appendLine(
-                    "${entry.date},${categoryOf(entry.category).label}," +
-                        "\"$safeMerchant\",\"$safeItem\",\"$safeNote\",${"%.2f".format(entry.amount)}"
-                )
-            }
-        }
-        startActivity(
-            Intent.createChooser(
-                Intent(Intent.ACTION_SEND).apply {
-                    type = "text/csv"
-                    putExtra(Intent.EXTRA_SUBJECT, "Saan Napunta? ${prettyMonth(viewMonth)}")
-                    putExtra(Intent.EXTRA_TEXT, csv)
-                },
-                getString(R.string.export_csv)
-            )
-        )
     }
 
     /* ---------- small helpers ---------- */

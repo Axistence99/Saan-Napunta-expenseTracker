@@ -103,7 +103,7 @@ Single screen plus two overlays. Key element IDs (JavaScript looks all of these 
 | Background | `.live-gradient` (CSS only, no id) |
 | Header | `.heading-row`, `.tagline` |
 | Summary card | `monthLabel`, `monthTotal`, `budgetMeter`, `budgetFill`, `budgetLeft`, `budgetCap`, `todayTotal`, `entryCount` |
-| Breakdown card | `breakdown` (ul), `breakdownEmpty`, `exportButton` |
+| Breakdown card | `breakdown` (ul), `breakdownEmpty`, `categoryRangeLabel` |
 | Entries card | `entries` (ul), `entriesEmpty`, `monthPicker` |
 | Add button | `addButton` (floating action button) |
 | Onboarding | `onboard`, `profileName`, `profileCurrency`, `stepOneNext`, `skipOnboarding`, `periodGrid`, `stepTwoBack`, `stepTwoNext`, `amountSub`, `onboardSymbol`, `onboardBudget`, `budgetPresets`, `budgetEquivalent`, `stepThreeBack`, `finishOnboarding`, `noBudget` |
@@ -308,15 +308,11 @@ All three mutating paths use it: the form `submit` handler, `deleteEntry`, and `
 
 #### Wiring and boot
 
-Listeners for the add button, both close buttons, export, month picker, budget, currency,
-week start, erase, backdrop clicks and Escape. Static `data-tip` attributes are assigned for
-the settings button, FAB, export button and month picker.
+Listeners cover adding and editing expenses, sheets, navigation, budgets, profile fields,
+week start, erase, backdrop clicks and Escape.
 
 `boot()` paints a skeleton, announces "Loading your ledger…", reads config and entries,
 sets `ready = true`, then after 260 ms adds `body.loaded` and does the first real paint.
-
-`exportCsv()` builds `date,category,note,amount` rows from the cached aggregate, quotes every
-cell, and downloads `saan-napunta-YYYY-MM.csv` via an object URL.
 
 ---
 
@@ -364,8 +360,7 @@ State: `store`, `viewMonth`, view references (`monthLabel`, `totalText`, `budget
   `buildEntriesCard()`, `buildFab()`.
 - Renderers: `refresh()` (totals + budget meter), `renderStats()`, `renderBreakdown()`,
   `renderEntries()` (tap edits, long-press deletes), `renderMonthSpinner()`.
-- Actions: `confirmDelete(entry)`, `showSettings()` (budget + currency + erase),
-  `confirmErase()`, `shareCsv()` (builds the CSV and fires `ACTION_SEND`).
+- Actions: `confirmDelete(entry)`, `showSettings()` and `confirmErase()`.
 - Helpers: `card()`, `cardParams()`, `sectionTitle()`, `mutedText()`, `footerText()`,
   `dp()`, `daysInMonth()`; `MATCH` / `WRAP` constants in the companion object.
 

@@ -59,7 +59,6 @@ WHAT YOU GET
 • Optional monthly budget with a meter that turns red the moment you overspend
 • Per-category breakdown so you can see what is really eating your sweldo
 • Browse past months and compare
-• Export any month to CSV
 • Built around the Philippine peso
 
 PRIVATE BY DESIGN

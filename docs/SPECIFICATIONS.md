@@ -21,7 +21,7 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 ### Dashboard
 - Header: centered app title; Settings is available only from the bottom navigation
 - Summary card: active-period label, big total, budget meter, Today and Entries; a highlighted set-budget action appears when neither a custom nor matching default budget exists
-- By-category card: share bars sorted high → low, CSV export action
+- By-category card: active-range label and share bars sorted high → low
 - Recent card: entries grouped by day with a per-day subtotal
 - Floating action button: add expense
 
@@ -77,7 +77,6 @@ drawables on Android). No emoji, no icon font, no image assets.
 - Daily average = month total ÷ days elapsed (current month) or days in month (past months).
 - Budget meter fills to 100 % maximum and turns red once the total exceeds the budget.
 - Editing an entry's date moves the dashboard to that entry's month.
-- CSV columns: `date,category,merchant,item,description,amount`; filename `saan-napunta-YYYY-MM.csv`.
 
 ## Non-goals for v1
 

@@ -17,7 +17,7 @@ Philippine peso spending. The user records a purchase in under five seconds — 
 category, optional note — and the app answers one question: where did the money go this
 month. It shows a monthly total, an optional budget meter, a per-category breakdown and a
 day-grouped history. There is no account, no sync, no network call and no analytics; all
-data lives on the device and can be exported to CSV or erased outright.
+data lives on the device and can be erased from the app.
 
 ## 2. Product identity
 
@@ -170,9 +170,9 @@ Vertical scroll, top to bottom:
      or "Custom budget for {period} — change" when an override exists. It opens an inline
      amount field with Save and Clear.
 
-3. **By-category card** — heading "BY CATEGORY" with an "Export CSV" text action on the
-   right. Each row: emoji glyph, category name above a thin share bar, and the amount with
-   the percentage underneath in small muted text. Sorted highest first. Empty state:
+3. **By-category card** — heading "BY CATEGORY" with the active range beneath it. Each row:
+   category glyph, category name above a thin share bar, and the amount with the percentage
+   underneath in small muted text. Sorted highest first. Empty state:
    "No spending recorded for this month yet."
 
 4. **Recent card** — heading "RECENT" with a month picker dropdown on the right. Entries are
@@ -317,7 +317,6 @@ aggregate-cache key and the budget-override key:
 
 Stepping moves a whole period at a time. Navigation into a period that has not begun is
 blocked. Saving an expense moves the view to the period containing that expense's date.
-CSV export covers the visible range and is named after its key.
 
 ## 7b. Budget period rules
 
@@ -341,8 +340,8 @@ CSV export covers the visible range and is named after its key.
 
 The entry form no longer asks where the money was spent; item and description cover it.
 The `merchant` field stays in the data model so records created earlier keep their value:
-it is still shown in entry subtitles and exported to CSV, and editing an old record
-preserves it rather than blanking it. Nothing writes a new merchant.
+it is still shown in entry details, and editing an old record preserves it rather than
+blanking it. Nothing writes a new merchant.
 
 ## 7d. Photos
 
@@ -434,7 +433,6 @@ peeks the tooltip for about two seconds. Required hints:
 | Category row | Entry count, average per entry, share of the month |
 | Entry row | Date, category, note, and "tap to view" |
 | Add button | "Record a new expense" |
-| Export | "Download this month as a CSV spreadsheet" |
 | Month picker | "Browse a different month" |
 
 ## 9b. Small-screen rules

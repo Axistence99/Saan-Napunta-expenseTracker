@@ -1,8 +1,7 @@
 # Saan Napunta?
 
 > **Status: in active development.** This is a prototype, not a finished product. Features
-> and the data format still change between commits, and a stored ledger may not survive an
-> update. Export a CSV before clearing site data or reinstalling.
+> and the data format may still change between commits.
 
 **In-app / launcher name:** Saan Napunta? · **Store listing title:** Saan Napunta - Expense Tracker
 (30 characters, the Play Store maximum — see [docs/STORE_LISTING.md](docs/STORE_LISTING.md)).
@@ -23,7 +22,6 @@ A minimal, offline-first expense tracker built with the same stack as
 - Independent daily, weekly, monthly and yearly defaults set in Profile, plus exact-period custom budgets; values never convert across scopes
 - Per-category breakdown with share bars
 - Day / week / month / year views with a period navigator
-- CSV export (download on web, share sheet on Android)
 - Philippine peso only for now; the data model stays currency-aware for a later update
 - Erase-all-data control; nothing leaves the device unless you opt in
 - **Optional Google sign-in** for cross-device sync — off by default, app is fully usable without it

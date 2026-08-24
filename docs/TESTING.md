@@ -20,8 +20,6 @@ python3 -m http.server 8080 --directory web
 7. **Currency** — no picker exists; both the onboarding step and Settings show a locked ₱ row. A profile stored with `"currency":"$"` is corrected to ₱ on load.
 8. **Month picker** — add an entry dated last month, switch months, verify the summary,
    breakdown and list all follow the selection.
-9. **CSV** — Export CSV downloads `saan-napunta-YYYY-MM.csv`; a note containing a quote
-   character stays properly escaped.
 10. **Persistence** — reload the page; everything survives. Erase all data clears it.
 11. **Skeletons** — hard-reload: shimmer placeholders appear, then resolve to real values.
     Switch to a month you have not opened yet → shimmer for one frame, then content.
@@ -46,7 +44,6 @@ python3 -m http.server 8080 --directory web
     thumbnails are still there. Delete the entry and confirm the media bucket shrinks.
 19. **Photo quota** — fill localStorage first; saving should keep the expense, drop the
     photos, and show "Expense saved, but there was no room for the photos."
-20. **CSV** — the export now has merchant, item and description columns.
 21. **Keyboard/a11y** — Escape closes sheets, tapping the backdrop closes them, the
     status line announces the latest action.
 
@@ -62,7 +59,6 @@ cd android && ./gradlew assembleDebug
 4. Tap a row → edit; long-press a row → delete confirmation.
 5. Date picker defaults to today and accepts past dates.
 6. Settings dialog: budget and currency persist across app restarts.
-7. Export CSV opens the system share sheet with the month's rows.
 8. Rotate the device and reopen — data is intact (it is read from SharedPreferences).
 9. Erase all data → empty state returns.
 
@@ -78,7 +74,6 @@ cd android && ./gradlew assembleDebug
    and `config.budgets` gains `"d:YYYY-MM-DD": 400`. Step to another day and it remains
    unset. Clear removes only today's key.
 6. Save an expense dated last month: the view jumps to that period.
-7. Export CSV: the file covers the visible range and is named after the range key.
 
 ## Expense detail
 

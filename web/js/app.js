@@ -1488,34 +1488,8 @@ $("deleteEntry").addEventListener("click", () => {
 });
 
 /* ============================================================
-   Settings, export, wiring
+   Settings and wiring
    ============================================================ */
-
-function exportCsv() {
-  const range = rangeFor(view.scope, view.anchor);
-  const agg = aggregatesFor(range);
-  if (!agg.list.length) {
-    toast("Nothing to export for this month.");
-    return;
-  }
-  const rows = [["date", "category", "merchant", "item", "description", "amount"]].concat(
-    agg.list.map((e) => [
-      e.date,
-      catById(e.category).label,
-      (e.merchant || "").replace(/"/g, '""'),
-      (e.item || "").replace(/"/g, '""'),
-      (e.note || "").replace(/"/g, '""'),
-      Number(e.amount).toFixed(2)
-    ])
-  );
-  const csv = rows.map((row) => row.map((cell) => `"${cell}"`).join(",")).join("\n");
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-  link.download = `saan-napunta-${range.key.replace(":", "-")}.csv`;
-  link.click();
-  URL.revokeObjectURL(link.href);
-  toast("CSV exported.", "ok");
-}
 
 /* The development warning stays dismissed for the session only, never permanently. */
 const DEV_BANNER_KEY = "saan-napunta-dev-banner";
@@ -1636,7 +1610,6 @@ $("photoInput").addEventListener("change", async (event) => {
   }
 });
 $("closeEntry").addEventListener("click", closeEntrySheet);
-$("exportButton").addEventListener("click", exportCsv);
 $("closeSettings").addEventListener("click", () => { $("settingsPanel").hidden = true; tooltip.hide(); });
 
 $("scopeTabs").addEventListener("click", (event) => {
@@ -1986,7 +1959,6 @@ $("settingsPanel").addEventListener("click", (event) => {
 
 /* Static tooltips that never change */
 $("addButton").setAttribute("data-tip", "Record a new expense");
-$("exportButton").setAttribute("data-tip", "Download this month as a CSV spreadsheet");
 $("rangePrev").setAttribute("data-tip", "Previous period");
 $("rangeNext").setAttribute("data-tip", "Next period");
 $("scopeTabs").setAttribute("data-tip", "View by day, week, month or year");
