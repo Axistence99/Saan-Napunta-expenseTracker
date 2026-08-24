@@ -19,8 +19,8 @@ A minimal, offline-first expense tracker built with the same stack as
 
 - Add, edit and delete expenses (amount, category, date, note)
 - 9 quick categories: Food, Transport, Bills, Load/Data, Groceries, School, Health, Fun, Other
-- Monthly total, today's total, daily average and entry count
-- Independent daily, weekly, monthly and yearly budgets, plus overrides so a single day, week, month or year can differ from the rest
+- Period total, today's total and entry count
+- Exact-period budgets: each day, week, month or year is set separately and never auto-fills another period
 - Per-category breakdown with share bars
 - Day / week / month / year views with a period navigator
 - CSV export (download on web, share sheet on Android)

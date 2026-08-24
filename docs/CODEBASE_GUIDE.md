@@ -101,14 +101,14 @@ Single screen plus two overlays. Key element IDs (JavaScript looks all of these 
 | Region | IDs |
 | --- | --- |
 | Background | `.live-gradient` (CSS only, no id) |
-| Header | `settingsButton`, `.tagline` |
-| Summary card | `monthLabel`, `monthTotal`, `budgetMeter`, `budgetFill`, `budgetLeft`, `budgetCap`, `todayTotal`, `avgTotal`, `entryCount` |
+| Header | `.heading-row`, `.tagline` |
+| Summary card | `monthLabel`, `monthTotal`, `budgetMeter`, `budgetFill`, `budgetLeft`, `budgetCap`, `todayTotal`, `entryCount` |
 | Breakdown card | `breakdown` (ul), `breakdownEmpty`, `exportButton` |
 | Entries card | `entries` (ul), `entriesEmpty`, `monthPicker` |
 | Add button | `addButton` (floating action button) |
 | Onboarding | `onboard`, `profileName`, `profileCurrency`, `stepOneNext`, `skipOnboarding`, `periodGrid`, `stepTwoBack`, `stepTwoNext`, `amountSub`, `onboardSymbol`, `onboardBudget`, `budgetPresets`, `budgetEquivalent`, `stepThreeBack`, `finishOnboarding`, `noBudget` |
 | Entry sheet | `entrySheet`, `entryForm`, `entryTitle`, `closeEntry`, `amountSymbol`, `amountInput`, `categoryChips`, `dateInput`, `noteInput`, `saveEntry`, `deleteEntry` |
-| Settings sheet | `settingsPanel`, `closeSettings`, `budgetInput`, `currencySelect`, `weekStartSelect`, `clearButton` |
+| Settings sheet | `settingsPanel`, `closeSettings`, sync controls, `weekStartSelect`, `clearButton` |
 | Accessibility | `status` (visually hidden `aria-live` region) |
 
 Both sheets start with the `hidden` attribute; JS toggles `.hidden` rather than a class.
@@ -221,13 +221,10 @@ returns an inline `<svg>` using `currentColor`. Adding a category means adding o
 | `rangeFor(scope, anchorDay)` | Returns `{ scope, key, start, end, label, totalDays, elapsed, daysRemaining, isCurrent, isFuture }` for day, week, month or year |
 | `shiftAnchor(scope, anchorDay, delta)` | Steps the anchor one whole period |
 | `renderRangeNav(range)` | Paints the scope tabs, the label and the arrow states |
-| `budgetForRange(range)` | Three-step resolution: override for that exact period, then the standing budget for that scope, then the closest set scope converted. Returns `{ amount, source, from }` where source is custom, default, derived or none |
-| `setRangeBudget(key, amount)` | Writes or clears an override (`null` clears) |
+| `budgetForRange(range)` | Reads only the budget matching the exact range key. It never repeats or converts a budget into another scope |
+| `setRangeBudget(key, amount)` | Writes or clears an exact-period budget (`null` clears) |
 | `sanitiseBudgets(raw)` | Keeps only well-formed `[dwmy]:` keys with in-range amounts |
-| `sanitiseDefaults(raw)` | Clamps the four standing budgets and migrates a legacy `budget` + `budgetPeriod` pair into the matching scope |
-| `renderBudgetSettings()` | Fills the four fields; an empty one shows the derived figure as its placeholder |
-| `renderOverrideList()` | Lists every period carrying its own budget, with remove buttons |
-| `describeRangeKey(key)` | Turns `d:2026-08-23` back into a human label |
+| `sanitiseDefaults(raw)` | Preserves and clamps legacy standing-budget data for storage compatibility; the current resolver ignores it |
 
 Module state is `view = { scope, anchor }`. `range.key` is the aggregate-cache key **and**
 the budget-override key, so both stay in step automatically.

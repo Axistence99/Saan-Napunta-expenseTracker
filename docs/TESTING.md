@@ -15,8 +15,8 @@ python3 -m http.server 8080 --directory web
 3. **Validation** — save with an empty or 0 amount → toast, sheet stays open.
 4. **Edit** — tap an entry, change amount and category, save changes; list reflects both.
 5. **Delete** — open an entry, Delete this entry → row disappears, totals recompute.
-6. **Budget** — set 1000 in settings; meter fills. Add entries past 1000 → meter turns
-   red and the legend reads "… over budget".
+6. **Budget** — set 1000 from the active Home period; its meter fills. Add entries past
+   1000 → the meter turns red. Switch scope and verify the other scope remains unset.
 7. **Currency** — no picker exists; both the onboarding step and Settings show a locked ₱ row. A profile stored with `"currency":"$"` is corrected to ₱ on load.
 8. **Month picker** — add an entry dated last month, switch months, verify the summary,
    breakdown and list all follow the selection.
@@ -73,11 +73,10 @@ cd android && ./gradlew assembleDebug
 2. Step back with the left arrow; the label becomes explicit ("July 2026") and "Back to
    today" appears. The right arrow is disabled at the current period.
 3. In Year view the history groups by month rather than by day.
-4. With a ₱12,000 monthly default, Day view shows roughly ₱394 and Week roughly ₱2,760 —
-   the default converted, not the raw figure.
-5. Set a custom ₱400 budget for today: the cap reads "Custom ₱400.00", the button changes to
-   "Custom budget for Today — change", and `config.budgets` gains `"d:YYYY-MM-DD": 400`.
-   Step to another day and it is back to the converted default. Clear removes the key.
+4. Set a ₱12,000 budget for this month. Day and Week must still read "No budget set".
+5. Set a ₱400 budget for today: the button changes to "Custom budget for Today — change",
+   and `config.budgets` gains `"d:YYYY-MM-DD": 400`. Step to another day and it remains
+   unset. Clear removes only today's key.
 6. Save an expense dated last month: the view jumps to that period.
 7. Export CSV: the file covers the visible range and is named after the range key.
 
@@ -107,8 +106,8 @@ cd android && ./gradlew assembleDebug
 
 ## Mobile layout
 
-1. At 360 px wide, first/last name, sex/occupation and the four budget fields each stack in
-   one column; nothing overflows horizontally.
+1. At 360 px wide, first/last name and sex/occupation stack in one column; nothing overflows
+   horizontally.
 2. The birthdate and expense date fields fill their cell, and the calendar icon is visible
    against the dark background.
 3. Tapping any input on iOS must not zoom the page.
@@ -117,19 +116,18 @@ cd android && ./gradlew assembleDebug
 5. A long merchant plus note ellipsises rather than widening the row.
 6. On a short screen, the profile step scrolls inside its card.
 
-## Budgets per scope
+## Exact-period budgets
 
-1. **Migration** — load a profile holding only `budget: 12000` and `budgetPeriod: "month"`;
-   it becomes `budgetDefaults: { day: 0, week: 0, month: 12000, year: 0 }`.
-2. **Derived figures** — with only a monthly budget set, Day reads about ₱394 and Week about
-   ₱2,760, and the empty Settings fields show those as "(auto)" placeholders.
-3. **Independence** — set Daily ₱500, Weekly ₱3,000, Yearly ₱200,000. Each scope now shows
-   its own figure and none of them disturb the monthly ₱12,000.
-4. **One day differs** — give today a ₱1,200 custom budget. Today reads "Custom ₱1,200.00";
-   step back a day and it still reads "Daily budget ₱500.00".
-5. **Manager** — Settings lists "Today ₱1,200.00" under Custom periods; removing it returns
-   today to ₱500 and hides the section. Clear all empties the list.
-6. **Fallback** — clear the Daily field and Day view drops back to the derived ₱394.22.
+1. **No cross-scope conversion** — set a ₱700 budget for today. Week, Month and Year must
+   continue to read "No budget set".
+2. **No repeating days** — set a budget for today, then move to yesterday. Yesterday must
+   remain unset until it receives its own budget.
+3. **Independent periods** — set this week to ₱3,000. The daily and monthly views must not
+   change.
+4. **Clear** — clearing a period removes only that exact `[dwmy]:` key.
+5. **Settings** — verify there are no budget fields or custom-budget manager in Settings.
+6. **Legacy safety** — load non-zero `budgetDefaults`; all periods without exact keys must
+   remain unset, preventing old defaults from being assigned automatically.
 
 ## Input limits
 

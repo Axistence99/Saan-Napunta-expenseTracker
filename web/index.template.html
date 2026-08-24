@@ -488,38 +488,6 @@
         <button class="secondary-button ghost" id="signOutButton" type="button" hidden>Sign out</button>
       </section>
 
-      <div class="budget-grid-wrap">
-        <span class="field-label">Budgets</span>
-        <p class="panel-note">Set any of these. A period with no budget of its own falls back to the closest one you did set.</p>
-        <div class="budget-grid">
-          <label>
-            Daily
-            <input id="budgetDay" type="number" inputmode="decimal" min="0" step="1" placeholder="—" />
-          </label>
-          <label>
-            Weekly
-            <input id="budgetWeek" type="number" inputmode="decimal" min="0" step="1" placeholder="—" />
-          </label>
-          <label>
-            Monthly
-            <input id="budgetMonth" type="number" inputmode="decimal" min="0" step="1" placeholder="—" />
-          </label>
-          <label>
-            Yearly
-            <input id="budgetYear" type="number" inputmode="decimal" min="0" step="1" placeholder="—" />
-          </label>
-        </div>
-      </div>
-
-      <div class="overrides" id="overridesBlock" hidden>
-        <div class="field-head">
-          <span class="field-label">Custom periods</span>
-          <button type="button" class="text-button" id="clearAllOverrides">Clear all</button>
-        </div>
-        <p class="panel-note">Specific days, weeks, months or years with their own budget.</p>
-        <ul class="override-list" id="overrideList"></ul>
-      </div>
-
       <div class="locked-field" aria-label="Currency">
       <span class="locked-label">Currency</span>
       <span class="locked-value">

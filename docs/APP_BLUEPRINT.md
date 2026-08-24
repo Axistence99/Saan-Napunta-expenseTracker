@@ -132,9 +132,9 @@ The selected card gets an orange border, tinted fill and an inner glow. Back / C
 **Step 3 — Amount.** Title "Set your budget", subtitle adapts to the choice ("How much can you spend
 per week?"). A very large amount field prefixed with the currency symbol, four preset chips
 scaled to the chosen period (daily 150/250/400/600 · weekly 1000/2000/3500/5000 · monthly
-5000/10000/15000/25000 · yearly 60000/120000/250000/500000), and a live gold conversion line:
-"That is about ₱286 a day · ₱8,697 a month · ₱104,357 a year". Back / "Start tracking", plus
-"I'll set a budget later". Submitting zero or blank shows an error toast.
+5000/10000/15000/25000 · yearly 60000/120000/250000/500000). A note explicitly says the
+amount applies only to the current selected period and leaves every other period unset. Back /
+"Start tracking", plus "I'll set a budget later". Submitting zero or blank shows an error toast.
 
 **Step 4 — Backup (optional).** Title "Keep a backup?", explaining that signing in syncs to
 other devices, works offline without it, and can be done later in Settings. Offers
@@ -148,9 +148,9 @@ greeting above the month label. Onboarding never appears again unless data is er
 
 Vertical scroll, top to bottom:
 
-1. **Header row** — three-column grid: empty spacer, centred title "Saan Napunta?", circular
-   settings button (gear icon) on the right. Under it, a small uppercase orange tagline
-   "GASTOS TRACKER" with wide letter-spacing.
+1. **Header row** — centred title "Saan Napunta?" without duplicate controls. Under it, a
+   small uppercase gold tagline "EXPENSE TRACKER" with wide letter-spacing. Settings is
+   reached only through the fixed bottom navigation.
 
 2. **View controls** — a four-way segmented control (Day · Week · Month · Year) above a
    navigator: left arrow, the period label, right arrow. The label reads "Today", "This
@@ -162,12 +162,10 @@ Vertical scroll, top to bottom:
 3. **Summary card**
    - Kicker: "This month", or the full month name when viewing a past month.
    - Big total for the selected month.
-   - Budget meter, scoped to the user's chosen budget period. Left legend reads
-     "₱X left this week"; right legend reads "Weekly ₱Y". When over budget the fill turns red
-     and the left legend reads "₱X over budget". With no budget set the bar is empty and
-     reads "No budget set" / "Add one in settings". When browsing a past month the meter
-     falls back to comparing that month against the monthly-equivalent of the budget.
-   - Three mini-stats separated by a hairline: **Today**, **Daily avg**, **Entries**.
+   - Budget meter for the exact visible period. When over budget the fill turns red and the
+     left legend reads "₱X over budget". With no exact budget, the bar is empty and reads
+     "No budget set". It never falls back to or converts another period's budget.
+   - Two mini-stats separated by a hairline: **Today** and **Entries**.
    - Below the meter, a per-period budget control reading "Set a budget just for {period}",
      or "Custom budget for {period} — change" when an override exists. It opens an inline
      amount field with Save and Clear.
@@ -244,15 +242,9 @@ pressing Escape closes without saving.
 A second bottom sheet with the same chrome.
 
 - **Back up & sync** — account card, described in 10b.
-- **First and last name** — side-by-side text fields.
-- **Province** — the same grouped 82-province dropdown used in onboarding.
-- **Occupation** — Student · Employee · Entrepreneur · Prefer not to say · N/A.
-- **Budgets** — four independent fields in a 2x2 grid: Daily, Weekly, Monthly, Yearly. Any
-  subset may be filled. A field left empty shows what it would work out to from the others,
-  greyed as "₱394.22 (auto)". Clearing a field removes that standing budget.
-- **Custom periods** — appears only when overrides exist. Lists each one ("Today ₱1,200.00")
-  with a remove button, plus Clear all. Removing an override returns that period to the
-  standing budget.
+- Profile editing is intentionally absent; it lives in the Profile tab.
+- Budget controls are intentionally absent; each budget is set directly on Home while viewing
+  the specific day, week, month or year it belongs to.
 - **Currency** — locked to the Philippine peso, shown as a dashed read-only row with a padlock and a note that more are coming.
 - **Week starts on** — Monday (default) or Sunday.
 - **Erase all data** — outlined button that turns red on hover, with a confirmation prompt.
@@ -282,10 +274,10 @@ Config {
   sexAtBirth   string   "female" | "male" | "undisclosed" | ""
   occupation   string   "student" | "employee" | "entrepreneur" | "undisclosed" | "na" | ""
   name         string   legacy display name, mirrors firstName
-  budget       number   amount for one budgetPeriod; 0 disables the meter
-  budgetPeriod   string  legacy, kept for migration only
-  budgetDefaults object  standing budget per scope, e.g. { day: 500, week: 3000, month: 12000, year: 0 }
-  budgets        object  per-period overrides, e.g. { "m:2026-08": 15000, "d:2026-08-23": 1200 }
+  budget         number  legacy field, ignored by the current budget resolver
+  budgetPeriod   string  legacy onboarding preference
+  budgetDefaults object  legacy standing budgets, retained for storage compatibility but ignored
+  budgets        object  exact-period budgets, e.g. { "m:2026-08": 15000, "d:2026-08-23": 1200 }
   currency     string   always "₱" while other currencies are locked
   weekStart    number   0 = Sunday, 1 = Monday
   onboarded    boolean  false shows the onboarding flow
@@ -334,21 +326,15 @@ CSV export covers the visible range and is named after its key.
 - Days remaining **includes today**, so the final day of a period reads "last day", never
   "0 days left".
 - Safe spend per day = amount left ÷ days remaining.
-- Changing the period in Settings converts the existing amount using 1 day : 7 days :
-  30.44 days : 365.25 days, and tells the user the new figure.
-- **Standing budgets per scope.** Daily, weekly, monthly and yearly budgets are independent
-  values, not one figure converted. Setting a ₱500 daily budget does not touch the ₱12,000
-  monthly one.
-- **Resolution order** for any period on screen:
-  1. an override saved for that exact period, shown as "Custom ₱1,200.00"
-  2. the standing budget for that scope, shown as "Daily budget ₱500.00"
-  3. the closest scope that is set, converted, shown as "Budget ₱394.22"
-  4. nothing, in which case the meter reads "No budget set"
-- **Per-period overrides.** Any single day, week, month or year can carry its own budget, so
-  no two days need the same figure. A ₱1,200 Saturday leaves every other day on ₱500.
-- Profiles written before per-scope budgets existed carried one `budget` plus a
-  `budgetPeriod`; that pair migrates into the matching scope on first read.
-- The budget meter is period-scoped; the breakdown and history stay monthly.
+- **Exact-period only.** Every budget belongs to one specific day, week, month or year.
+- A daily budget is never converted into or reused as a weekly, monthly or yearly budget.
+- A budget for one day does not automatically apply to any other day.
+- A period with no exact budget reads "No budget set".
+- Set or clear the active period's budget from its Home summary card; budget controls do not
+  appear in Settings.
+- During onboarding, the entered budget is saved only for the current selected period.
+- Legacy `budget` and `budgetDefaults` values remain readable for storage compatibility but
+  are ignored by the current resolver to prevent unintended automatic budgets.
 
 ## 7c. Merchant field (retired)
 
@@ -443,11 +429,9 @@ peeks the tooltip for about two seconds. Required hints:
 | Big total | Entry count for the month, plus cache hit/recompute stats |
 | Budget meter | Percent of budget used, days left, safe spend per day — or the amount over budget |
 | Today | "Spent so far on {pretty date}" |
-| Daily avg | The actual division, e.g. "₱4,120 ÷ 18 days so far" |
 | Entries | "Number of expenses recorded this month" |
 | Category row | Entry count, average per entry, share of the month |
-| Entry row | Date, category, note, and "tap to edit" |
-| Settings button | "Budget, currency and data controls" |
+| Entry row | Date, category, note, and "tap to view" |
 | Add button | "Record a new expense" |
 | Export | "Download this month as a CSV spreadsheet" |
 | Month picker | "Browse a different month" |

@@ -13,16 +13,16 @@
    region, plus Metro Manila), sex at birth, occupation (Student / Employee /
    Entrepreneur / Prefer not to say / N/A). Currency is shown but locked to the Philippine peso
 2. Budget period — Daily / Weekly / Monthly / Yearly cards
-3. Amount — big field, period-scaled presets, live conversion to the other windows
+3. Amount — big field and period-scaled presets; the budget applies only to the current selected period
 4. Backup — optional Google sign-in, skippable
 
 Skippable at any step. Sets `onboarded: true` so it never returns.
 
 ### Dashboard
-- Header: app title + settings button
-- Summary card: month label, big total, budget meter, three mini-stats (Today, Daily avg, Entries)
+- Header: centered app title; Settings is available only from the bottom navigation
+- Summary card: active-period label, big total, exact-period budget meter, Today and Entries
 - By-category card: share bars sorted high → low, CSV export action
-- Recent card: month picker, entries grouped by day with a per-day subtotal
+- Recent card: entries grouped by day with a per-day subtotal
 - Floating action button: add expense
 
 ### Entry sheet / EntryActivity
@@ -36,9 +36,9 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 - Save; Delete shown only when editing
 
 ### Settings
-- First name, last name, province, occupation
-- Budget period (converts the existing amount when changed)
-- Budget for that period (0 disables the meter)
+- Back up, sync and sign-out controls
+- No profile fields; profile editing belongs in the Profile tab
+- No budget fields; budgets are set on Home for the exact active period
 - Currency: locked to ₱ (other currencies deferred to a later release)
 - Week start: Monday (default) or Sunday
 - Erase all data, with confirmation
