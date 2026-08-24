@@ -27,6 +27,7 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 
 ### Records
 - Monthly spending overview and spending-per-category analytics
+- Interactive daily spending bar graph with an average line; selecting a bar toggles that date
 - Compact calendar supports multiple selected dates
 - Tapping an unselected date adds it; tapping a selected date removes it
 - Totals and the record list combine all selected dates

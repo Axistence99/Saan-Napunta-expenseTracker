@@ -1920,3 +1920,57 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   box-shadow: 0 9px 24px rgba(255, 126, 0, 0.3);
   transform: translateY(-1px);
 }
+
+/* Daily spending graph in Records analytics. */
+.spending-chart-panel { padding: 16px 14px 12px; }
+.chart-total {
+  color: var(--gold);
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.spending-chart {
+  width: 100%;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 13px;
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.06), rgba(0, 0, 0, 0.08));
+}
+.spending-chart svg { display: block; width: 100%; height: auto; min-height: 150px; }
+.chart-grid-line { stroke: rgba(245, 239, 230, 0.09); stroke-width: 1; }
+.chart-y-label,
+.chart-x-label,
+.chart-average-label {
+  fill: var(--grey-dim);
+  font-family: system-ui, sans-serif;
+  font-size: 7px;
+}
+.chart-average-label { fill: var(--gold); font-size: 6.5px; }
+.chart-average-line {
+  stroke: rgba(233, 196, 106, 0.55);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+.chart-hit { fill: transparent; cursor: pointer; }
+.chart-bar {
+  fill: var(--orange);
+  opacity: 0.82;
+  transition: opacity 140ms ease, filter 140ms ease;
+  pointer-events: none;
+}
+.chart-day:hover .chart-bar,
+.chart-day:focus .chart-bar { opacity: 1; filter: brightness(1.15); }
+.chart-day:focus { outline: none; }
+.chart-day:focus .chart-hit { stroke: var(--gold); stroke-width: 1; }
+.chart-day.selected .chart-bar { fill: var(--purple); opacity: 1; }
+.chart-zero-selected { fill: var(--purple); pointer-events: none; }
+.chart-day.future { opacity: 0.2; }
+.chart-day.future .chart-hit { cursor: default; }
+.chart-hint {
+  margin: 5px 2px 0;
+  color: var(--grey-dim);
+  font-size: 0.63rem;
+  line-height: 1.35;
+  text-align: center;
+}

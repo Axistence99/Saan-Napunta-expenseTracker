@@ -1799,6 +1799,90 @@ function restoreBottomNavState() {
   setBottomNavState(activeAppView);
 }
 
+function compactMoney(value) {
+  const amount = Number(value) || 0;
+  if (amount >= 1000000) return `${config.currency}${(amount / 1000000).toFixed(1)}m`;
+  if (amount >= 1000) return `${config.currency}${(amount / 1000).toFixed(amount >= 10000 ? 0 : 1)}k`;
+  return `${config.currency}${Math.round(amount)}`;
+}
+
+/** Monthly daily-spending bar graph. Bars also act as multi-date selectors. */
+function renderSpendingChart(year, month, totals, monthTotal, averageDays) {
+  const holder = $("spendingChart");
+  const days = new Date(year, month, 0).getDate();
+  const values = Array.from({ length: days }, (_, index) => {
+    const key = `${year}-${String(month).padStart(2, "0")}-${String(index + 1).padStart(2, "0")}`;
+    return { key, day: index + 1, total: totals.get(key) || 0 };
+  });
+  const maximum = Math.max(1, ...values.map((item) => item.total));
+  const average = monthTotal / Math.max(1, averageDays);
+  const left = 34;
+  const top = 12;
+  const width = 318;
+  const height = 118;
+  const baseline = top + height;
+  const slot = width / days;
+  const barWidth = Math.max(3, slot - 2.4);
+  const labelDays = new Set([1, Math.ceil(days / 2), days]);
+  const grid = [0, 0.5, 1].map((ratio) => {
+    const y = baseline - height * ratio;
+    const value = maximum * ratio;
+    return `<line class="chart-grid-line" x1="${left}" y1="${y}" x2="${left + width}" y2="${y}" />
+      <text class="chart-y-label" x="${left - 5}" y="${y + 3}" text-anchor="end">${compactMoney(value)}</text>`;
+  }).join("");
+
+  const bars = values.map((item, index) => {
+    const x = left + index * slot + (slot - barWidth) / 2;
+    const barHeight = item.total > 0 ? Math.max(2, (item.total / maximum) * height) : 0;
+    const y = baseline - barHeight;
+    const selected = recordsDays.has(item.key);
+    const future = item.key > todayKey();
+    const classes = ["chart-day", selected ? "selected" : "", item.total > 0 ? "has-spend" : "", future ? "future" : ""]
+      .filter(Boolean).join(" ");
+    return `<g class="${classes}" data-chart-date="${item.key}" tabindex="${future ? -1 : 0}" role="button" aria-label="${item.key}, ${money(item.total)} spent${selected ? ", selected" : ""}">
+      <title>${prettyDay(item.key)} · ${money(item.total)}</title>
+      <rect class="chart-hit" x="${left + index * slot}" y="${top}" width="${slot}" height="${height}" />
+      ${barHeight ? `<rect class="chart-bar" x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" rx="2" />` : ""}
+      ${selected && !barHeight ? `<circle class="chart-zero-selected" cx="${x + barWidth / 2}" cy="${baseline - 3}" r="2.5" />` : ""}
+      ${labelDays.has(item.day) ? `<text class="chart-x-label" x="${x + barWidth / 2}" y="${baseline + 17}" text-anchor="middle">${item.day}</text>` : ""}
+    </g>`;
+  }).join("");
+
+  const averageY = average > 0 ? baseline - Math.min(height, (average / maximum) * height) : baseline;
+  const averageLine = average > 0
+    ? `<line class="chart-average-line" x1="${left}" y1="${averageY}" x2="${left + width}" y2="${averageY}" />
+       <text class="chart-average-label" x="${left + width - 2}" y="${Math.max(top + 8, averageY - 4)}" text-anchor="end">Avg</text>`
+    : "";
+
+  holder.innerHTML = `<svg viewBox="0 0 360 154" role="group" aria-label="Daily spending bars">${grid}${averageLine}${bars}</svg>`;
+  holder.setAttribute(
+    "aria-label",
+    `${MONTH_NAMES[month - 1]} ${year} daily spending graph. Total ${money(monthTotal)}. Highest day ${money(maximum === 1 && monthTotal === 0 ? 0 : maximum)}.`
+  );
+  $("spendingChartPeriod").textContent = `${MONTH_NAMES[month - 1]} ${year}`;
+  $("spendingChartTotal").textContent = money(monthTotal);
+  $("spendingChartHint").textContent = monthTotal > 0
+    ? "Select a bar to add or remove that date from the records below."
+    : "No spending this month yet. You can still select a date from the calendar.";
+
+  holder.querySelectorAll("[data-chart-date]:not(.future)").forEach((bar) => {
+    const toggle = () => {
+      const key = bar.dataset.chartDate;
+      if (recordsDays.has(key)) recordsDays.delete(key);
+      else recordsDays.add(key);
+      recordsMonth = key.slice(0, 7);
+      renderRecordsView();
+    };
+    bar.addEventListener("click", toggle);
+    bar.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        toggle();
+      }
+    });
+  });
+}
+
 function renderRecordsView() {
   if (!$("calendarGrid")) return;
   const [year, month] = recordsMonth.split("-").map(Number);
@@ -1829,6 +1913,7 @@ function renderRecordsView() {
   $("analyticsMonthTotal").textContent = money(monthTotal);
   $("analyticsDailyAverage").textContent = money(monthTotal / Math.max(1, averageDays));
   $("analyticsTransactionCount").textContent = String(monthEntries.length);
+  renderSpendingChart(year, month, totals, monthTotal, averageDays);
   $("analyticsPeriodLabel").textContent = `${MONTH_NAMES[month - 1].slice(0, 3)} ${year}`;
   $("analyticsEmpty").hidden = categoryRows.length > 0;
   $("analyticsCategories").innerHTML = categoryRows.map(([categoryId, stat]) => {

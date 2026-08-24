@@ -20,7 +20,7 @@ A minimal, offline-first expense tracker built with the same stack as
 - 9 quick categories: Food, Transport, Bills, Load/Data, Groceries, School, Health, Fun, Other
 - Period total, today's total and entry count
 - Independent daily, weekly, monthly and yearly defaults set in Profile, plus exact-period custom budgets; values never convert across scopes
-- Per-category breakdown with share bars
+- Per-category breakdown with share bars and an interactive daily spending graph
 - Day / week / month / year views with a period navigator
 - Philippine peso only for now; the data model stays currency-aware for a later update
 - Erase-all-data control; nothing leaves the device unless you opt in

@@ -111,6 +111,15 @@ cd android && ./gradlew assembleDebug
 5. A long merchant plus note ellipsises rather than widening the row.
 6. On a short screen, the profile step scrolls inside its card.
 
+## Records analytics graph
+
+1. Add expenses on at least two dates in one month; each date appears as a bar and the graph
+   total matches the monthly overview.
+2. The dashed average line appears whenever the month has spending.
+3. Clicking or pressing Enter/Space on a bar toggles that date in the combined records list.
+4. Selected bars use the purple selected state and future dates cannot be selected.
+5. An empty month keeps the graph frame visible and shows its empty-state guidance.
+
 ## Budget defaults and custom periods
 
 1. **Profile defaults** — set Daily ₱500, Weekly ₱3,000 and Monthly ₱12,000 in Profile.
