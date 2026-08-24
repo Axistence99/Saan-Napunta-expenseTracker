@@ -221,7 +221,7 @@ returns an inline `<svg>` using `currentColor`. Adding a category means adding o
 | `rangeFor(scope, anchorDay)` | Returns `{ scope, key, start, end, label, totalDays, elapsed, daysRemaining, isCurrent, isFuture }` for day, week, month or year |
 | `shiftAnchor(scope, anchorDay, delta)` | Steps the anchor one whole period |
 | `renderRangeNav(range)` | Paints the scope tabs, the label and the arrow states |
-| `budgetForRange(range)` | Reads only the budget matching the exact range key. It never repeats or converts a budget into another scope |
+| `budgetForRange(range)` | Resolves an exact-period custom budget, then the Profile default for the same scope. It never converts across scopes |
 | `setRangeBudget(key, amount)` | Writes or clears an exact-period budget (`null` clears) |
 | `sanitiseBudgets(raw)` | Keeps only well-formed `[dwmy]:` keys with in-range amounts |
 | `sanitiseDefaults(raw)` | Preserves and clamps legacy standing-budget data for storage compatibility; the current resolver ignores it |

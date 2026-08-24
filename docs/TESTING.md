@@ -116,18 +116,19 @@ cd android && ./gradlew assembleDebug
 5. A long merchant plus note ellipsises rather than widening the row.
 6. On a short screen, the profile step scrolls inside its card.
 
-## Exact-period budgets
+## Budget defaults and custom periods
 
-1. **No cross-scope conversion** — set a ₱700 budget for today. Week, Month and Year must
-   continue to read "No budget set".
-2. **No repeating days** — set a budget for today, then move to yesterday. Yesterday must
-   remain unset until it receives its own budget.
-3. **Independent periods** — set this week to ₱3,000. The daily and monthly views must not
-   change.
-4. **Clear** — clearing a period removes only that exact `[dwmy]:` key.
-5. **Settings** — verify there are no budget fields or custom-budget manager in Settings.
-6. **Legacy safety** — load non-zero `budgetDefaults`; all periods without exact keys must
-   remain unset, preventing old defaults from being assigned automatically.
+1. **Profile defaults** — set Daily ₱500, Weekly ₱3,000 and Monthly ₱12,000 in Profile.
+   Each matching Home scope uses its own value.
+2. **No cross-scope conversion** — leave Yearly blank. Year must show the missing-default
+   indicator and must not derive a value from Daily, Weekly or Monthly.
+3. **Custom priority** — set today to ₱700 on Home. Today uses ₱700 while another day uses
+   the ₱500 daily default.
+4. **Clear** — clearing today's custom key makes the ₱500 daily default apply again and does
+   not alter another scope.
+5. **Settings** — verify there are no profile or budget fields in Settings.
+6. **Validation** — negative and over-limit Profile defaults are rejected; blank is accepted
+   as no default.
 
 ## Input limits
 

@@ -1862,3 +1862,46 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 .profile-form input,
 .profile-form select { width: 100%; min-width: 0; }
 .profile-form .primary-button { margin-top: 2px; }
+
+/* Scope defaults are visible at a glance without opening another screen. */
+.scope-budget-indicator {
+  margin: -5px 0 0;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 0.68rem;
+  text-align: center;
+}
+.scope-budget-indicator.set {
+  color: var(--gold);
+  border-color: var(--line-warm);
+  background: rgba(233, 196, 106, 0.06);
+}
+.scope-budget-indicator.missing {
+  color: var(--grey);
+  border-style: dashed;
+  background: rgba(154, 147, 166, 0.04);
+}
+
+.calendar-selection-hint {
+  width: min(100%, 304px);
+  margin: 7px auto 0;
+  color: var(--grey-dim);
+  font-size: 0.62rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.profile-budgets {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 4px;
+}
+.profile-budgets .budget-grid { margin-top: 3px; }
+.profile-budgets .budget-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--muted);
+}

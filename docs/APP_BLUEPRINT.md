@@ -276,8 +276,8 @@ Config {
   name         string   legacy display name, mirrors firstName
   budget         number  legacy field, ignored by the current budget resolver
   budgetPeriod   string  legacy onboarding preference
-  budgetDefaults object  legacy standing budgets, retained for storage compatibility but ignored
-  budgets        object  exact-period budgets, e.g. { "m:2026-08": 15000, "d:2026-08-23": 1200 }
+  budgetDefaults object  independent scope defaults, e.g. { day: 500, week: 3000, month: 12000, year: 0 }
+  budgets        object  exact-period custom budgets, e.g. { "m:2026-08": 15000, "d:2026-08-23": 1200 }
   currency     string   always "₱" while other currencies are locked
   weekStart    number   0 = Sunday, 1 = Monday
   onboarded    boolean  false shows the onboarding flow
@@ -326,15 +326,15 @@ CSV export covers the visible range and is named after its key.
 - Days remaining **includes today**, so the final day of a period reads "last day", never
   "0 days left".
 - Safe spend per day = amount left ÷ days remaining.
-- **Exact-period only.** Every budget belongs to one specific day, week, month or year.
-- A daily budget is never converted into or reused as a weekly, monthly or yearly budget.
-- A budget for one day does not automatically apply to any other day.
-- A period with no exact budget reads "No budget set".
-- Set or clear the active period's budget from its Home summary card; budget controls do not
-  appear in Settings.
+- **Independent defaults.** Profile contains separate Daily, Weekly, Monthly and Yearly
+  defaults. Empty values are allowed and shown on Home with a missing-default indicator.
+- Defaults never convert across scopes: a daily default cannot create a weekly, monthly or
+  yearly value.
+- **Resolution order:** an exact-period custom budget set on Home, then the default for that
+  same scope, then no budget.
+- Set or clear the active period's custom budget from its Home summary card. Budget controls
+  do not appear in Settings.
 - During onboarding, the entered budget is saved only for the current selected period.
-- Legacy `budget` and `budgetDefaults` values remain readable for storage compatibility but
-  are ignored by the current resolver to prevent unintended automatic budgets.
 
 ## 7c. Merchant field (retired)
 

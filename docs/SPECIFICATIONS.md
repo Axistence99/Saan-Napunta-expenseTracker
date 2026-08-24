@@ -20,10 +20,16 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 
 ### Dashboard
 - Header: centered app title; Settings is available only from the bottom navigation
-- Summary card: active-period label, big total, exact-period budget meter, Today and Entries
+- Summary card: active-period label, big total, budget meter, default-budget indicator, Today and Entries
 - By-category card: share bars sorted high → low, CSV export action
 - Recent card: entries grouped by day with a per-day subtotal
 - Floating action button: add expense
+
+### Records
+- Monthly spending overview and spending-per-category analytics
+- Compact calendar supports multiple selected dates
+- Tapping an unselected date adds it; tapping a selected date removes it
+- Totals and the record list combine all selected dates
 
 ### Entry sheet / EntryActivity
 - Amount field with currency symbol (numeric keypad, required, must be > 0)
@@ -35,10 +41,15 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 - Up to 3 photos, device-only
 - Save; Delete shown only when editing
 
+### Profile
+- Editable profile fields
+- Independent optional Daily, Weekly, Monthly and Yearly default budgets
+- Empty defaults are allowed; defaults never convert into another scope
+
 ### Settings
 - Back up, sync and sign-out controls
-- No profile fields; profile editing belongs in the Profile tab
-- No budget fields; budgets are set on Home for the exact active period
+- No profile fields; profile editing and default budgets belong in the Profile tab
+- No budget fields; custom budgets are set on Home for the exact active period
 - Currency: locked to ₱ (other currencies deferred to a later release)
 - Week start: Monday (default) or Sunday
 - Erase all data, with confirmation

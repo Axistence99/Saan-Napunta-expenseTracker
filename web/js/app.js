@@ -29,7 +29,7 @@ const DEFAULT_CONFIG = {
   name: "", // legacy display name, kept in sync with firstName
   budget: 0,          // legacy single budget, retained for storage compatibility
   budgetPeriod: "month",
-  budgetDefaults: { day: 0, week: 0, month: 0, year: 0 }, // legacy; exact-period resolver ignores these
+  budgetDefaults: { day: 0, week: 0, month: 0, year: 0 }, // independent defaults for each scope
   budgets: {}, // exact-period budgets keyed by range, e.g. "m:2026-08" or "d:2026-08-23"
   currency: CURRENCY,
   weekStart: 1,
@@ -207,10 +207,7 @@ const storage = {
   }
 };
 
-/**
- * Preserves and clamps legacy standing-budget fields when reading older profiles.
- * The current resolver intentionally ignores these values; only exact-period keys apply.
- */
+/** Clamps independent daily, weekly, monthly and yearly default budgets. */
 function sanitiseDefaults(raw) {
   const source = raw.budgetDefaults && typeof raw.budgetDefaults === "object" ? raw.budgetDefaults : {};
   const clean = { day: 0, week: 0, month: 0, year: 0 };
@@ -430,6 +427,9 @@ function applyInputLimits() {
   $("amountInput").max = String(LIMITS.maxAmount);
   $("onboardBudget").max = String(LIMITS.maxBudget);
   $("rangeBudgetInput").max = String(LIMITS.maxBudget);
+  Object.values(PROFILE_BUDGET_FIELDS).forEach((id) => {
+    $(id).max = String(LIMITS.maxBudget);
+  });
   $("itemInput").maxLength = LIMITS.item;
   $("noteInput").maxLength = LIMITS.note;
   [$("firstName"), $("lastName"), $("firstNameInput"), $("lastNameInput")].forEach((node) => {
@@ -517,6 +517,12 @@ function dayKey(date) {
    ============================================================ */
 
 const SCOPES = ["day", "week", "month", "year"];
+const PROFILE_BUDGET_FIELDS = {
+  day: "defaultBudgetDay",
+  week: "defaultBudgetWeek",
+  month: "defaultBudgetMonth",
+  year: "defaultBudgetYear"
+};
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"];
 
@@ -665,14 +671,15 @@ function periodStats() {
 }
 
 /**
- * A budget belongs only to the exact day, week, month or year where it was set.
- * Budgets never repeat and are never converted into another scope: a daily budget
- * must not silently become a weekly, monthly or yearly budget.
+ * Resolves an exact-period custom budget first, then the default for that same scope.
+ * Defaults never convert across scopes: daily cannot become weekly, monthly or yearly.
  */
 function budgetForRange(range) {
-  const amount = Number((config.budgets || {})[range.key]) || 0;
-  return amount > 0
-    ? { amount, source: "custom" }
+  const custom = Number((config.budgets || {})[range.key]) || 0;
+  if (custom > 0) return { amount: custom, source: "custom" };
+  const fallback = Number((config.budgetDefaults || {})[range.scope]) || 0;
+  return fallback > 0
+    ? { amount: fallback, source: "default" }
     : { amount: 0, source: "none" };
 }
 
@@ -985,16 +992,24 @@ function renderSummary(agg) {
   const track = fill.parentElement;
   const meter = $("budgetMeter");
   const scopeWord = { day: "today", week: "this week", month: "this month", year: "this year" }[range.scope];
+  const scopeLabel = PERIODS[range.scope].label.toLowerCase();
+  const defaultAmount = Number((config.budgetDefaults || {})[range.scope]) || 0;
+  const indicator = $("scopeBudgetIndicator");
+  indicator.classList.toggle("missing", defaultAmount <= 0);
+  indicator.classList.toggle("set", defaultAmount > 0);
+  indicator.textContent = defaultAmount > 0
+    ? `Default ${scopeLabel} budget: ${money(defaultAmount)}`
+    : `No default ${scopeLabel} budget — set one in Profile`;
 
   $("editRangeBudget").textContent = source === "custom"
     ? `Custom budget for ${range.label} — change`
-    : `Set a budget just for ${range.label}`;
+    : `Set a custom budget for ${range.label}`;
 
   if (budget <= 0) {
     fill.style.width = "0%";
     track.classList.remove("over");
     $("budgetLeft").textContent = "No budget set";
-    $("budgetCap").textContent = "Set one for this period below";
+    $("budgetCap").textContent = "No custom or default budget";
     meter.setAttribute("data-tip", `No budget applies to ${range.label}`);
     return;
   }
@@ -1007,7 +1022,7 @@ function renderSummary(agg) {
   $("budgetLeft").innerHTML = left >= 0
     ? `${money(left)} left ${range.isCurrent ? scopeWord : ""}`.trim()
     : `<span class="over">${money(Math.abs(left))} over budget</span>`;
-  $("budgetCap").textContent = `This period ${money(budget)}`;
+  $("budgetCap").textContent = `${source === "custom" ? "Custom" : "Default"} ${money(budget)}`;
 
   const perDay = left / range.daysRemaining;
   meter.setAttribute(
@@ -1019,7 +1034,7 @@ function renderSummary(agg) {
             ? ` · last day · ${money(left)} to spend`
             : ` · ${range.daysRemaining} days left · ${money(Math.max(0, perDay))}/day to stay under`
           : "") +
-        " · applies only to this period"
+        (source === "custom" ? " · custom for this exact period" : ` · default for each ${range.scope}`)
       : `${money(Math.abs(left))} over the ${money(budget)} budget for ${range.label}`
   );
 }
@@ -1136,6 +1151,10 @@ function paint(agg) {
   $("occupationInput").value = config.occupation || "";
   $("birthdateProfileInput").value = config.birthdate || "";
   $("sexAtBirthInput").value = config.sexAtBirth || "";
+  SCOPES.forEach((scope) => {
+    const amount = Number((config.budgetDefaults || {})[scope]) || 0;
+    $(PROFILE_BUDGET_FIELDS[scope]).value = amount > 0 ? String(amount) : "";
+  });
   renderRecordsView();
   renderProfileView();
 
@@ -1677,7 +1696,10 @@ $("clearRangeBudget").addEventListener("click", async () => {
   const range = rangeFor(view.scope, view.anchor);
   $("rangeBudgetForm").hidden = true;
   await setRangeBudget(range.key, null);
-  toast(`Budget removed for ${range.label}.`);
+  const fallback = Number((config.budgetDefaults || {})[range.scope]) || 0;
+  toast(fallback > 0
+    ? `Custom budget removed. Your ${PERIODS[range.scope].label.toLowerCase()} default now applies.`
+    : `Budget removed for ${range.label}.`);
 });
 
 $("profileForm").addEventListener("submit", async (event) => {
@@ -1690,11 +1712,20 @@ $("profileForm").addEventListener("submit", async (event) => {
   const province = PROVINCE_SET.has($("provinceInput").value) ? $("provinceInput").value : "";
   const sexAtBirth = SEXES[$("sexAtBirthInput").value] ? $("sexAtBirthInput").value : "";
   const occupation = OCCUPATIONS[$("occupationInput").value] ? $("occupationInput").value : "";
+  const budgetDefaults = {};
+  const budgetChecks = SCOPES.map((scope) => {
+    const field = $(PROFILE_BUDGET_FIELDS[scope]);
+    const raw = field.value.trim();
+    const check = validateAmount(raw === "" ? 0 : raw, { max: LIMITS.maxBudget, allowZero: true });
+    budgetDefaults[scope] = check.error ? 0 : check.value;
+    return [field, check.error || null];
+  });
 
   const checks = [
     [$("firstNameInput"), !firstName ? "Enter your first name." : validateName(firstName, "First name")],
     [$("lastNameInput"), validateName(lastName, "Last name")],
-    [$("birthdateProfileInput"), validateBirthdate(birthdate)]
+    [$("birthdateProfileInput"), validateBirthdate(birthdate)],
+    ...budgetChecks
   ];
   const invalid = checks.find(([, problem]) => problem);
   checks.forEach(([field, problem]) => setFieldError(field, problem));
@@ -1712,7 +1743,8 @@ $("profileForm").addEventListener("submit", async (event) => {
     birthdate,
     province,
     sexAtBirth,
-    occupation
+    occupation,
+    budgetDefaults
   };
   await storage.writeConfig(config);
   render({ allowSkeleton: false });
@@ -1760,7 +1792,7 @@ document.addEventListener("keydown", (event) => {
    ============================================================ */
 
 let activeAppView = "home";
-let recordsDay = todayKey();
+let recordsDays = new Set([todayKey()]);
 let recordsMonth = todayKey().slice(0, 7);
 
 function setBottomNavState(name) {
@@ -1851,17 +1883,20 @@ function renderRecordsView() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "calendar-day";
+    button.dataset.date = key;
     button.textContent = String(date.getDate());
     button.setAttribute("role", "gridcell");
     button.setAttribute("aria-label", `${prettyDay(key)}${totals.has(key) ? `, ${money(totals.get(key))} spent` : ""}`);
     button.classList.toggle("outside", date.getMonth() !== month - 1);
     button.classList.toggle("today", key === todayKey());
-    button.classList.toggle("selected", key === recordsDay);
+    button.classList.toggle("selected", recordsDays.has(key));
+    button.setAttribute("aria-selected", String(recordsDays.has(key)));
     button.classList.toggle("has-spend", totals.has(key));
     button.classList.toggle("future", key > todayKey());
     button.disabled = key > todayKey();
     button.addEventListener("click", () => {
-      recordsDay = key;
+      if (recordsDays.has(key)) recordsDays.delete(key);
+      else recordsDays.add(key);
       recordsMonth = key.slice(0, 7);
       renderRecordsView();
     });
@@ -1869,10 +1904,15 @@ function renderRecordsView() {
   }
 
   const selected = allEntries
-    .filter((entry) => entry.date === recordsDay)
-    .sort((a, b) => b.createdAt - a.createdAt);
+    .filter((entry) => recordsDays.has(entry.date))
+    .sort((a, b) => a.date === b.date ? b.createdAt - a.createdAt : a.date < b.date ? 1 : -1);
   const total = selected.reduce((sum, entry) => sum + entry.amount, 0);
-  $("recordsDateLabel").textContent = prettyDay(recordsDay);
+  const selectedKeys = [...recordsDays].sort();
+  $("recordsDateLabel").textContent = selectedKeys.length === 0
+    ? "No dates selected"
+    : selectedKeys.length === 1
+      ? prettyDay(selectedKeys[0])
+      : `${selectedKeys.length} dates selected`;
   $("recordsDayTotal").textContent = money(total);
   $("recordsDayCount").textContent = String(selected.length);
   const categoryCount = new Set(selected.map((entry) => entry.category)).size;
@@ -1880,13 +1920,16 @@ function renderRecordsView() {
     ? `${categoryCount} ${categoryCount === 1 ? "category" : "categories"}`
     : "";
   $("recordsEmpty").hidden = selected.length > 0;
+  $("recordsEmpty").textContent = recordsDays.size
+    ? "No expenses recorded on the selected dates."
+    : "Select one or more dates to view their combined records.";
 
   const list = $("recordsEntries");
   list.innerHTML = "";
   selected.forEach((entry) => {
     const category = catById(entry.category);
     const title = entry.item || entry.merchant || category.label;
-    const subtitle = [category.label, entry.note].filter(Boolean).join(" · ");
+    const subtitle = [prettyDay(entry.date), category.label, entry.note].filter(Boolean).join(" · ");
     const li = document.createElement("li");
     li.className = "row";
     const button = document.createElement("button");
@@ -1931,8 +1974,9 @@ $("calendarNext").addEventListener("click", () => {
   renderRecordsView();
 });
 $("recordsToday").addEventListener("click", () => {
-  recordsDay = todayKey();
-  recordsMonth = recordsDay.slice(0, 7);
+  const today = todayKey();
+  recordsDays = new Set([today]);
+  recordsMonth = today.slice(0, 7);
   renderRecordsView();
 });
 $("closeSettings").addEventListener("click", restoreBottomNavState);

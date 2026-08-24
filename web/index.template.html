@@ -41,6 +41,7 @@
         <button type="button" role="tab" data-scope="month">Month</button>
         <button type="button" role="tab" data-scope="year">Year</button>
       </div>
+      <p class="scope-budget-indicator" id="scopeBudgetIndicator"></p>
 
       <div class="range-nav">
         <button type="button" id="rangePrev" class="nav-arrow" aria-label="Previous period">
@@ -137,8 +138,9 @@
         </div>
         <div class="calendar-body">
           <div class="calendar-weekdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
-          <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Expense calendar"></div>
+          <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Expense calendar with multiple date selection"></div>
         </div>
+        <p class="calendar-selection-hint">Select multiple dates to combine their records. Tap a selected date again to remove it.</p>
       </section>
 
       <section class="records-summary">
@@ -205,6 +207,18 @@
           <span class="locked-value"><b>₱</b> Philippine peso</span>
           <span class="locked-note">More currencies are coming in a later update.</span>
         </div>
+        <section class="profile-budgets" aria-labelledby="profileBudgetsTitle">
+          <div class="field-head">
+            <span class="field-label" id="profileBudgetsTitle">Default budgets</span>
+          </div>
+          <p class="panel-note">Optional defaults for each view. They do not convert into or change the other periods. A custom budget on Home overrides the matching default.</p>
+          <div class="budget-grid">
+            <label>Daily<input id="defaultBudgetDay" type="number" inputmode="decimal" min="0" step="1" placeholder="No default" /></label>
+            <label>Weekly<input id="defaultBudgetWeek" type="number" inputmode="decimal" min="0" step="1" placeholder="No default" /></label>
+            <label>Monthly<input id="defaultBudgetMonth" type="number" inputmode="decimal" min="0" step="1" placeholder="No default" /></label>
+            <label>Yearly<input id="defaultBudgetYear" type="number" inputmode="decimal" min="0" step="1" placeholder="No default" /></label>
+          </div>
+        </section>
         <button class="primary-button" id="saveProfileButton" type="submit">Save profile</button>
       </form>
       <p class="privacy-note">Your profile stays on this device and is not included in expense sync.</p>
