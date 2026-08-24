@@ -1041,7 +1041,10 @@ function renderSummary(agg) {
 
 function renderBreakdown(agg) {
   const target = $("breakdown");
+  const scopeName = { day: "Day", week: "Week", month: "Month", year: "Year" }[agg.range.scope];
+  $("categoryRangeLabel").textContent = `${scopeName} · ${agg.range.label}`;
   $("breakdownEmpty").hidden = agg.byCategory.length > 0;
+  $("breakdownEmpty").textContent = `No spending recorded for ${agg.range.label}.`;
   target.innerHTML = agg.byCategory
     .map(([id, stat]) => {
       const meta = catById(id);
