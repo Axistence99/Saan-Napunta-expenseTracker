@@ -1169,6 +1169,8 @@ function paint(agg) {
   $("provinceInput").value = config.province || "";
   if (!$("occupationInput").options.length) fillOptions($("occupationInput"), OCCUPATIONS);
   $("occupationInput").value = config.occupation || "";
+  renderRecordsView();
+  renderProfileView();
 
   prefetchNeighbours(agg.range);
 }
@@ -1779,6 +1781,163 @@ document.addEventListener("keydown", (event) => {
     closeDetailSheet();
     tooltip.hide();
   }
+});
+
+/* ============================================================
+   Bottom navigation, records calendar and profile
+   ============================================================ */
+
+let activeAppView = "home";
+let recordsDay = todayKey();
+let recordsMonth = todayKey().slice(0, 7);
+
+function setBottomNavState(name) {
+  document.querySelectorAll("#bottomNav [data-nav]").forEach((button) => {
+    const on = button.dataset.nav === name;
+    button.classList.toggle("on", on);
+    if (on) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
+  });
+}
+
+function showAppView(name) {
+  if (!$(name + "View")) return;
+  activeAppView = name;
+  document.querySelectorAll(".app-view").forEach((section) => {
+    section.hidden = section.dataset.view !== name;
+  });
+  $("settingsPanel").hidden = true;
+  setBottomNavState(name);
+  if (name === "records") renderRecordsView();
+  if (name === "profile") renderProfileView();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function openSettingsFromNav() {
+  $("settingsPanel").hidden = false;
+  setBottomNavState("settings");
+}
+
+function restoreBottomNavState() {
+  setBottomNavState(activeAppView);
+}
+
+function renderRecordsView() {
+  if (!$("calendarGrid")) return;
+  const [year, month] = recordsMonth.split("-").map(Number);
+  const first = new Date(year, month - 1, 1);
+  const gridStart = addDays(first, -first.getDay());
+  const totals = new Map();
+
+  liveEntries().forEach((entry) => {
+    totals.set(entry.date, (totals.get(entry.date) || 0) + entry.amount);
+  });
+
+  $("calendarMonth").textContent = `${MONTH_NAMES[month - 1]} ${year}`;
+  const nextMonth = new Date(year, month, 1);
+  $("calendarNext").disabled = dayKey(nextMonth).slice(0, 7) > todayKey().slice(0, 7);
+
+  const grid = $("calendarGrid");
+  grid.innerHTML = "";
+  for (let index = 0; index < 42; index += 1) {
+    const date = addDays(gridStart, index);
+    const key = dayKey(date);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "calendar-day";
+    button.textContent = String(date.getDate());
+    button.setAttribute("role", "gridcell");
+    button.setAttribute("aria-label", `${prettyDay(key)}${totals.has(key) ? `, ${money(totals.get(key))} spent` : ""}`);
+    button.classList.toggle("outside", date.getMonth() !== month - 1);
+    button.classList.toggle("today", key === todayKey());
+    button.classList.toggle("selected", key === recordsDay);
+    button.classList.toggle("has-spend", totals.has(key));
+    button.classList.toggle("future", key > todayKey());
+    button.disabled = key > todayKey();
+    button.addEventListener("click", () => {
+      recordsDay = key;
+      recordsMonth = key.slice(0, 7);
+      renderRecordsView();
+    });
+    grid.appendChild(button);
+  }
+
+  const selected = liveEntries()
+    .filter((entry) => entry.date === recordsDay)
+    .sort((a, b) => b.createdAt - a.createdAt);
+  const total = selected.reduce((sum, entry) => sum + entry.amount, 0);
+  $("recordsDateLabel").textContent = prettyDay(recordsDay);
+  $("recordsDayTotal").textContent = money(total);
+  $("recordsDayCount").textContent = String(selected.length);
+  const categoryCount = new Set(selected.map((entry) => entry.category)).size;
+  $("recordsCategoryCount").textContent = categoryCount
+    ? `${categoryCount} ${categoryCount === 1 ? "category" : "categories"}`
+    : "";
+  $("recordsEmpty").hidden = selected.length > 0;
+
+  const list = $("recordsEntries");
+  list.innerHTML = "";
+  selected.forEach((entry) => {
+    const category = catById(entry.category);
+    const title = entry.item || entry.merchant || category.label;
+    const subtitle = [category.label, entry.note].filter(Boolean).join(" · ");
+    const li = document.createElement("li");
+    li.className = "row";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.innerHTML = `<span class="glyph">${icon(category.id)}</span>
+      <span class="meta"><b>${escapeHtml(title)}</b><span>${escapeHtml(subtitle)}</span></span>
+      <span class="amount">${money(entry.amount)}${entry.photoCount ? `<small class="photo-badge">${PHOTO_ICON}${entry.photoCount}</small>` : ""}</span>`;
+    button.addEventListener("click", () => openDetailSheet(entry.id));
+    li.appendChild(button);
+    list.appendChild(li);
+  });
+}
+
+function renderProfileView() {
+  if (!$("profileName")) return;
+  const first = config.firstName || config.name || "";
+  const fullName = [first, config.lastName].filter(Boolean).join(" ");
+  $("profileAvatar").textContent = (first || config.lastName || "?").charAt(0).toUpperCase();
+  $("profileName").textContent = fullName || "Your profile";
+  $("profileSubtitle").textContent = config.occupation && OCCUPATIONS[config.occupation]
+    ? OCCUPATIONS[config.occupation]
+    : "Stored privately on this device";
+  $("profileBirthdate").textContent = config.birthdate
+    ? parseDay(config.birthdate).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
+    : "Not provided";
+  $("profileProvince").textContent = config.province || "Not provided";
+  $("profileSex").textContent = SEXES[config.sexAtBirth] || "Not provided";
+  $("profileOccupation").textContent = OCCUPATIONS[config.occupation] || "Not provided";
+}
+
+document.querySelectorAll("#bottomNav [data-nav]").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (button.dataset.nav === "settings") openSettingsFromNav();
+    else showAppView(button.dataset.nav);
+  });
+});
+
+$("calendarPrev").addEventListener("click", () => {
+  const [year, month] = recordsMonth.split("-").map(Number);
+  recordsMonth = monthKey(new Date(year, month - 2, 1));
+  renderRecordsView();
+});
+$("calendarNext").addEventListener("click", () => {
+  const [year, month] = recordsMonth.split("-").map(Number);
+  const next = monthKey(new Date(year, month, 1));
+  if (next <= todayKey().slice(0, 7)) recordsMonth = next;
+  renderRecordsView();
+});
+$("recordsToday").addEventListener("click", () => {
+  recordsDay = todayKey();
+  recordsMonth = recordsDay.slice(0, 7);
+  renderRecordsView();
+});
+$("editProfileButton").addEventListener("click", openSettingsFromNav);
+$("closeSettings").addEventListener("click", restoreBottomNavState);
+$("settingsPanel").addEventListener("click", (event) => {
+  if (event.target === $("settingsPanel")) restoreBottomNavState();
 });
 
 /* Static tooltips that never change */

@@ -19,6 +19,7 @@
   </div>
 
   <main class="shell">
+    <section class="app-view" id="homeView" data-view="home">
     <div class="heading-row">
       <h1>Saan Napunta?</h1>
       <button class="icon-button" id="settingsButton" type="button" aria-label="Open settings">
@@ -102,6 +103,62 @@
     </p>
     <p class="privacy-note">Private by design. No account, no sync, no analytics.</p>
     <p class="credit">Made by Aleksis Ong</p>
+    </section>
+
+    <section class="app-view records-view" id="recordsView" data-view="records" hidden>
+      <div class="view-heading">
+        <div>
+          <p class="view-kicker">Analytics &amp; records</p>
+          <h1>Spending calendar</h1>
+        </div>
+        <button class="calendar-today" id="recordsToday" type="button">Today</button>
+      </div>
+
+      <section class="panel calendar-panel">
+        <div class="calendar-nav">
+          <button type="button" id="calendarPrev" class="nav-arrow" aria-label="Previous month">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          </button>
+          <strong id="calendarMonth">Month</strong>
+          <button type="button" id="calendarNext" class="nav-arrow" aria-label="Next month">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+        <div class="calendar-weekdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+        <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Expense calendar"></div>
+      </section>
+
+      <section class="records-summary">
+        <div><span id="recordsDateLabel">Today</span><strong id="recordsDayTotal">₱0.00</strong></div>
+        <div><span>Transactions</span><strong id="recordsDayCount">0</strong></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading"><h2>Records</h2><span class="range-count" id="recordsCategoryCount"></span></div>
+        <ul class="entries" id="recordsEntries"></ul>
+        <p class="empty-note" id="recordsEmpty">No expenses recorded on this date.</p>
+      </section>
+    </section>
+
+    <section class="app-view profile-view" id="profileView" data-view="profile" hidden>
+      <div class="view-heading">
+        <div><p class="view-kicker">Your account</p><h1>Profile</h1></div>
+      </div>
+      <section class="profile-card">
+        <div class="profile-avatar" id="profileAvatar" aria-hidden="true">?</div>
+        <h2 id="profileName">Your profile</h2>
+        <p id="profileSubtitle">Stored privately on this device</p>
+      </section>
+      <section class="panel profile-details">
+        <div><span>Birthdate</span><strong id="profileBirthdate">Not provided</strong></div>
+        <div><span>Province</span><strong id="profileProvince">Not provided</strong></div>
+        <div><span>Sex at birth</span><strong id="profileSex">Not provided</strong></div>
+        <div><span>Occupation</span><strong id="profileOccupation">Not provided</strong></div>
+        <div><span>Currency</span><strong>PHP · Philippine peso</strong></div>
+      </section>
+      <button class="primary-button" id="editProfileButton" type="button">Edit profile in Settings</button>
+      <p class="privacy-note">Your profile stays on this device and is not included in expense sync.</p>
+    </section>
   </main>
 
   <button class="fab" id="addButton" type="button" aria-label="Add expense">
@@ -109,6 +166,21 @@
       <path d="M12 5v14M5 12h14"/>
     </svg>
   </button>
+
+  <nav class="bottom-nav" id="bottomNav" aria-label="Primary navigation">
+    <button type="button" class="bottom-nav-item on" data-nav="home" aria-current="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.8 12 3l9 7.8v9.7a.5.5 0 0 1-.5.5H15v-6H9v6H3.5a.5.5 0 0 1-.5-.5Z"/></svg><span>Home</span>
+    </button>
+    <button type="button" class="bottom-nav-item" data-nav="records">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M7 14h2M11 14h2M15 14h2M7 18h2M11 18h2"/></svg><span>Records</span>
+    </button>
+    <button type="button" class="bottom-nav-item" data-nav="profile">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg><span>Profile</span>
+    </button>
+    <button type="button" class="bottom-nav-item" data-nav="settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 14.6l.9.5a1.5 1.5 0 0 1 .6 2l-1 1.7a1.5 1.5 0 0 1-2 .6l-.9-.5a7.6 7.6 0 0 1-1.8 1v1a1.5 1.5 0 0 1-1.5 1.5h-2A1.5 1.5 0 0 1 10.2 21v-1a7.6 7.6 0 0 1-1.8-1l-.9.5a1.5 1.5 0 0 1-2-.6l-1-1.7a1.5 1.5 0 0 1 .6-2l.9-.5a7.6 7.6 0 0 1 0-2.1l-.9-.5a1.5 1.5 0 0 1-.6-2l1-1.7a1.5 1.5 0 0 1 2-.6l.9.5a7.6 7.6 0 0 1 1.8-1V3a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 15.3 3v1a7.6 7.6 0 0 1 1.8 1l.9-.5a1.5 1.5 0 0 1 2 .6l1 1.7a1.5 1.5 0 0 1-.6 2l-.9.5a7.6 7.6 0 0 1 0 2.1Z"/></svg><span>Settings</span>
+    </button>
+  </nav>
 
   <div class="onboard" id="onboard" hidden>
     <div class="onboard-card">
