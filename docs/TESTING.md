@@ -111,14 +111,16 @@ cd android && ./gradlew assembleDebug
 5. A long merchant plus note ellipsises rather than widening the row.
 6. On a short screen, the profile step scrolls inside its card.
 
-## Records analytics graph
+## Records analytics graph and date picker
 
-1. Add expenses on at least two dates in one month; each date appears as a bar and the graph
-   total matches the monthly overview.
-2. The dashed average line appears whenever the month has spending.
-3. Clicking or pressing Enter/Space on a bar toggles that date in the combined records list.
-4. Selected bars use the purple selected state and future dates cannot be selected.
-5. An empty month keeps the graph frame visible and shows its empty-state guidance.
+1. Switch Day / Week / Month / Year; overview, graph and category totals must all use the
+   exact selected range. The graph shows 1, 7, calendar-day, and 12 monthly buckets respectively.
+2. Previous/next changes one complete analytics period and Next cannot enter a future period.
+3. The dashed average line appears for multi-bucket ranges with spending.
+4. Clicking or pressing Enter/Space on a day bar toggles that date in combined records.
+5. The full calendar is absent from the normal scroll flow. **Choose dates** opens it as a
+   bottom sheet; Done, close, backdrop and Escape dismiss it.
+6. The popup supports multiple dates, and tapping a selected date again removes it.
 
 ## Budget defaults and custom periods
 

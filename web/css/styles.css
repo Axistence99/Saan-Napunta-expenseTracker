@@ -1992,3 +1992,103 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   line-height: 1.35;
   text-align: center;
 }
+
+/* Records analytics scope picker and independent range navigation. */
+.analytics-scope-tabs { margin-top: -4px; }
+.analytics-range-nav {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 10px;
+  margin-top: -8px;
+}
+.analytics-range-nav strong {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Compact mobile trigger replaces the permanently expanded Records calendar. */
+.date-filter-button {
+  width: 100%;
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 13px;
+  color: var(--ink);
+  text-align: left;
+  border: 1px solid var(--line-warm);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(139, 92, 246, 0.13), rgba(255, 126, 0, 0.08));
+  cursor: pointer;
+}
+.date-filter-button:hover { border-color: var(--gold); }
+.date-filter-button:active { transform: scale(0.99); }
+.date-filter-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  border-radius: 12px;
+  background: rgba(233, 196, 106, 0.09);
+}
+.date-filter-copy { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.date-filter-copy b { font-size: 0.88rem; }
+.date-filter-copy small {
+  overflow: hidden;
+  color: var(--grey);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.date-filter-chevron { color: var(--grey-dim); }
+
+/* Bottom-sheet calendar dialog optimized for thumb reach on phones. */
+body.calendar-open { overflow: hidden; }
+.calendar-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px 12px max(12px, env(safe-area-inset-bottom, 0px));
+  background: rgba(0, 0, 0, 0.74);
+  backdrop-filter: blur(6px);
+}
+.calendar-dialog {
+  width: min(100%, 430px);
+  max-height: calc(100svh - 24px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 18px;
+  color: var(--ink);
+  border: 1px solid var(--line-warm);
+  border-radius: 24px 24px 18px 18px;
+  background: linear-gradient(165deg, #1c1326, #100c15 72%);
+  box-shadow: 0 -18px 55px rgba(0, 0, 0, 0.55);
+  animation: sheetUp 190ms ease;
+}
+.calendar-dialog-heading { align-items: flex-start; }
+.calendar-dialog-heading .view-kicker { margin-bottom: 4px; }
+.calendar-dialog .calendar-nav,
+.calendar-dialog .calendar-body,
+.calendar-dialog .calendar-selection-hint { width: min(100%, 330px); }
+.calendar-dialog .calendar-day { height: 34px; }
+.calendar-dialog .primary-button { margin-top: 2px; }
+
+@media (min-width: 700px) {
+  .calendar-modal { align-items: center; }
+  .calendar-dialog { border-radius: 24px; }
+}
+.chart-day:not([data-chart-date]) .chart-hit { cursor: default; }

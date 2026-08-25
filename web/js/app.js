@@ -1794,6 +1794,10 @@ document.addEventListener("keydown", (event) => {
       closeLightbox();
       return;
     }
+    if (!$("calendarModal").hidden) {
+      closeCalendarModal();
+      return;
+    }
     $("entrySheet").hidden = true;
     $("settingsPanel").hidden = true;
     closeDetailSheet();
@@ -1808,6 +1812,7 @@ document.addEventListener("keydown", (event) => {
 let activeAppView = "home";
 let recordsDays = new Set([todayKey()]);
 let recordsMonth = todayKey().slice(0, 7);
+let recordsAnalytics = { scope: "month", anchor: todayKey() };
 
 /** Updates bottom-navigation selection and aria-current state. */
 function setBottomNavState(name) {
@@ -1852,66 +1857,105 @@ function compactMoney(value) {
   return `${config.currency}${Math.round(amount)}`;
 }
 
-/** Monthly daily-spending bar graph. Bars also act as multi-date selectors. */
-function renderSpendingChart(year, month, totals, monthTotal, averageDays) {
-  const holder = $("spendingChart");
-  const days = new Date(year, month, 0).getDate();
-  const values = Array.from({ length: days }, (_, index) => {
-    const key = `${year}-${String(month).padStart(2, "0")}-${String(index + 1).padStart(2, "0")}`;
-    return { key, day: index + 1, total: totals.get(key) || 0 };
+/** Builds graph buckets appropriate to the selected analytics scope. */
+function trendPointsFor(range, entries) {
+  const byDay = new Map();
+  entries.forEach((entry) => byDay.set(entry.date, (byDay.get(entry.date) || 0) + entry.amount));
+
+  if (range.scope === "day") {
+    return [{ key: range.start, label: String(parseDay(range.start).getDate()), total: byDay.get(range.start) || 0 }];
+  }
+
+  if (range.scope === "week" || range.scope === "month") {
+    const points = [];
+    for (let date = parseDay(range.start); dayKey(date) <= range.end; date = addDays(date, 1)) {
+      const key = dayKey(date);
+      points.push({
+        key,
+        label: range.scope === "week"
+          ? date.toLocaleDateString(undefined, { weekday: "narrow" })
+          : String(date.getDate()),
+        total: byDay.get(key) || 0
+      });
+    }
+    return points;
+  }
+
+  return Array.from({ length: 12 }, (_, index) => {
+    const key = `${parseDay(range.start).getFullYear()}-${String(index + 1).padStart(2, "0")}`;
+    const total = entries
+      .filter((entry) => entry.date.startsWith(`${key}-`))
+      .reduce((sum, entry) => sum + entry.amount, 0);
+    return { key: null, monthKey: key, label: MONTH_NAMES[index].slice(0, 3), total };
   });
-  const maximum = Math.max(1, ...values.map((item) => item.total));
-  const average = monthTotal / Math.max(1, averageDays);
+}
+
+/** Renders a bar graph for one day, week, month or year analytics range. */
+function renderSpendingChart(range, entries) {
+  const holder = $("spendingChart");
+  const points = trendPointsFor(range, entries);
+  const total = entries.reduce((sum, entry) => sum + entry.amount, 0);
+  const maximum = Math.max(1, ...points.map((point) => point.total));
+  const currentBuckets = range.scope === "year"
+    ? parseDay(todayKey()).getMonth() + 1
+    : range.scope === "day"
+      ? 1
+      : Math.min(points.length, range.elapsed);
+  const averageBuckets = range.isCurrent ? currentBuckets : points.length;
+  const average = total / Math.max(1, averageBuckets);
   const left = 34;
   const top = 12;
   const width = 318;
   const height = 118;
   const baseline = top + height;
-  const slot = width / days;
-  const barWidth = Math.max(3, slot - 2.4);
-  const labelDays = new Set([1, Math.ceil(days / 2), days]);
+  const slot = width / Math.max(1, points.length);
+  const barWidth = Math.max(5, Math.min(26, slot - 3));
+  const labelIndexes = points.length <= 12
+    ? new Set(points.map((_, index) => index))
+    : new Set([0, Math.floor((points.length - 1) / 2), points.length - 1]);
+
   const grid = [0, 0.5, 1].map((ratio) => {
     const y = baseline - height * ratio;
-    const value = maximum * ratio;
     return `<line class="chart-grid-line" x1="${left}" y1="${y}" x2="${left + width}" y2="${y}" />
-      <text class="chart-y-label" x="${left - 5}" y="${y + 3}" text-anchor="end">${compactMoney(value)}</text>`;
+      <text class="chart-y-label" x="${left - 5}" y="${y + 3}" text-anchor="end">${compactMoney(maximum * ratio)}</text>`;
   }).join("");
 
-  const bars = values.map((item, index) => {
+  const bars = points.map((point, index) => {
     const x = left + index * slot + (slot - barWidth) / 2;
-    const barHeight = item.total > 0 ? Math.max(2, (item.total / maximum) * height) : 0;
+    const barHeight = point.total > 0 ? Math.max(2, (point.total / maximum) * height) : 0;
     const y = baseline - barHeight;
-    const selected = recordsDays.has(item.key);
-    const future = item.key > todayKey();
-    const classes = ["chart-day", selected ? "selected" : "", item.total > 0 ? "has-spend" : "", future ? "future" : ""]
+    const selected = Boolean(point.key && recordsDays.has(point.key));
+    const future = Boolean(point.key && point.key > todayKey());
+    const interactive = Boolean(point.key && !future);
+    const classes = ["chart-day", selected ? "selected" : "", point.total > 0 ? "has-spend" : "", future ? "future" : ""]
       .filter(Boolean).join(" ");
-    return `<g class="${classes}" data-chart-date="${item.key}" tabindex="${future ? -1 : 0}" role="button" aria-label="${item.key}, ${money(item.total)} spent${selected ? ", selected" : ""}">
-      <title>${prettyDay(item.key)} · ${money(item.total)}</title>
+    const periodLabel = point.key ? prettyDay(point.key) : prettyMonth(point.monthKey);
+    return `<g class="${classes}" ${interactive ? `data-chart-date="${point.key}" tabindex="0" role="button"` : ""} aria-label="${periodLabel}, ${money(point.total)} spent${selected ? ", selected" : ""}">
+      <title>${periodLabel} · ${money(point.total)}</title>
       <rect class="chart-hit" x="${left + index * slot}" y="${top}" width="${slot}" height="${height}" />
       ${barHeight ? `<rect class="chart-bar" x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" rx="2" />` : ""}
       ${selected && !barHeight ? `<circle class="chart-zero-selected" cx="${x + barWidth / 2}" cy="${baseline - 3}" r="2.5" />` : ""}
-      ${labelDays.has(item.day) ? `<text class="chart-x-label" x="${x + barWidth / 2}" y="${baseline + 17}" text-anchor="middle">${item.day}</text>` : ""}
+      ${labelIndexes.has(index) ? `<text class="chart-x-label" x="${x + barWidth / 2}" y="${baseline + 17}" text-anchor="middle">${point.label}</text>` : ""}
     </g>`;
   }).join("");
 
   const averageY = average > 0 ? baseline - Math.min(height, (average / maximum) * height) : baseline;
-  const averageLine = average > 0
+  const averageLine = average > 0 && points.length > 1
     ? `<line class="chart-average-line" x1="${left}" y1="${averageY}" x2="${left + width}" y2="${averageY}" />
        <text class="chart-average-label" x="${left + width - 2}" y="${Math.max(top + 8, averageY - 4)}" text-anchor="end">Avg</text>`
     : "";
 
-  holder.innerHTML = `<svg viewBox="0 0 360 154" role="group" aria-label="Daily spending bars">${grid}${averageLine}${bars}</svg>`;
-  holder.setAttribute(
-    "aria-label",
-    `${MONTH_NAMES[month - 1]} ${year} daily spending graph. Total ${money(monthTotal)}. Highest day ${money(maximum === 1 && monthTotal === 0 ? 0 : maximum)}.`
-  );
-  $("spendingChartPeriod").textContent = `${MONTH_NAMES[month - 1]} ${year}`;
-  $("spendingChartTotal").textContent = money(monthTotal);
-  $("spendingChartHint").textContent = monthTotal > 0
-    ? "Select a bar to add or remove that date from the records below."
-    : "No spending this month yet. You can still select a date from the calendar.";
+  holder.innerHTML = `<svg viewBox="0 0 360 154" role="group" aria-label="Spending trend bars">${grid}${averageLine}${bars}</svg>`;
+  holder.setAttribute("aria-label", `${range.label} spending graph. Total ${money(total)}.`);
+  $("spendingChartPeriod").textContent = range.label;
+  $("spendingChartTotal").textContent = money(total);
+  $("spendingChartHint").textContent = range.scope === "year"
+    ? "Each bar represents one month in the selected year."
+    : total > 0
+      ? "Select a bar to add or remove that date from the records below."
+      : `No spending recorded for ${range.label}.`;
 
-  holder.querySelectorAll("[data-chart-date]:not(.future)").forEach((bar) => {
+  holder.querySelectorAll("[data-chart-date]").forEach((bar) => {
     const toggle = () => {
       const key = bar.dataset.chartDate;
       if (recordsDays.has(key)) recordsDays.delete(key);
@@ -1929,27 +1973,47 @@ function renderSpendingChart(year, month, totals, monthTotal, averageDays) {
   });
 }
 
-/** Recalculates monthly analytics, calendar selection and combined records. */
+/** Updates analytics tabs, period label and previous/next button availability. */
+function renderAnalyticsNav(range) {
+  document.querySelectorAll("#analyticsScopeTabs [data-analytics-scope]").forEach((tab) => {
+    const active = tab.dataset.analyticsScope === recordsAnalytics.scope;
+    tab.classList.toggle("on", active);
+    tab.setAttribute("aria-selected", String(active));
+  });
+  $("analyticsRangeLabel").textContent = range.isCurrent
+    ? { day: "Today", week: "This week", month: "This month", year: "This year" }[range.scope]
+    : range.label;
+  const next = rangeFor(range.scope, shiftAnchor(range.scope, recordsAnalytics.anchor, 1));
+  $("analyticsNext").disabled = next.isFuture;
+}
+
+/** Opens the mobile calendar dialog without changing the selected dates. */
+function openCalendarModal() {
+  $("calendarModal").hidden = false;
+  document.body.classList.add("calendar-open");
+  $("chooseDatesButton").setAttribute("aria-expanded", "true");
+  setTimeout(() => $("closeCalendar").focus(), 0);
+}
+
+/** Closes the calendar dialog and returns focus to its trigger. */
+function closeCalendarModal() {
+  $("calendarModal").hidden = true;
+  document.body.classList.remove("calendar-open");
+  $("chooseDatesButton").setAttribute("aria-expanded", "false");
+  $("chooseDatesButton").focus();
+}
+
+/** Recalculates scoped analytics, the popup calendar and combined selected-date records. */
 function renderRecordsView() {
   if (!$("calendarGrid")) return;
-  const [year, month] = recordsMonth.split("-").map(Number);
-  const first = new Date(year, month - 1, 1);
-  const gridStart = addDays(first, -first.getDay());
+  const analyticsRange = rangeFor(recordsAnalytics.scope, recordsAnalytics.anchor);
   const allEntries = liveEntries();
-  const totals = new Map();
-
-  allEntries.forEach((entry) => {
-    totals.set(entry.date, (totals.get(entry.date) || 0) + entry.amount);
-  });
-
-  const monthEntries = allEntries.filter((entry) => entry.date.startsWith(`${recordsMonth}-`));
-  const monthTotal = monthEntries.reduce((sum, entry) => sum + entry.amount, 0);
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const averageDays = recordsMonth === todayKey().slice(0, 7)
-    ? Number(todayKey().slice(8, 10))
-    : daysInMonth;
+  const analyticsEntries = allEntries.filter((entry) => entry.date >= analyticsRange.start && entry.date <= analyticsRange.end);
+  const analyticsTotal = analyticsEntries.reduce((sum, entry) => sum + entry.amount, 0);
+  const averageDays = analyticsRange.isCurrent ? analyticsRange.elapsed : analyticsRange.totalDays;
   const byCategory = new Map();
-  monthEntries.forEach((entry) => {
+
+  analyticsEntries.forEach((entry) => {
     const current = byCategory.get(entry.category) || { total: 0, count: 0 };
     current.total += entry.amount;
     current.count += 1;
@@ -1957,15 +2021,17 @@ function renderRecordsView() {
   });
   const categoryRows = [...byCategory.entries()].sort((a, b) => b[1].total - a[1].total);
 
-  $("analyticsMonthTotal").textContent = money(monthTotal);
-  $("analyticsDailyAverage").textContent = money(monthTotal / Math.max(1, averageDays));
-  $("analyticsTransactionCount").textContent = String(monthEntries.length);
-  renderSpendingChart(year, month, totals, monthTotal, averageDays);
-  $("analyticsPeriodLabel").textContent = `${MONTH_NAMES[month - 1].slice(0, 3)} ${year}`;
+  renderAnalyticsNav(analyticsRange);
+  $("analyticsMonthTotal").textContent = money(analyticsTotal);
+  $("analyticsDailyAverage").textContent = money(analyticsTotal / Math.max(1, averageDays));
+  $("analyticsTransactionCount").textContent = String(analyticsEntries.length);
+  renderSpendingChart(analyticsRange, analyticsEntries);
+  $("analyticsPeriodLabel").textContent = analyticsRange.label;
   $("analyticsEmpty").hidden = categoryRows.length > 0;
+  $("analyticsEmpty").textContent = `No spending data for ${analyticsRange.label}.`;
   $("analyticsCategories").innerHTML = categoryRows.map(([categoryId, stat]) => {
     const category = catById(categoryId);
-    const share = monthTotal ? Math.round((stat.total / monthTotal) * 100) : 0;
+    const share = analyticsTotal ? Math.round((stat.total / analyticsTotal) * 100) : 0;
     return `<li>
       <span class="analytics-category-icon">${icon(category.id)}</span>
       <span class="analytics-category-main">
@@ -1975,6 +2041,12 @@ function renderRecordsView() {
       <span class="analytics-category-value"><b>${money(stat.total)}</b><small>${share}%</small></span>
     </li>`;
   }).join("");
+
+  const [year, month] = recordsMonth.split("-").map(Number);
+  const first = new Date(year, month - 1, 1);
+  const gridStart = addDays(first, -first.getDay());
+  const totals = new Map();
+  allEntries.forEach((entry) => totals.set(entry.date, (totals.get(entry.date) || 0) + entry.amount));
 
   $("calendarMonth").textContent = `${MONTH_NAMES[month - 1]} ${year}`;
   const nextMonth = new Date(year, month, 1);
@@ -2013,11 +2085,13 @@ function renderRecordsView() {
     .sort((a, b) => a.date === b.date ? b.createdAt - a.createdAt : a.date < b.date ? 1 : -1);
   const total = selected.reduce((sum, entry) => sum + entry.amount, 0);
   const selectedKeys = [...recordsDays].sort();
-  $("recordsDateLabel").textContent = selectedKeys.length === 0
+  const selectionLabel = selectedKeys.length === 0
     ? "No dates selected"
     : selectedKeys.length === 1
       ? prettyDay(selectedKeys[0])
       : `${selectedKeys.length} dates selected`;
+  $("recordsDateLabel").textContent = selectionLabel;
+  $("chooseDatesSummary").textContent = selectionLabel;
   $("recordsDayTotal").textContent = money(total);
   $("recordsDayCount").textContent = String(selected.length);
   const categoryCount = new Set(selected.map((entry) => entry.category)).size;
@@ -2068,6 +2142,34 @@ document.querySelectorAll("#bottomNav [data-nav]").forEach((button) => {
   });
 });
 
+$("analyticsScopeTabs").addEventListener("click", (event) => {
+  const tab = event.target.closest("[data-analytics-scope]");
+  if (!tab) return;
+  recordsAnalytics = { scope: tab.dataset.analyticsScope, anchor: recordsAnalytics.anchor };
+  renderRecordsView();
+});
+$("analyticsPrev").addEventListener("click", () => {
+  recordsAnalytics = {
+    ...recordsAnalytics,
+    anchor: shiftAnchor(recordsAnalytics.scope, recordsAnalytics.anchor, -1)
+  };
+  renderRecordsView();
+});
+$("analyticsNext").addEventListener("click", () => {
+  const next = shiftAnchor(recordsAnalytics.scope, recordsAnalytics.anchor, 1);
+  if (!rangeFor(recordsAnalytics.scope, next).isFuture) {
+    recordsAnalytics = { ...recordsAnalytics, anchor: next };
+    renderRecordsView();
+  }
+});
+
+$("chooseDatesButton").addEventListener("click", openCalendarModal);
+$("closeCalendar").addEventListener("click", closeCalendarModal);
+$("calendarDone").addEventListener("click", closeCalendarModal);
+$("calendarModal").addEventListener("click", (event) => {
+  if (event.target === $("calendarModal")) closeCalendarModal();
+});
+
 $("calendarPrev").addEventListener("click", () => {
   const [year, month] = recordsMonth.split("-").map(Number);
   recordsMonth = monthKey(new Date(year, month - 2, 1));
@@ -2083,6 +2185,7 @@ $("recordsToday").addEventListener("click", () => {
   const today = todayKey();
   recordsDays = new Set([today]);
   recordsMonth = today.slice(0, 7);
+  recordsAnalytics = { ...recordsAnalytics, anchor: today };
   renderRecordsView();
 });
 $("closeSettings").addEventListener("click", restoreBottomNavState);

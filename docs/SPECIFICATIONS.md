@@ -26,11 +26,11 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 - Floating action button: add expense
 
 ### Records
-- Monthly spending overview and spending-per-category analytics
-- Interactive daily spending bar graph with an average line; selecting a bar toggles that date
-- Compact calendar supports multiple selected dates
-- Tapping an unselected date adds it; tapping a selected date removes it
-- Totals and the record list combine all selected dates
+- Day / Week / Month / Year controls independently scope overview totals, trend and category analytics
+- Trend buckets adapt to the scope: one day, seven weekdays, calendar days, or twelve months
+- A compact **Choose dates** button near the top opens the calendar as a mobile bottom sheet
+- The popup calendar supports multiple dates; tapping a selected date again removes it
+- Totals and the record list combine all selected dates without keeping the calendar in the scroll flow
 
 ### Entry sheet / EntryActivity
 - Amount field with currency symbol (numeric keypad, required, must be > 0)
