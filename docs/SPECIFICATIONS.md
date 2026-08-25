@@ -86,6 +86,7 @@ receipt photos, shared wallets.
 
 ## Visual language
 
-Violet-black base (`#07050B`) with drifting purple and orange gradients. Ink `#F5EFE6`,
+Violet-black base (`#07050B`) with a non-linear woven-aurora background: off-axis radial
+mesh, an organic conic color ribbon and subtle topographic contour rings. Ink `#F5EFE6`,
 grey `#9A93A6`, purple `#8B5CF6`, orange `#FF7E00`, yellow `#FFC53D`, gold `#E9C46A`,
 brown `#6B4A2F`, danger `#E5484D`. 22 px rounded cards on a translucent panel with blur.

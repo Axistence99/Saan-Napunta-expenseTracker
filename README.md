@@ -9,8 +9,8 @@
 A minimal, offline-first expense tracker built with the same stack as
 [Bawal Scroll](https://github.com/Axistence99/Bawal-Scroll) — no frameworks, no accounts, no network.
 
-- **Web prototype** — vanilla HTML/CSS/JS with `localStorage` persistence and the same
-  black-and-orange drifting gradient, sized for a phone screen.
+- **Web prototype** — vanilla HTML/CSS/JS with `localStorage` persistence and a responsive
+  woven-aurora background, sized for a phone screen.
 - **Native Android prototype** — Kotlin, plain `Activity` + programmatic views, data in
   `SharedPreferences` as JSON. No Compose, no third-party dependencies.
 

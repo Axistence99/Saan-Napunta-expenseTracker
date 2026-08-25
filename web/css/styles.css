@@ -52,56 +52,98 @@ body {
 button, select, input { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 
-/* Fixed decorative background; it never receives pointer input. */
+/*
+ * Fixed "woven aurora" background. Several off-axis radial fields form the dark mesh,
+ * while a blurred conic ribbon and faint topographic rings make it feel less like a
+ * standard left-to-right gradient. It remains decorative and never receives input.
+ */
 .live-gradient {
   position: fixed;
   inset: 0;
   z-index: 0;
   overflow: hidden;
+  isolation: isolate;
   pointer-events: none;
-  background: radial-gradient(120% 90% at 50% 0%, #150e20 0%, var(--black) 62%);
+  background:
+    radial-gradient(ellipse 95% 62% at 8% 4%, rgba(76, 29, 149, 0.42) 0%, transparent 58%),
+    radial-gradient(ellipse 72% 55% at 92% 92%, rgba(194, 65, 12, 0.32) 0%, transparent 62%),
+    radial-gradient(ellipse 45% 38% at 58% 47%, rgba(107, 74, 47, 0.16) 0%, transparent 72%),
+    radial-gradient(circle at 50% 35%, #161020 0%, var(--black) 72%);
 }
 
 .live-gradient::before,
 .live-gradient::after {
   content: "";
   position: absolute;
-  width: 82vmax;
-  height: 82vmax;
-  border-radius: 50%;
   pointer-events: none;
-  filter: blur(70px);
 }
 
+/* Irregular conic color ribbon: purple folds into orange, gold and brown as it orbits. */
 .live-gradient::before {
-  top: -46vmax;
-  left: -26vmax;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.62) 0%, rgba(76, 29, 149, 0.4) 32%, rgba(76, 29, 149, 0) 72%);
-  animation: gradientDrift 22s ease-in-out infinite alternate;
+  inset: -42%;
+  z-index: 0;
+  border-radius: 42% 58% 63% 37% / 38% 44% 56% 62%;
+  opacity: 0.58;
+  background: conic-gradient(
+    from 218deg at 52% 48%,
+    transparent 0deg 34deg,
+    rgba(139, 92, 246, 0.68) 66deg,
+    rgba(76, 29, 149, 0.22) 112deg,
+    transparent 145deg 188deg,
+    rgba(255, 126, 0, 0.62) 224deg,
+    rgba(233, 196, 106, 0.42) 251deg,
+    rgba(107, 74, 47, 0.18) 281deg,
+    transparent 326deg 360deg
+  );
+  filter: blur(76px) saturate(1.12);
+  mix-blend-mode: screen;
+  animation: auroraOrbit 34s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
 }
 
+/* Soft contour rings add texture without competing with cards or reducing readability. */
 .live-gradient::after {
-  right: -36vmax;
-  bottom: -46vmax;
-  background: radial-gradient(circle, rgba(255, 126, 0, 0.6) 0%, rgba(233, 196, 106, 0.22) 30%, rgba(107, 74, 47, 0) 72%);
-  animation: gradientDriftReverse 30s ease-in-out -6s infinite alternate;
+  inset: -12%;
+  z-index: 0;
+  opacity: 0.2;
+  background:
+    repeating-radial-gradient(
+      ellipse 72% 46% at 18% 22%,
+      rgba(233, 196, 106, 0.14) 0 1px,
+      transparent 1px 17px
+    ),
+    repeating-radial-gradient(
+      ellipse 64% 52% at 88% 82%,
+      rgba(139, 92, 246, 0.12) 0 1px,
+      transparent 1px 21px
+    );
+  -webkit-mask-image: radial-gradient(ellipse at center, black 10%, transparent 76%);
+  mask-image: radial-gradient(ellipse at center, black 10%, transparent 76%);
+  animation: contourDrift 24s ease-in-out infinite alternate;
 }
 
-@keyframes gradientDrift {
-  0% { transform: translate3d(-10vw, -5vh, 0) scale(0.86); }
-  50% { transform: translate3d(10vw, 8vh, 0) scale(1.08); }
-  100% { transform: translate3d(18vw, -2vh, 0) scale(1.16); }
+@keyframes auroraOrbit {
+  0% {
+    transform: translate3d(-8%, -5%, 0) rotate(-9deg) scale(0.9);
+    border-radius: 42% 58% 63% 37% / 38% 44% 56% 62%;
+  }
+  48% {
+    transform: translate3d(7%, 4%, 0) rotate(12deg) scale(1.06);
+    border-radius: 59% 41% 35% 65% / 55% 38% 62% 45%;
+  }
+  100% {
+    transform: translate3d(-2%, 9%, 0) rotate(27deg) scale(0.96);
+    border-radius: 36% 64% 56% 44% / 46% 61% 39% 54%;
+  }
 }
 
-@keyframes gradientDriftReverse {
-  0% { transform: translate3d(10vw, 6vh, 0) scale(1.12); }
-  50% { transform: translate3d(-9vw, -8vh, 0) scale(0.9); }
-  100% { transform: translate3d(-18vw, 4vh, 0) scale(1.14); }
+@keyframes contourDrift {
+  from { transform: translate3d(-2%, -1%, 0) rotate(-1deg) scale(1.02); }
+  to { transform: translate3d(3%, 2%, 0) rotate(2deg) scale(1.08); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .live-gradient::before { animation-duration: 40s; }
-  .live-gradient::after { animation-duration: 54s; }
+  .live-gradient::before,
+  .live-gradient::after { animation: none; }
 }
 
 /* Centered phone-width content column used by all main tabs. */

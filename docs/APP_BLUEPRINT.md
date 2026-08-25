@@ -61,11 +61,12 @@ the warm ramp as its darker base. No greens or blues anywhere.
 
 ### Background
 
-A full-bleed animated backdrop: near-black with a violet vignette, a large blurred purple
-radial circle anchored top-left and a warm orange-to-gold one bottom-right, drifting and
-scaling slowly on alternating 18–30 second loops. It is decorative, never interactive, and slows down (never stops) under
-reduced-motion settings. On mobile it runs at a deliberately low frame rate (~2 fps native)
-to protect battery.
+A full-bleed “woven aurora” backdrop: four off-axis radial fields create the near-black mesh,
+while an irregular blurred conic ribbon folds purple into orange, gold and brown. Two very
+faint repeating-radial contour patterns add topographic texture without competing with cards.
+The ribbon slowly orbits and changes its organic border shape; contour rings drift separately.
+It is decorative and never interactive. Web animation stops under reduced-motion settings;
+the simpler native Android background continues using its battery-conscious low frame rate.
 
 ### Type and shape
 
