@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Limits Android's system backup to the app's one private SharedPreferences file. -->
 <full-backup-content>
+    <!-- Contains the native ledger, legacy budget and currency preference. -->
     <include domain="sharedpref" path="saan_napunta_prefs.xml" />
 </full-backup-content>

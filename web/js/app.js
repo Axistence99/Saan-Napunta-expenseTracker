@@ -258,6 +258,7 @@ function sanitiseConfig(raw) {
   };
 }
 
+/** Returns a persistable entry without optimistic UI-only flags. */
 function stripRuntimeFlags({ pending, failed, ...rest }) {
   return rest;
 }
@@ -310,6 +311,7 @@ const LIMITS = {
 /** Letters (any script), marks, spaces and the punctuation real names use. */
 const NAME_PATTERN = /^[\p{L}][\p{L}\p{M}'.\-\s]*$/u;
 
+/** Returns today shifted backward by a whole number of years as an ISO date. */
 function shiftYears(years) {
   const date = new Date();
   date.setFullYear(date.getFullYear() - years);
@@ -325,6 +327,7 @@ function cleanText(value, max) {
     .slice(0, max);
 }
 
+/** Parses a finite number and clamps it to the accepted storage range. */
 function clampNumber(value, min, max) {
   const number = Number(value);
   if (!Number.isFinite(number)) return null;
@@ -346,6 +349,7 @@ function ageFrom(isoDay) {
   return age;
 }
 
+/** Validates optional birthdates against the supported age window. */
 function validateBirthdate(value) {
   if (!value) return null; // optional
   if (value > todayKey()) return "Birthdate cannot be in the future.";
@@ -356,6 +360,7 @@ function validateBirthdate(value) {
   return null;
 }
 
+/** Validates a profile name while allowing real-world letters and punctuation. */
 function validateName(value, label) {
   if (!value) return null;
   if (value.length > LIMITS.name) return `${label} is too long.`;
@@ -363,6 +368,7 @@ function validateName(value, label) {
   return null;
 }
 
+/** Rejects missing, future or excessively old expense dates. */
 function validateEntryDate(value) {
   if (!value) return "Pick a date.";
   if (value > todayKey()) return "You cannot log an expense in the future.";
@@ -372,6 +378,7 @@ function validateEntryDate(value) {
   return null;
 }
 
+/** Parses and validates an expense or budget amount, returning either a value or error. */
 function validateAmount(raw, { max = LIMITS.maxAmount, allowZero = false } = {}) {
   const value = Number(raw);
   if (!Number.isFinite(value)) return { error: "Enter a number." };
@@ -403,6 +410,7 @@ function setFieldError(field, message) {
   }
 }
 
+/** Removes all validation messages and invalid styling inside a form section. */
 function clearFieldErrors(scope) {
   scope.querySelectorAll(".field-error").forEach((node) => node.remove());
   scope.querySelectorAll(".invalid").forEach((node) => {
@@ -526,17 +534,20 @@ const PROFILE_BUDGET_FIELDS = {
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"];
 
+/** Parses a local YYYY-MM-DD key without introducing UTC timezone shifts. */
 function parseDay(key) {
   const [y, m, d] = key.split("-").map(Number);
   return new Date(y, m - 1, d);
 }
 
+/** Returns a copy of a Date moved by the requested number of calendar days. */
 function addDays(date, days) {
   const next = new Date(date);
   next.setDate(next.getDate() + days);
   return next;
 }
 
+/** Finds the configured Sunday or Monday start for the week containing a date. */
 function startOfWeek(date) {
   const weekStart = Number(config.weekStart) === 0 ? 0 : 1;
   const shift = (date.getDay() - weekStart + 7) % 7;
@@ -683,6 +694,7 @@ function budgetForRange(range) {
     : { amount: 0, source: "none" };
 }
 
+/** Writes or removes one exact-period budget, then repaints and persists config. */
 async function setRangeBudget(rangeKey, amount) {
   const budgets = { ...(config.budgets || {}) };
   if (amount === null) delete budgets[rangeKey];
@@ -701,6 +713,7 @@ let dataVersion = 0;
 const aggregateCache = new Map();
 const cacheStats = { hits: 0, misses: 0 };
 
+/** Advances the data version and clears cached aggregates after a ledger mutation. */
 function invalidate() {
   dataVersion += 1;
   aggregateCache.clear();
@@ -755,6 +768,7 @@ function aggregatesFor(range) {
   return value;
 }
 
+/** Checks whether aggregates for the current data version and range are warm. */
 function isCached(range) {
   return aggregateCache.has(`${range.key}|${dataVersion}`);
 }
@@ -777,11 +791,13 @@ function monthKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
+/** Returns the browser-local current day as YYYY-MM-DD. */
 function todayKey() {
   const now = new Date();
   return `${monthKey(now)}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
+/** Formats a numeric value using the locked Philippine peso symbol. */
 function money(value) {
   return config.currency + Number(value || 0).toLocaleString(undefined, {
     minimumFractionDigits: 2,
@@ -789,11 +805,13 @@ function money(value) {
   });
 }
 
+/** Turns YYYY-MM into a localized full month and year label. */
 function prettyMonth(key) {
   const [year, month] = key.split("-").map(Number);
   return new Date(year, month - 1, 1).toLocaleString(undefined, { month: "long", year: "numeric" });
 }
 
+/** Turns YYYY-MM-DD into Today, Yesterday or a compact localized date. */
 function prettyDay(key) {
   const [year, month, day] = key.split("-").map(Number);
   if (key === todayKey()) return "Today";
@@ -807,16 +825,19 @@ function prettyDay(key) {
   });
 }
 
+/** Escapes untrusted text before inserting it into an HTML template string. */
 function escapeHtml(text) {
   return String(text).replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
   );
 }
 
+/** Updates the hidden live region for screen-reader status announcements. */
 function announce(message) {
   $("status").textContent = message;
 }
 
+/** Displays a temporary status message and replaces any previous toast. */
 function toast(message, tone = "info") {
   document.querySelector(".toast")?.remove();
   const node = document.createElement("p");
@@ -841,7 +862,8 @@ const tooltip = (() => {
 
   let anchor = null;
 
-  function show(target) {
+  /** Positions and reveals the reusable tooltip for a target element. */
+function show(target) {
     const text = target.getAttribute("data-tip");
     if (!text) return;
     anchor = target;
@@ -862,7 +884,8 @@ const tooltip = (() => {
     node.style.top = `${Math.round(top)}px`;
   }
 
-  function hide() {
+  /** Hides the reusable tooltip and clears its current owner. */
+function hide() {
     node.hidden = true;
     anchor?.removeAttribute("aria-describedby");
     anchor = null;
@@ -901,6 +924,7 @@ function bar(width, height = 14, radius = 8) {
   return `<span class="sk" style="width:${width};height:${height}px;border-radius:${radius}px"></span>`;
 }
 
+/** Draws shimmer placeholders while stored data or aggregates are loading. */
 function paintSkeleton() {
   $("monthTotal").innerHTML = bar("62%", 40, 12);
   $("budgetLeft").innerHTML = bar("120px", 11);
@@ -955,6 +979,7 @@ function renderRangeNav(range) {
   $("rangeToday").hidden = range.isCurrent;
 }
 
+/** Renders the active range total, budget meter, greeting and compact statistics. */
 function renderSummary(agg) {
   const greeting = $("greeting");
   if (greeting) {
@@ -1036,6 +1061,7 @@ function renderSummary(agg) {
   );
 }
 
+/** Renders category totals and percentage bars for the active Home range. */
 function renderBreakdown(agg) {
   const target = $("breakdown");
   const scopeName = { day: "Day", week: "Week", month: "Month", year: "Year" }[agg.range.scope];
@@ -1065,6 +1091,7 @@ const PHOTO_ICON =
   '<rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.2"/>' +
   '<path d="M8 6l1.5-2h5L16 6"/></svg>';
 
+/** Renders active-range expenses grouped by day, or by month in Year view. */
 function renderEntries(agg) {
   const target = $("entries");
   $("entriesEmpty").hidden = agg.list.length > 0;
@@ -1136,6 +1163,7 @@ function render({ allowSkeleton = true } = {}) {
   paint(aggregatesFor(range));
 }
 
+/** Paints every data-driven screen section from one aggregate result. */
 function paint(agg) {
   renderSummary(agg);
   renderBreakdown(agg);
@@ -1171,6 +1199,7 @@ function paint(agg) {
 
 let detailId = null;
 
+/** Formats a stored millisecond timestamp for expense detail metadata. */
 function formatStamp(ms) {
   if (!ms) return "";
   return new Date(ms).toLocaleString(undefined, {
@@ -1178,10 +1207,12 @@ function formatStamp(ms) {
   });
 }
 
+/** Builds one escaped definition-list row for the expense detail sheet. */
 function detailRow(term, value) {
   return `<div><dt>${escapeHtml(term)}</dt><dd>${escapeHtml(value)}</dd></div>`;
 }
 
+/** Loads one saved expense into the read-only detail sheet. */
 function openDetailSheet(id) {
   const entry = entries.find((e) => e.id === id);
   if (!entry || entry.deleted) return;
@@ -1242,16 +1273,19 @@ function renderDetailPhotos(id) {
   });
 }
 
+/** Closes the detail sheet and clears the selected detail ID. */
 function closeDetailSheet() {
   $("detailSheet").hidden = true;
   detailId = null;
 }
 
+/** Shows one validated receipt image in the full-screen lightbox. */
 function openLightbox(src) {
   $("lightboxImage").src = src;
   $("lightbox").hidden = false;
 }
 
+/** Closes the receipt lightbox and clears its image source. */
 function closeLightbox() {
   $("lightbox").hidden = true;
   $("lightboxImage").removeAttribute("src");
@@ -1283,6 +1317,7 @@ $("deleteFromDetail").addEventListener("click", () => {
   }, { success: "Entry deleted.", failure: "Delete failed — the entry is back." });
 });
 
+/** Builds category selection chips and marks the current draft category. */
 function renderChips() {
   const wrap = $("categoryChips");
   wrap.innerHTML = "";
@@ -1301,6 +1336,7 @@ function renderChips() {
   });
 }
 
+/** Repaints receipt thumbnails, remove actions and remaining photo capacity. */
 function renderPhotoStrip() {
   const strip = $("photoStrip");
   strip.querySelectorAll(".photo-thumb").forEach((node) => node.remove());
@@ -1331,6 +1367,7 @@ function renderPhotoStrip() {
     : "Receipts stay on this device";
 }
 
+/** Opens a blank expense editor or prefills it from an existing record. */
 function openEntrySheet(id = null) {
   editingId = id;
   const entry = id ? entries.find((e) => e.id === id) : null;
@@ -1359,6 +1396,7 @@ function openEntrySheet(id = null) {
   setTimeout(() => $("amountInput").focus(), 60);
 }
 
+/** Closes the editor and resets transient editing and photo state. */
 function closeEntrySheet() {
   $("entrySheet").hidden = true;
   tooltip.hide();
@@ -1511,6 +1549,7 @@ function amountStep(value) {
   return 500;
 }
 
+/** Moves the amount up or down using a scale-appropriate step. */
 function nudgeAmount(direction) {
   const field = $("amountInput");
   const current = Number(field.value) || 0;
@@ -1523,6 +1562,7 @@ function nudgeAmount(direction) {
   if (navigator.vibrate) navigator.vibrate(8);
 }
 
+/** Disables amount controls when they reach zero or the configured maximum. */
 function refreshStepperState() {
   const current = Number($("amountInput").value) || 0;
   $("amountDown").disabled = current <= 0;
@@ -1559,6 +1599,7 @@ bindHold($("amountDown"), -1);
 bindHold($("amountUp"), 1);
 $("amountInput").addEventListener("input", refreshStepperState);
 
+/** Creates the preset amount-addition buttons below the stepper. */
 function renderQuickAmounts() {
   const wrap = $("quickAmounts");
   wrap.innerHTML = "";
@@ -1768,6 +1809,7 @@ let activeAppView = "home";
 let recordsDays = new Set([todayKey()]);
 let recordsMonth = todayKey().slice(0, 7);
 
+/** Updates bottom-navigation selection and aria-current state. */
 function setBottomNavState(name) {
   document.querySelectorAll("#bottomNav [data-nav]").forEach((button) => {
     const on = button.dataset.nav === name;
@@ -1777,6 +1819,7 @@ function setBottomNavState(name) {
   });
 }
 
+/** Shows one main tab, hides the others and scrolls to its top. */
 function showAppView(name) {
   if (!$(name + "View")) return;
   activeAppView = name;
@@ -1790,15 +1833,18 @@ function showAppView(name) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+/** Opens the Settings sheet and marks its navigation item active. */
 function openSettingsFromNav() {
   $("settingsPanel").hidden = false;
   setBottomNavState("settings");
 }
 
+/** Restores navigation highlight after the Settings sheet closes. */
 function restoreBottomNavState() {
   setBottomNavState(activeAppView);
 }
 
+/** Formats graph-axis values into compact peso labels such as ₱1.2k. */
 function compactMoney(value) {
   const amount = Number(value) || 0;
   if (amount >= 1000000) return `${config.currency}${(amount / 1000000).toFixed(1)}m`;
@@ -1883,6 +1929,7 @@ function renderSpendingChart(year, month, totals, monthTotal, averageDays) {
   });
 }
 
+/** Recalculates monthly analytics, calendar selection and combined records. */
 function renderRecordsView() {
   if (!$("calendarGrid")) return;
   const [year, month] = recordsMonth.split("-").map(Number);
@@ -2001,6 +2048,7 @@ function renderRecordsView() {
   });
 }
 
+/** Refreshes the Profile header from the current sanitized config. */
 function renderProfileView() {
   if (!$("profileName")) return;
   const first = config.firstName || config.name || "";
@@ -2074,6 +2122,7 @@ let draft = {
 };
 let onboardStep = 1;
 
+/** Displays one onboarding step and updates its progress indicators. */
 function showStep(step) {
   onboardStep = step;
   document.querySelectorAll("#onboard .step").forEach((node) => {
@@ -2094,12 +2143,14 @@ function showStep(step) {
   }
 }
 
+/** Marks the onboarding budget-period card selected by the user. */
 function renderPeriodCards() {
   document.querySelectorAll(".period-card").forEach((card) => {
     card.setAttribute("aria-pressed", String(card.dataset.period === draft.period));
   });
 }
 
+/** Builds budget presets appropriate to the selected onboarding period. */
 function renderPresets() {
   const wrap = $("budgetPresets");
   wrap.innerHTML = "";
@@ -2129,6 +2180,7 @@ function renderEquivalent() {
   node.textContent = `Applies only to ${range.label}. Other days, weeks, months and years stay unset.`;
 }
 
+/** Persists the completed profile and optional exact-period onboarding budget. */
 async function finishOnboarding({ budget }) {
   const amount = Math.max(0, budget || 0);
   const range = rangeFor(draft.period, todayKey());
@@ -2162,6 +2214,7 @@ async function finishOnboarding({ budget }) {
   );
 }
 
+/** Attaches validation, navigation, budget and optional sign-in handlers. */
 function wireOnboarding() {
   $("stepOneNext").addEventListener("click", () => {
     const step = document.querySelector('.step[data-step="1"]');
@@ -2251,6 +2304,7 @@ function wireOnboarding() {
   renderPeriodCards();
 }
 
+/** Opens onboarding only for profiles that have not completed or skipped it. */
 function maybeShowOnboarding() {
   if (config.onboarded) return false;
   draft = {
@@ -2289,6 +2343,7 @@ const STATUS_LABEL = {
   error: "Sync issue"
 };
 
+/** Reflects account and synchronization state in the header and Settings sheet. */
 function renderSyncState(state) {
   const signedIn = Boolean(state.user);
   const detail = window.SaanSync.state().description;
@@ -2324,6 +2379,7 @@ async function adoptLedger(merged) {
   render({ allowSkeleton: false });
 }
 
+/** Connects the optional sync engine to local ledger reads, writes and controls. */
 function wireSync() {
   const sync = window.SaanSync;
   if (!sync) return;

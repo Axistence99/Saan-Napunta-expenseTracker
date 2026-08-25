@@ -1,40 +1,50 @@
+# Rebuilds the standalone web artifact and publishes it to GitHub Pages.
 name: Deploy Saan Napunta? to GitHub Pages
 
+# Deploy automatically from main, with a manual retry button in the Actions interface.
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
+# Minimum permissions required by GitHub's official Pages deployment action.
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Keep only the latest Pages run when several commits are pushed close together.
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
   deploy:
+    # Associates the job with GitHub's protected Pages environment and published URL.
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+      # Make repository files available to all following commands.
       - name: Check out repository
         uses: actions/checkout@v4
 
+      # Inline the authoritative CSS and JavaScript sources into web/index.html.
       - name: Rebuild standalone web build
         run: python3 tools/build_web_preview.py
 
+      # Ask GitHub to prepare metadata and routing for this Pages site.
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
+      # Package the complete static web directory as the Pages artifact.
       - name: Upload web artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./web
 
+      # Publish the uploaded artifact and expose its URL through the environment above.
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

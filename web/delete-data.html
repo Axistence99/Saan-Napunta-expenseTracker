@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Delete your data — Saan Napunta?</title>
   <style>
+    /* Standalone policy page styles; kept inline so GitHub Pages needs no extra assets. */
     body {
       margin: 0;
       padding: 40px 20px;
@@ -22,11 +23,13 @@
   </style>
 </head>
 <body>
+  <!-- Human-readable deletion instructions for local-only and signed-in users. -->
   <main>
     <h1>Delete your data</h1>
     <p>Saan Napunta? (Expense Tracker) stores your expenses on your own device. Signing in is optional.</p>
     <p class="note" style="margin-top:12px">This app is currently in development.</p>
 
+    <!-- Local-only deletion requires clearing the device or browser copy. -->
     <h2>If you never signed in</h2>
     <p>All of your data is on the device only. To delete it:</p>
     <ul>
@@ -35,6 +38,7 @@
     </ul>
     <p>Deletion is immediate and cannot be undone. Nothing is retained anywhere else, because nothing was ever sent anywhere.</p>
 
+    <!-- Signed-in deletion also covers the optional synchronized ledger copy. -->
     <h2>If you signed in with Google</h2>
     <p>A copy of your ledger is stored in your account so it can sync between your devices. It contains only expense records: amount, category, note, date, plus your account identifier and email address. To delete it:</p>
     <ol>
@@ -44,6 +48,7 @@
     </ol>
     <p>The stored copy and the account record are deleted within 30 days of the request. You may also revoke the app's access at <code>myaccount.google.com/permissions</code>.</p>
 
+    <!-- Fallback path for a user who no longer has access to the installed application. -->
     <h2>Request deletion by email</h2>
     <p>If you no longer have the app installed, email a deletion request from the address you signed in with. Include the words &ldquo;Saan Napunta? data deletion&rdquo;. Requests are completed within 30 days and confirmed by reply.</p>
 

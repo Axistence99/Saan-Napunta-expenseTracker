@@ -1,3 +1,10 @@
+/*
+ * Saan Napunta? visual system.
+ * Rules are grouped by logical component: tokens/reset, ambient background, Home cards,
+ * overlays/forms, onboarding, responsive behavior, navigation, analytics and detail views.
+ */
+
+/* Shared color and surface tokens keep every component on the same palette. */
 :root {
   /* base */
   --black: #07050b;
@@ -24,6 +31,7 @@
   --surface: #16101f;
 }
 
+/* Predictable sizing and minimal browser normalization. */
 * { box-sizing: border-box; }
 
 /* The hidden attribute must beat any display rule below, otherwise elements that are
@@ -44,6 +52,7 @@ body {
 button, select, input { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 
+/* Fixed decorative background; it never receives pointer input. */
 .live-gradient {
   position: fixed;
   inset: 0;
@@ -95,6 +104,7 @@ button { -webkit-tap-highlight-color: transparent; }
   .live-gradient::after { animation-duration: 54s; }
 }
 
+/* Centered phone-width content column used by all main tabs. */
 .shell {
   position: relative;
   z-index: 1;
@@ -154,6 +164,7 @@ h2 { margin: 0; font-size: 0.95rem; letter-spacing: 0.02em; text-transform: uppe
   opacity: 0.85;
 }
 
+/* Reusable translucent surfaces for summaries, panels and modal cards. */
 .summary-card,
 .panel,
 .sheet-card {
@@ -180,6 +191,7 @@ h2 { margin: 0; font-size: 0.95rem; letter-spacing: 0.02em; text-transform: uppe
   color: var(--ink);
 }
 
+/* Budget progress meter and its over-budget state. */
 .budget-bar {
   height: 10px;
   border-radius: 999px;
@@ -209,6 +221,7 @@ h2 { margin: 0; font-size: 0.95rem; letter-spacing: 0.02em; text-transform: uppe
 
 .budget-legend .over { color: var(--danger); }
 
+/* Compact Home statistics shown below the budget meter. */
 .mini-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -221,6 +234,7 @@ h2 { margin: 0; font-size: 0.95rem; letter-spacing: 0.02em; text-transform: uppe
 .mini-stats span { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey); }
 .mini-stats strong { font-size: 1rem; }
 
+/* Category and ledger list structure shared by Home panels. */
 .panel { display: flex; flex-direction: column; gap: 12px; }
 
 .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -270,6 +284,7 @@ h2 { margin: 0; font-size: 0.95rem; letter-spacing: 0.02em; text-transform: uppe
 
 .empty-note { margin: 0; font-size: 0.85rem; color: var(--muted); }
 
+/* Floating global add action positioned above the bottom navigation. */
 .fab {
   position: fixed;
   z-index: 3;
@@ -317,6 +332,7 @@ h2 { margin: 0; font-size: 0.95rem; letter-spacing: 0.02em; text-transform: uppe
 .fab:active { transform: scale(0.93); }
 .fab:focus-visible { outline: 2px solid var(--purple); outline-offset: 4px; }
 
+/* Full-screen backdrop and bottom-sheet card used by details, editor and Settings. */
 .sheet {
   position: fixed;
   inset: 0;
@@ -344,6 +360,7 @@ h2 { margin: 0; font-size: 0.95rem; letter-spacing: 0.02em; text-transform: uppe
   to { transform: translateY(0); opacity: 1; }
 }
 
+/* Shared form fields, chips and primary/secondary actions. */
 label { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; color: var(--muted); }
 label em { font-style: normal; opacity: 0.7; }
 .field-label { font-size: 0.85rem; color: var(--muted); }
@@ -415,6 +432,7 @@ select option { color: #111; }
 .panel-note { text-align: left; }
 .credit { opacity: 0.6; }
 
+/* Temporary feedback message displayed above other application content. */
 .toast {
   position: fixed;
   z-index: 5;

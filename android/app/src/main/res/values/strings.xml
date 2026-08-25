@@ -3,15 +3,22 @@
     <string name="app_name">Saan Napunta?</string>
     <!-- In-app tagline. The Play Store listing title is "Saan Napunta - Expense Tracker" (30 chars). -->
     <string name="app_tagline">Expense Tracker</string>
+    <!-- Dashboard disclosure and privacy footer text. -->
     <string name="development_warning">Development build. This app is still being built: features may change and your data can be lost between updates.</string>
     <string name="privacy_note">Private by design. No account, no sync, no analytics.</string>
+
+    <!-- Expense editor titles and actions. -->
     <string name="add_expense">Add expense</string>
     <string name="edit_expense">Edit expense</string>
     <string name="save_expense">Save expense</string>
     <string name="delete_expense">Delete this entry</string>
+
+    <!-- Legacy Android settings and destructive data controls. -->
     <string name="settings">Settings</string>
     <string name="monthly_budget">Monthly budget</string>
     <string name="erase_all">Erase all data</string>
+
+    <!-- Empty-state and author attribution shown on the dashboard. -->
     <string name="empty_entries">No expenses yet. Tap + to record your first expense.</string>
     <string name="credit">Made by Aleksis Ong</string>
 </resources>
