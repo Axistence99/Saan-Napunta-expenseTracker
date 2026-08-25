@@ -20,27 +20,42 @@ import android.widget.Toast
 import java.util.Calendar
 
 /** Add or edit a single expense. */
+/**
+ * Native add/edit screen for one expense.
+ *
+ * A missing [EXTRA_ID] means “create”; a matching ID loads the existing record for editing.
+ * The screen validates the amount, lets the user choose a category and date, then delegates
+ * persistence to [ExpenseStore].
+ */
 class EntryActivity : Activity() {
 
+    // Local persistence service, initialized only when the screen first needs it.
     private val store by lazy { ExpenseStore(this) }
+
+    // Non-null while editing an existing record; null while creating a new one.
     private var editing: Expense? = null
+    // Draft values that are changed by the category chips and native date picker.
     private var selectedCategory = "food"
     private var selectedDate = todayKey()
 
+    // Input views are constructed in onCreate and read later by save().
     private lateinit var amountField: EditText
     private lateinit var noteField: EditText
     private lateinit var dateButton: Button
     private lateinit var chipRow: LinearLayout
 
+    /** Loads optional edit data and constructs the scrollable expense form. */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Resolve the optional expense ID passed by MainActivity.
         editing = store.find(intent.getStringExtra(EXTRA_ID))
         editing?.let {
             selectedCategory = it.category
             selectedDate = it.date
         }
 
+        // Layer the animated background behind the scrollable form.
         val root = FrameLayout(this)
         root.addView(GradientBackgroundView(this), FrameLayout.LayoutParams(MATCH, MATCH))
 
@@ -61,6 +76,7 @@ class EntryActivity : Activity() {
             setPadding(dp(18), dp(18), dp(18), dp(18))
         }
 
+        // Amount uses a decimal keypad and is prefilled when editing.
         card.addView(label("Amount"))
         amountField = EditText(this).apply {
             hint = "0.00"
@@ -78,11 +94,13 @@ class EntryActivity : Activity() {
         amountRow.addView(amountField, LinearLayout.LayoutParams(0, WRAP, 1f))
         card.addView(amountRow)
 
+        // Category choices are rendered from the shared CATEGORIES list.
         card.addView(label("Category"))
         chipRow = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         card.addView(chipRow)
         renderChips()
 
+        // Date uses Android's native DatePickerDialog instead of a free-text field.
         card.addView(label("Date"))
         dateButton = Button(this).apply {
             text = prettyDay(selectedDate)
@@ -101,6 +119,7 @@ class EntryActivity : Activity() {
 
         content.addView(card, LinearLayout.LayoutParams(MATCH, WRAP).apply { topMargin = dp(16) })
 
+        // The primary action validates and persists the draft with a short haptic response.
         content.addView(Button(this).apply {
             text = getString(R.string.save_expense)
             setBackgroundResource(R.drawable.fab_background)
@@ -111,6 +130,7 @@ class EntryActivity : Activity() {
             }
         }, LinearLayout.LayoutParams(MATCH, WRAP).apply { topMargin = dp(18) })
 
+        // Destructive deletion is available only for a record that already exists.
         if (editing != null) {
             content.addView(TextView(this).apply {
                 text = getString(R.string.delete_expense)
@@ -128,6 +148,7 @@ class EntryActivity : Activity() {
         setContentView(root)
     }
 
+    /** Rebuilds the category grid so the selected chip receives active styling. */
     private fun renderChips() {
         chipRow.removeAllViews()
         var line = newChipLine()
@@ -162,8 +183,10 @@ class EntryActivity : Activity() {
         chipRow.addView(line)
     }
 
+    /** Creates one equally weighted horizontal row for up to three category chips. */
     private fun newChipLine() = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
 
+    /** Opens the system calendar and stores the chosen date as YYYY-MM-DD. */
     private fun pickDate() {
         val parts = selectedDate.split("-").mapNotNull { it.toIntOrNull() }
         val calendar = Calendar.getInstance()
@@ -180,6 +203,7 @@ class EntryActivity : Activity() {
         ).show()
     }
 
+    /** Validates the amount, upserts the expense, confirms success and closes the screen. */
     private fun save() {
         val amount = amountField.text.toString().toDoubleOrNull()
         if (amount == null || amount <= 0.0) {
@@ -202,6 +226,7 @@ class EntryActivity : Activity() {
         finish()
     }
 
+    /** Shows a confirmation dialog before permanently deleting the edited record. */
     private fun confirmDelete() {
         val entry = editing ?: return
         AlertDialog.Builder(this)
@@ -215,6 +240,7 @@ class EntryActivity : Activity() {
             .show()
     }
 
+    /** Creates the small uppercase label placed above each form field. */
     private fun label(text: String): View = TextView(this).apply {
         this.text = text.uppercase()
         textSize = 11f
@@ -223,8 +249,10 @@ class EntryActivity : Activity() {
         setTextColor(getColor(R.color.text_muted))
     }
 
+    /** Converts density-independent layout units into physical device pixels. */
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
+    /** Intent contract and reusable layout constants for this Activity. */
     companion object {
         const val EXTRA_ID = "expense_id"
         private const val MATCH = ViewGroup.LayoutParams.MATCH_PARENT

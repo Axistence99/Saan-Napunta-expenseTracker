@@ -5,13 +5,16 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Calendar
 
+// SharedPreferences file and keys used by the dependency-free Android prototype.
 const val PREFS = "saan_napunta_prefs"
 const val ENTRIES_KEY = "entries"
 const val BUDGET_KEY = "monthly_budget"
 const val CURRENCY_KEY = "currency"
 
+/** Metadata needed to render one expense category in native Android views. */
 data class Category(val id: String, val label: String, val iconRes: Int)
 
+// Fixed category catalogue shared by the dashboard and expense editor.
 val CATEGORIES = listOf(
     Category("food", "Food", R.drawable.ic_cat_food),
     Category("transport", "Transport", R.drawable.ic_cat_transport),
@@ -24,6 +27,7 @@ val CATEGORIES = listOf(
     Category("other", "Other", R.drawable.ic_cat_other)
 )
 
+/** Finds category metadata and safely falls back to Other for unknown legacy IDs. */
 fun categoryOf(id: String): Category = CATEGORIES.firstOrNull { it.id == id } ?: CATEGORIES.last()
 
 /** One recorded expense. [date] is an ISO day string, e.g. 2026-08-23. */
@@ -38,6 +42,7 @@ data class Expense(
     val created: Long,
     val photoCount: Int = 0
 ) {
+    /** Returns YYYY-MM so records can be grouped without reparsing the full date. */
     fun monthKey(): String = date.take(7)
 
     /** Field names match the web build so a synced ledger round-trips losslessly. */
@@ -52,7 +57,9 @@ data class Expense(
         .put("created", created)
         .put("photoCount", photoCount)
 
+    /** Factory functions associated with Expense rather than one existing instance. */
     companion object {
+        /** Reconstructs an expense and supplies safe defaults for missing legacy fields. */
         fun fromJson(json: JSONObject) = Expense(
             id = json.optString("id"),
             amount = json.optDouble("amount", 0.0),
@@ -74,6 +81,7 @@ data class Expense(
 class ExpenseStore(context: Context) {
     private val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
+    /** Reads and decodes the complete local ledger; malformed JSON produces an empty list. */
     fun all(): MutableList<Expense> {
         val raw = prefs.getString(ENTRIES_KEY, "[]") ?: "[]"
         val out = mutableListOf<Expense>()
@@ -84,10 +92,12 @@ class ExpenseStore(context: Context) {
         return out
     }
 
+    /** Returns one month newest-first, with creation time breaking same-day ties. */
     fun forMonth(monthKey: String): List<Expense> =
         all().filter { it.monthKey() == monthKey }
             .sortedWith(compareByDescending<Expense> { it.date }.thenByDescending { it.created })
 
+    /** Inserts a new ID or replaces the existing record with that ID. */
     fun save(entry: Expense) {
         val items = all()
         val index = items.indexOfFirst { it.id == entry.id }
@@ -95,26 +105,33 @@ class ExpenseStore(context: Context) {
         persist(items)
     }
 
+    /** Permanently removes the matching ID from local Android storage. */
     fun delete(id: String) = persist(all().filterNot { it.id == id }.toMutableList())
 
+    /** Permanently replaces the entire ledger with an empty array. */
     fun clear() = persist(mutableListOf())
 
+    /** Looks up an optional ID; null naturally means the editor is creating a record. */
     fun find(id: String?): Expense? = id?.let { key -> all().firstOrNull { it.id == key } }
 
+    /** Lists stored months newest-first and always includes the current month. */
     fun months(): List<String> {
         val keys = all().map { it.monthKey() }.toMutableSet()
         keys.add(currentMonthKey())
         return keys.sortedDescending()
     }
 
+    /** Legacy monthly budget stored independently from the expense JSON array. */
     var budget: Double
         get() = prefs.getFloat(BUDGET_KEY, 0f).toDouble()
         set(value) = prefs.edit().putFloat(BUDGET_KEY, value.toFloat()).apply()
 
+    /** Currency symbol used by the older Android prototype UI. */
     var currency: String
         get() = prefs.getString(CURRENCY_KEY, "\u20B1") ?: "\u20B1"
         set(value) = prefs.edit().putString(CURRENCY_KEY, value).apply()
 
+    /** Serializes the supplied ledger and commits it asynchronously with apply(). */
     private fun persist(items: MutableList<Expense>) {
         val array = JSONArray()
         items.forEach { array.put(it.toJson()) }
@@ -122,11 +139,13 @@ class ExpenseStore(context: Context) {
     }
 }
 
+/** Returns the device-local current month as YYYY-MM. */
 fun currentMonthKey(): String {
     val now = Calendar.getInstance()
     return "%04d-%02d".format(now.get(Calendar.YEAR), now.get(Calendar.MONTH) + 1)
 }
 
+/** Returns the device-local current date as YYYY-MM-DD. */
 fun todayKey(): String {
     val now = Calendar.getInstance()
     return "%04d-%02d-%02d".format(
@@ -136,6 +155,7 @@ fun todayKey(): String {
     )
 }
 
+/** Converts YYYY-MM into a readable label such as August 2026. */
 fun prettyMonth(monthKey: String): String {
     val parts = monthKey.split("-")
     val year = parts.getOrNull(0)?.toIntOrNull() ?: return monthKey
@@ -147,6 +167,7 @@ fun prettyMonth(monthKey: String): String {
     return "${names[(month - 1).coerceIn(0, 11)]} $year"
 }
 
+/** Converts an ISO date into Today or a compact readable date. */
 fun prettyDay(dayKey: String): String {
     if (dayKey == todayKey()) return "Today"
     val parts = dayKey.split("-").mapNotNull { it.toIntOrNull() }
@@ -155,4 +176,5 @@ fun prettyDay(dayKey: String): String {
     return "${names[(parts[1] - 1).coerceIn(0, 11)]} ${parts[2]}, ${parts[0]}"
 }
 
+/** Formats a numeric amount with a symbol, grouping separators and two decimals. */
 fun money(currency: String, value: Double): String = currency + "%,.2f".format(value)

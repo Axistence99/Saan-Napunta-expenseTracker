@@ -22,12 +22,22 @@ import android.widget.Spinner
 import android.widget.TextView
 import java.util.Calendar
 
-/** Dashboard: monthly total, budget meter, category breakdown and recent entries. */
+/**
+ * Native Android dashboard for the offline expense ledger.
+ *
+ * This prototype uses Android's classic View system rather than Compose. It builds the
+ * screen in Kotlin, reads monthly records from [ExpenseStore], calculates summary values,
+ * and opens [EntryActivity] when the user adds or edits an expense.
+ */
 class MainActivity : Activity() {
 
+    // Created only when first used, avoiding access to the Activity before it is ready.
     private val store by lazy { ExpenseStore(this) }
+
+    // Month currently displayed by the Android prototype, formatted as YYYY-MM.
     private var viewMonth = currentMonthKey()
 
+    // References to views that are created in onCreate and updated by refresh().
     private lateinit var monthLabel: TextView
     private lateinit var totalText: TextView
     private lateinit var budgetBar: ProgressBar
@@ -36,23 +46,28 @@ class MainActivity : Activity() {
     private lateinit var breakdownList: LinearLayout
     private lateinit var entriesList: LinearLayout
     private lateinit var monthSpinner: Spinner
+    // Prevents the Spinner's initial selection callback from triggering a second refresh.
     private var suppressSpinner = true
 
+    /** Builds the complete dashboard view hierarchy when Android creates this screen. */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Root layers the animated background, scrollable content and floating action button.
         val root = FrameLayout(this)
         root.addView(
             GradientBackgroundView(this),
             FrameLayout.LayoutParams(MATCH, MATCH)
         )
 
+        // The dashboard is scrollable so cards remain usable on short phone screens.
         val scroll = ScrollView(this).apply { isFillViewport = true }
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(20), dp(28), dp(20), dp(120))
         }
 
+        // Assemble the dashboard from small builder functions, one visual section at a time.
         content.addView(buildHeader())
         content.addView(TextView(this).apply {
             text = getString(R.string.app_tagline).uppercase()
@@ -70,6 +85,7 @@ class MainActivity : Activity() {
 
         scroll.addView(content, ViewGroup.LayoutParams(MATCH, WRAP))
         root.addView(scroll, FrameLayout.LayoutParams(MATCH, MATCH))
+        // Overlay the add-expense action above the bottom-right corner of the content.
         root.addView(buildFab(), FrameLayout.LayoutParams(dp(64), dp(64), Gravity.END or Gravity.BOTTOM).apply {
             marginEnd = dp(22)
             bottomMargin = dp(28)
@@ -78,6 +94,7 @@ class MainActivity : Activity() {
         setContentView(root)
     }
 
+    /** Reloads totals after returning from the add/edit screen. */
     override fun onResume() {
         super.onResume()
         refresh()
@@ -85,6 +102,7 @@ class MainActivity : Activity() {
 
     /* ---------- view builders ---------- */
 
+    /** Creates the centered app title and Settings action. */
     private fun buildHeader(): View {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -104,6 +122,7 @@ class MainActivity : Activity() {
         return row
     }
 
+    /** Creates the month total, budget meter and compact statistics container. */
     private fun buildSummaryCard(): View {
         val card = card()
 
@@ -138,6 +157,7 @@ class MainActivity : Activity() {
         return card
     }
 
+    /** Creates the card that will contain spending totals grouped by category. */
     private fun buildBreakdownCard(): View {
         val card = card()
         val heading = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
@@ -148,6 +168,7 @@ class MainActivity : Activity() {
         return card
     }
 
+    /** Creates the month selector and the container for recent expense rows. */
     private fun buildEntriesCard(): View {
         val card = card()
         val heading = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
@@ -160,6 +181,7 @@ class MainActivity : Activity() {
         return card
     }
 
+    /** Creates the floating plus button that opens a blank [EntryActivity]. */
     private fun buildFab(): View = TextView(this).apply {
         text = "+"
         textSize = 30f
@@ -176,6 +198,7 @@ class MainActivity : Activity() {
 
     /* ---------- rendering ---------- */
 
+    /** Reads the selected month, recalculates every dashboard value and repaints the cards. */
     private fun refresh() {
         val currency = store.currency
         val items = store.forMonth(viewMonth)
@@ -207,6 +230,7 @@ class MainActivity : Activity() {
         renderMonthSpinner()
     }
 
+    /** Rebuilds the Today, daily-average and entry-count columns for the selected month. */
     private fun renderStats(currency: String, items: List<Expense>, total: Double) {
         statsRow.removeAllViews()
         val today = items.filter { it.date == todayKey() }.sumOf { it.amount }
@@ -236,6 +260,7 @@ class MainActivity : Activity() {
         }
     }
 
+    /** Groups expenses by category and renders each amount, share bar and percentage. */
     private fun renderBreakdown(currency: String, items: List<Expense>, total: Double) {
         breakdownList.removeAllViews()
         if (items.isEmpty()) {
@@ -282,6 +307,7 @@ class MainActivity : Activity() {
             }
     }
 
+    /** Renders expenses by day; tap edits an entry and long-press asks to delete it. */
     private fun renderEntries(currency: String, items: List<Expense>) {
         entriesList.removeAllViews()
         if (items.isEmpty()) {
@@ -344,6 +370,7 @@ class MainActivity : Activity() {
         }
     }
 
+    /** Fills the month picker and refreshes the dashboard after a real user selection. */
     private fun renderMonthSpinner() {
         val months = store.months()
         suppressSpinner = true
@@ -369,6 +396,7 @@ class MainActivity : Activity() {
 
     /* ---------- dialogs & actions ---------- */
 
+    /** Shows a destructive confirmation dialog before removing one expense. */
     private fun confirmDelete(entry: Expense) {
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.delete_expense))
@@ -381,6 +409,7 @@ class MainActivity : Activity() {
             .show()
     }
 
+    /** Opens the legacy Android settings dialog for its local budget and currency values. */
     private fun showSettings() {
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -412,6 +441,7 @@ class MainActivity : Activity() {
             .show()
     }
 
+    /** Requires confirmation before permanently clearing the Android ledger. */
     private fun confirmErase() {
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.erase_all))
@@ -434,14 +464,17 @@ class MainActivity : Activity() {
         contentDescription = category.label
     }
 
+    /** Returns a consistently styled vertical card used by dashboard sections. */
     private fun card() = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
         setBackgroundResource(R.drawable.card_background)
         setPadding(dp(18), dp(18), dp(18), dp(18))
     }
 
+    /** Supplies standard spacing for every dashboard card. */
     private fun cardParams() = LinearLayout.LayoutParams(MATCH, WRAP).apply { topMargin = dp(14) }
 
+    /** Creates the uppercase heading used at the top of a card. */
     private fun sectionTitle(text: String) = TextView(this).apply {
         this.text = text.uppercase()
         textSize = 12f
@@ -449,6 +482,7 @@ class MainActivity : Activity() {
         setTextColor(getColor(R.color.text_muted))
     }
 
+    /** Creates secondary explanatory or empty-state text. */
     private fun mutedText(text: String) = TextView(this).apply {
         this.text = text
         textSize = 13f
@@ -456,6 +490,7 @@ class MainActivity : Activity() {
         setTextColor(getColor(R.color.text_muted))
     }
 
+    /** Creates one centered footer line with the requested color resource. */
     private fun footerText(text: String, colorRes: Int) = TextView(this).apply {
         this.text = text
         textSize = 12f
@@ -464,8 +499,10 @@ class MainActivity : Activity() {
         setTextColor(getColor(colorRes))
     }
 
+    /** Converts density-independent layout units into physical device pixels. */
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
+    /** Returns the number of calendar days represented by a YYYY-MM key. */
     private fun daysInMonth(monthKey: String): Int {
         val parts = monthKey.split("-").mapNotNull { it.toIntOrNull() }
         if (parts.size != 2) return 30
