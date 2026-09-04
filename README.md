@@ -33,6 +33,8 @@ saan-napunta/
 ├── README.md
 ├── LICENSE
 ├── PRIVACY.md
+├── CREDITS.md                 # creator, testers and product feedback credits
+├── TESTERS.md                 # dedicated application-testing acknowledgments
 ├── .gitignore
 ├── docs/
 │   ├── ARCHITECTURE.md
@@ -113,10 +115,18 @@ Requirements: JDK 17, Android SDK 35, `minSdk` 26. No runtime permissions are re
 | [docs/SPECIFICATIONS.md](docs/SPECIFICATIONS.md) | You need the product rules and category list |
 | [docs/TESTING.md](docs/TESTING.md) | You are about to ship |
 | [docs/STORE_LISTING.md](docs/STORE_LISTING.md) | You are filling in the Play Console or App Store Connect |
+| [CREDITS.md](CREDITS.md) | You want to see who created, tested or gave feedback on the application |
+| [TESTERS.md](TESTERS.md) | You want the dedicated application tester list |
+
+## Credits
+
+Created and maintained by **Aleksis Ong**.
+
+Application testing was provided by **Geraldine Camarines** and **Xanjo Opeña**. Geraldine Camarines also contributed product suggestions and feedback.
+
+See the complete [project credits](CREDITS.md) and [tester acknowledgments](TESTERS.md).
 
 ## Privacy
 
 Every peso you log stays in browser `localStorage` or app `SharedPreferences`.
 See [PRIVACY.md](PRIVACY.md).
-
-Made by Aleksis Ong.
