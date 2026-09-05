@@ -239,6 +239,7 @@
           <h2>Edit profile</h2>
           <span class="range-count">Private on this device</span>
         </div>
+        <p class="profile-data-note">Birthdate and sex at birth are optional. They are not needed for expense tracking, stay on this device, and are excluded from sync.</p>
         <div class="field-pair">
           <label>
             First name
@@ -250,7 +251,7 @@
           </label>
         </div>
         <label>
-          Birthdate
+          Birthdate <em>(optional)</em>
           <input id="birthdateProfileInput" type="date" autocomplete="bday" />
         </label>
         <label>
@@ -259,7 +260,7 @@
         </label>
         <div class="field-pair">
           <label>
-            Sex at birth
+            Sex at birth <em>(optional)</em>
             <select id="sexAtBirthInput">
               <option value="">Select</option>
               <option value="female">Female</option>
@@ -331,6 +332,7 @@
       <section class="step" data-step="1">
         <h2 class="onboard-title">Create your profile</h2>
         <p class="onboard-sub">Let&rsquo;s set up your profile. Everything here stays on your device.</p>
+        <p class="profile-data-note">Birthdate and sex at birth are optional, are not needed for expense tracking, and are excluded from sync.</p>
         <p class="onboard-warning">
           Heads up: this is an early development build. Things will change, and your records
           may not survive future updates.
@@ -348,7 +350,7 @@
         </div>
 
         <label>
-          Birthdate
+          Birthdate <em>(optional)</em>
           <input id="birthdate" type="date" autocomplete="bday" />
         </label>
 
@@ -359,7 +361,7 @@
 
         <div class="field-pair">
           <label>
-            Sex at birth
+            Sex at birth <em>(optional)</em>
             <select id="sexAtBirth">
               <option value="">Select</option>
               <option value="female">Female</option>
@@ -606,7 +608,17 @@
           </button>
           <button class="theme-option" type="button" role="radio" data-theme-option="cash" aria-checked="true">
             <span class="theme-preview preview-cash" aria-hidden="true"></span>
-            <span><b>Philippine Cash</b><small>Plain denomination-colored blocks</small></span>
+            <span><b>Philippine Cash</b><small>Philippine Peso Bills colors and blocks</small></span>
+            <i aria-hidden="true"></i>
+          </button>
+          <button class="theme-option" type="button" role="radio" data-theme-option="light" aria-checked="false">
+            <span class="theme-preview preview-light" aria-hidden="true"></span>
+            <span><b>Light</b><small>Warm paper and dark readable text</small></span>
+            <i aria-hidden="true"></i>
+          </button>
+          <button class="theme-option" type="button" role="radio" data-theme-option="dark" aria-checked="false">
+            <span class="theme-preview preview-dark" aria-hidden="true"></span>
+            <span><b>Dark</b><small>Simple graphite with quiet accents</small></span>
             <i aria-hidden="true"></i>
           </button>
         </div>
@@ -650,7 +662,7 @@
         <div><strong>Aleksis Ong</strong><span>Creator and developer</span></div>
       </div>
 
-      <p class="about-description">Saan Napunta? is an offline-first Philippine peso expense tracker designed to make everyday spending easier to understand.</p>
+      <p class="about-description">Saan Napunta? is a Philippine peso expense tracker that works offline and helps you clearly see where your money goes.</p>
 
       <button class="primary-button" id="aboutDeveloperDone" type="button">Done</button>
     </section>

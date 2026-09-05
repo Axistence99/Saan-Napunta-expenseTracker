@@ -11,6 +11,7 @@
 
 const ENTRIES_KEY = "saan-napunta-entries";
 const CONFIG_KEY = "saan-napunta-config";
+const SCHEMA_VERSION = 3;
 /**
  * Locked to the Philippine peso for now. The config field and every formatting path stay
  * currency-aware, so enabling more later means extending this list and restoring the
@@ -21,10 +22,13 @@ const CURRENCIES = [CURRENCY];
 const THEMES = {
   gradient: "Goldrora",
   monochrome: "Monochrome",
-  cash: "Philippine Cash"
+  cash: "Philippine Cash",
+  light: "Light",
+  dark: "Dark"
 };
 
 const DEFAULT_CONFIG = {
+  schemaVersion: SCHEMA_VERSION,
   firstName: "",
   lastName: "",
   birthdate: "",
@@ -158,6 +162,7 @@ let entries = [];
 let selectedCategory = "food";
 let draftPhotos = [];
 let editingId = null;
+let entryDirty = false;
 let view = { scope: "month", anchor: todayKey() };
 let ready = false;
 
@@ -165,10 +170,42 @@ let ready = false;
    Storage — promise based so the UI never assumes it is instant
    ============================================================ */
 
+/** Migrates the original single-budget profile into independent scope containers. */
+function migrateConfigV1ToV2(raw) {
+  const next = { ...raw };
+  if (!next.budgetDefaults || typeof next.budgetDefaults !== "object") next.budgetDefaults = {};
+  if (!next.budgets || typeof next.budgets !== "object") next.budgets = {};
+  return { ...next, schemaVersion: 2 };
+}
+
+/** Adds the profile/theme fields introduced after the first budget migration. */
+function migrateConfigV2ToV3(raw) {
+  return {
+    ...raw,
+    birthdate: raw.birthdate || "",
+    sexAtBirth: raw.sexAtBirth || "",
+    theme: THEMES[raw.theme] ? raw.theme : "cash",
+    schemaVersion: 3
+  };
+}
+
+/** Runs every required migration in order and safely normalizes unknown version values. */
+function migrateConfig(raw) {
+  let next = raw && typeof raw === "object" ? { ...raw } : {};
+  let version = Number.isInteger(Number(next.schemaVersion)) ? Number(next.schemaVersion) : 1;
+  if (version < 2) {
+    next = migrateConfigV1ToV2(next);
+    version = 2;
+  }
+  if (version < 3) next = migrateConfigV2ToV3(next);
+  return { ...next, schemaVersion: SCHEMA_VERSION };
+}
+
 const storage = {
   readConfig() {
     try {
-      const raw = { ...DEFAULT_CONFIG, ...JSON.parse(localStorage.getItem(CONFIG_KEY) || "{}") };
+      const stored = JSON.parse(localStorage.getItem(CONFIG_KEY) || "{}");
+      const raw = { ...DEFAULT_CONFIG, ...migrateConfig(stored) };
       return sanitiseConfig(raw);
     } catch {
       return { ...DEFAULT_CONFIG };
@@ -244,6 +281,7 @@ function sanitiseConfig(raw) {
   const firstName = cleanText(raw.firstName || raw.name, LIMITS.name);
   return {
     ...raw,
+    schemaVersion: SCHEMA_VERSION,
     firstName: validateName(firstName, "x") ? "" : firstName,
     lastName: (() => {
       const value = cleanText(raw.lastName, LIMITS.name);
@@ -1337,6 +1375,7 @@ function renderChips() {
     chip.setAttribute("data-tip", `Tag this expense as ${cat.label}`);
     chip.innerHTML = `${icon(cat.id, 16)}${cat.label}`;
     chip.addEventListener("click", () => {
+      if (selectedCategory !== cat.id) entryDirty = true;
       selectedCategory = cat.id;
       renderChips();
     });
@@ -1364,6 +1403,7 @@ function renderPhotoStrip() {
     cell.append(img, remove);
     remove.addEventListener("click", () => {
       draftPhotos.splice(index, 1);
+      entryDirty = true;
       renderPhotoStrip();
     });
     strip.insertBefore(cell, adder);
@@ -1400,16 +1440,20 @@ function openEntrySheet(id = null) {
   renderQuickAmounts();
   refreshStepperState();
   renderPhotoStrip();
+  entryDirty = false;
   $("entrySheet").hidden = false;
   setTimeout(() => $("amountInput").focus(), 60);
 }
 
-/** Closes the editor and resets transient editing and photo state. */
-function closeEntrySheet() {
+/** Closes the editor, protecting any changed draft unless the caller already saved it. */
+function closeEntrySheet(force = false) {
+  if (!force && entryDirty && !confirm("Discard your unsaved expense changes?")) return false;
   $("entrySheet").hidden = true;
   tooltip.hide();
   editingId = null;
   draftPhotos = [];
+  entryDirty = false;
+  return true;
 }
 
 /* ============================================================
@@ -1483,7 +1527,7 @@ $("entryForm").addEventListener("submit", (event) => {
   const wasEditing = editingId;
   const photos = draftPhotos.slice();
   view = { ...view, anchor: payload.date };
-  closeEntrySheet();
+  closeEntrySheet(true);
 
   commit(
     () => {
@@ -1525,7 +1569,7 @@ function savePhotos(id, photos) {
 $("deleteEntry").addEventListener("click", () => {
   const id = editingId;
   if (!id) return;
-  closeEntrySheet();
+  closeEntrySheet(true);
   commit(() => {
     entries = entries.map((e) => (e.id === id ? tombstone(e) : e));
     media.remove(id);
@@ -1565,6 +1609,7 @@ function nudgeAmount(direction) {
   const step = amountStep(direction > 0 ? current : Math.max(0, current - 0.01));
   const next = Math.max(0, Math.min(LIMITS.maxAmount, Math.round((current + direction * step) * 100) / 100));
   field.value = next ? String(next) : "";
+  entryDirty = true;
   setFieldError(field, null);
   refreshStepperState();
   if (navigator.vibrate) navigator.vibrate(8);
@@ -1620,6 +1665,7 @@ function renderQuickAmounts() {
     chip.addEventListener("click", () => {
       const current = Number($("amountInput").value) || 0;
       $("amountInput").value = String(Math.min(LIMITS.maxAmount, current + value));
+      entryDirty = true;
       setFieldError($("amountInput"), null);
       refreshStepperState();
     });
@@ -1653,12 +1699,19 @@ $("photoInput").addEventListener("change", async (event) => {
   try {
     const encoded = await Promise.all(files.map(compressImage));
     draftPhotos = draftPhotos.concat(encoded).slice(0, MAX_PHOTOS);
+    entryDirty = true;
     renderPhotoStrip();
   } catch {
     toast("Could not read that image.", "error");
   }
 });
-$("closeEntry").addEventListener("click", closeEntrySheet);
+$("entryForm").addEventListener("input", () => {
+  if (!$("entrySheet").hidden) entryDirty = true;
+});
+$("entryForm").addEventListener("change", () => {
+  if (!$("entrySheet").hidden) entryDirty = true;
+});
+$("closeEntry").addEventListener("click", () => closeEntrySheet());
 $("closeSettings").addEventListener("click", () => { $("settingsPanel").hidden = true; tooltip.hide(); });
 
 $("scopeTabs").addEventListener("click", (event) => {
@@ -1777,7 +1830,7 @@ $("profileForm").addEventListener("submit", async (event) => {
 function applyTheme(theme) {
   const selected = THEMES[theme] ? theme : "cash";
   document.body.dataset.theme = selected;
-  document.documentElement.style.colorScheme = "dark";
+  document.documentElement.style.colorScheme = selected === "light" ? "light" : "dark";
 }
 
 /** Updates theme cards so their visible and accessible selection states stay synchronized. */
@@ -1837,7 +1890,8 @@ $("clearButton").addEventListener("click", () => {
 [$("entrySheet"), $("settingsPanel"), $("detailSheet")].forEach((sheet) => {
   sheet.addEventListener("click", (event) => {
     if (event.target === sheet) {
-      sheet.hidden = true;
+      if (sheet === $("entrySheet")) closeEntrySheet();
+      else sheet.hidden = true;
       tooltip.hide();
     }
   });
@@ -1857,7 +1911,7 @@ document.addEventListener("keydown", (event) => {
       closeAboutDeveloper();
       return;
     }
-    $("entrySheet").hidden = true;
+    if (!$("entrySheet").hidden && !closeEntrySheet()) return;
     $("settingsPanel").hidden = true;
     closeDetailSheet();
     tooltip.hide();

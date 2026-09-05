@@ -52,7 +52,7 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 - No profile fields; profile editing and default budgets belong in the Profile tab
 - No budget fields; custom budgets are set on Home for the exact active period
 - Currency: locked to ₱ (other currencies deferred to a later release)
-- Theme: Philippine Cash by default, with Goldrora and Monochrome alternatives; selection persists locally
+- Theme: Philippine Cash by default, with Goldrora, Monochrome, Light and Dark alternatives; selection persists locally
 - Week start: Monday (default) or Sunday
 - About the developer opens a popup containing creator and product information
 - Erase all data, with confirmation

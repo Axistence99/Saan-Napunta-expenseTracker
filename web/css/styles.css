@@ -2657,3 +2657,376 @@ body[data-theme="monochrome"] .analytics-range-nav strong,
 body[data-theme="monochrome"] .calendar-nav small {
   color: #b5b5b5;
 }
+
+/* Five choices fit as touch-friendly cards; the final card spans an otherwise empty cell. */
+.theme-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.theme-option:last-child { grid-column: 1 / -1; }
+.preview-light {
+  background:
+    radial-gradient(circle at 22% 20%, rgba(139, 92, 246, 0.26), transparent 38%),
+    linear-gradient(145deg, #fffdf8, #eadfce);
+}
+.preview-dark {
+  background:
+    radial-gradient(circle at 78% 28%, rgba(233, 196, 106, 0.2), transparent 38%),
+    linear-gradient(145deg, #25262b, #07080b);
+}
+
+/* Light mode uses warm paper surfaces with dark text and restrained violet/gold accents. */
+body[data-theme="light"] {
+  /* High-contrast warm-paper palette: dark primary copy and clearly separated labels. */
+  --black: #eee8de;
+  --ink: #171411;
+  --grey: #4f4943;
+  --grey-dim: #6d655d;
+  --muted: rgba(23, 20, 17, 0.76);
+  --purple: #5933b2;
+  --purple-deep: #432381;
+  --orange: #ac4709;
+  --orange-dark: #7d3107;
+  --yellow: #c49312;
+  --gold: #765015;
+  --brown: #67452f;
+  --brown-deep: #3e291d;
+  --danger: #a72431;
+  --action-ink: #160d05;
+  --action-end: #873507;
+  --glow-primary: rgba(135, 53, 7, 0.2);
+  --glow-primary-hover: rgba(135, 53, 7, 0.28);
+  --glow-primary-soft: rgba(118, 80, 21, 0.16);
+  --glow-secondary: rgba(89, 51, 178, 0.19);
+  --glow-secondary-fade: rgba(89, 51, 178, 0);
+  --glow-gold: rgba(118, 80, 21, 0.24);
+  --line: rgba(38, 29, 22, 0.2);
+  --line-warm: rgba(118, 80, 21, 0.36);
+  --panel: rgba(255, 253, 248, 0.96);
+  --surface: #fffdf8;
+}
+body[data-theme="light"] .live-gradient {
+  background:
+    radial-gradient(ellipse 82% 56% at 4% 4%, rgba(105, 65, 198, 0.16), transparent 64%),
+    radial-gradient(ellipse 70% 48% at 96% 92%, rgba(200, 91, 18, 0.14), transparent 66%),
+    radial-gradient(circle at 50% 38%, #fffdf9, #eee6da 76%);
+}
+body[data-theme="light"] .live-gradient::before {
+  opacity: 0.18;
+  filter: blur(90px) saturate(0.8);
+}
+body[data-theme="light"] .live-gradient::after { opacity: 0.1; }
+body[data-theme="light"] .summary-card,
+body[data-theme="light"] .panel,
+body[data-theme="light"] .sheet-card,
+body[data-theme="light"] .onboard-card {
+  box-shadow: 0 12px 36px rgba(67, 48, 32, 0.08);
+}
+body[data-theme="light"] input,
+body[data-theme="light"] select,
+body[data-theme="light"] textarea,
+body[data-theme="light"] .amount-input-wrap,
+body[data-theme="light"] .chip,
+body[data-theme="light"] .scope-tabs,
+body[data-theme="light"] .nav-arrow,
+body[data-theme="light"] .icon-button,
+body[data-theme="light"] .close-button,
+body[data-theme="light"] .locked-value,
+body[data-theme="light"] .account {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.7);
+}
+body[data-theme="light"] input::placeholder,
+body[data-theme="light"] textarea::placeholder { color: #91877e; opacity: 1; }
+body[data-theme="light"] .stepper {
+  color: var(--ink);
+  background: linear-gradient(160deg, rgba(105, 65, 198, 0.1), rgba(255, 255, 255, 0.78));
+}
+body[data-theme="light"] .bottom-nav {
+  background: rgba(255, 252, 246, 0.95);
+  box-shadow: 0 -12px 34px rgba(67, 48, 32, 0.12);
+}
+body[data-theme="light"] .bottom-nav-item.on {
+  color: var(--purple-deep);
+  background: linear-gradient(145deg, rgba(105, 65, 198, 0.12), rgba(200, 91, 18, 0.07));
+}
+body[data-theme="light"] .calendar-dialog,
+body[data-theme="light"] .about-dialog {
+  color: var(--ink);
+  background: linear-gradient(165deg, #fffdf9, #eee5d8 78%);
+  box-shadow: 0 22px 65px rgba(50, 35, 24, 0.2);
+}
+body[data-theme="light"] .lightbox-close { color: #fff; background: rgba(20, 16, 14, 0.82); }
+body[data-theme="light"] .day-divider,
+body[data-theme="light"] .analytics-range-nav strong { color: #6b625b; }
+body[data-theme="light"] .chart-grid-line { stroke: rgba(33, 27, 23, 0.13); }
+body[data-theme="light"] .chart-y-label,
+body[data-theme="light"] .chart-x-label { fill: #766d65; }
+body[data-theme="light"] .spending-chart { background: rgba(105, 65, 198, 0.045); }
+body[data-theme="light"] select option { color: #211b17; background: #fffdf9; }
+
+/* Dark mode is intentionally quiet and conventional, unlike the animated Goldrora theme. */
+body[data-theme="dark"] {
+  --black: #07080b;
+  --ink: #f4f4f5;
+  --grey: #b0b0b5;
+  --grey-dim: #7f8088;
+  --muted: rgba(244, 244, 245, 0.68);
+  --purple: #8970c7;
+  --purple-deep: #423663;
+  --orange: #c77a42;
+  --orange-dark: #8e4d25;
+  --yellow: #d5b66c;
+  --gold: #c9ad6b;
+  --brown: #625044;
+  --brown-deep: #302620;
+  --danger: #d45b63;
+  --action-ink: #17120b;
+  --action-end: #80512f;
+  --glow-primary: rgba(201, 173, 107, 0.16);
+  --glow-primary-hover: rgba(201, 173, 107, 0.23);
+  --glow-primary-soft: rgba(201, 173, 107, 0.1);
+  --glow-secondary: rgba(137, 112, 199, 0.15);
+  --glow-secondary-fade: rgba(137, 112, 199, 0);
+  --glow-gold: rgba(201, 173, 107, 0.24);
+  --line: rgba(244, 244, 245, 0.13);
+  --line-warm: rgba(201, 173, 107, 0.2);
+  --panel: rgba(18, 19, 23, 0.88);
+  --surface: #15161a;
+}
+body[data-theme="dark"] .live-gradient {
+  background:
+    radial-gradient(ellipse 78% 52% at 8% 4%, rgba(137, 112, 199, 0.12), transparent 65%),
+    radial-gradient(ellipse 62% 44% at 94% 94%, rgba(201, 173, 107, 0.09), transparent 67%),
+    radial-gradient(circle at 50% 40%, #15161b, #07080b 74%);
+}
+body[data-theme="dark"] .live-gradient::before { opacity: 0.16; filter: blur(96px) saturate(0.65); }
+body[data-theme="dark"] .live-gradient::after { opacity: 0.06; }
+body[data-theme="dark"] .bottom-nav { background: rgba(9, 10, 13, 0.96); }
+body[data-theme="dark"] .summary-card,
+body[data-theme="dark"] .panel,
+body[data-theme="dark"] .sheet-card { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025); }
+
+@media (max-width: 370px) {
+  .theme-option:last-child { grid-column: auto; }
+}
+
+/* Light-mode readability pass for secondary copy, controls, charts and date states. */
+body[data-theme="light"] {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body[data-theme="light"] h1,
+body[data-theme="light"] .total,
+body[data-theme="light"] .detail-amount,
+body[data-theme="light"] .analytics-overview strong,
+body[data-theme="light"] .records-summary strong {
+  color: #15120f;
+  font-weight: 760;
+}
+body[data-theme="light"] h2,
+body[data-theme="light"] .entries .meta b,
+body[data-theme="light"] .breakdown .cat-name b,
+body[data-theme="light"] .analytics-category-main b {
+  color: #29231f;
+  font-weight: 700;
+}
+body[data-theme="light"] .summary-card,
+body[data-theme="light"] .panel,
+body[data-theme="light"] .sheet-card,
+body[data-theme="light"] .onboard-card {
+  border-color: rgba(38, 29, 22, 0.2);
+  background-color: rgba(255, 253, 248, 0.96);
+  box-shadow: 0 12px 34px rgba(55, 39, 27, 0.11);
+}
+body[data-theme="light"] label,
+body[data-theme="light"] .field-label,
+body[data-theme="light"] .budget-legend,
+body[data-theme="light"] .mini-stats span,
+body[data-theme="light"] .analytics-overview span,
+body[data-theme="light"] .records-summary span {
+  color: #504941;
+  font-weight: 590;
+}
+body[data-theme="light"] .entries .meta span,
+body[data-theme="light"] .panel-note,
+body[data-theme="light"] .empty-note,
+body[data-theme="light"] .about-description,
+body[data-theme="light"] .profile-card p,
+body[data-theme="light"] .chart-hint,
+body[data-theme="light"] .calendar-selection-hint {
+  color: #5e564f;
+}
+body[data-theme="light"] .range-count,
+body[data-theme="light"] .locked-note,
+body[data-theme="light"] .field-hint,
+body[data-theme="light"] .analytics-category-main small,
+body[data-theme="light"] .analytics-category-value small,
+body[data-theme="light"] .date-filter-copy small,
+body[data-theme="light"] .settings-link-copy small {
+  color: #6c635b;
+}
+body[data-theme="light"] input,
+body[data-theme="light"] select,
+body[data-theme="light"] textarea,
+body[data-theme="light"] .amount-input-wrap {
+  color: #171411;
+  border-color: rgba(38, 29, 22, 0.24);
+  background: rgba(255, 255, 255, 0.9);
+}
+body[data-theme="light"] input:focus,
+body[data-theme="light"] select:focus,
+body[data-theme="light"] textarea:focus,
+body[data-theme="light"] .amount-input-wrap:focus-within {
+  border-color: var(--purple-deep);
+  box-shadow: 0 0 0 3px rgba(89, 51, 178, 0.13);
+}
+body[data-theme="light"] .scope-tabs button,
+body[data-theme="light"] .bottom-nav-item {
+  color: #554e47;
+  font-weight: 650;
+}
+body[data-theme="light"] .scope-tabs button.on {
+  color: #160d05;
+}
+body[data-theme="light"] .calendar-day { color: #443d37; font-weight: 600; }
+body[data-theme="light"] .calendar-day.outside { color: #756d65; opacity: 0.68; }
+body[data-theme="light"] .calendar-day.future { opacity: 0.42; }
+body[data-theme="light"] .calendar-day.today { border-color: var(--gold); }
+body[data-theme="light"] .day-divider,
+body[data-theme="light"] .analytics-range-nav strong,
+body[data-theme="light"] .calendar-nav small { color: #5b534c; }
+body[data-theme="light"] .analytics-category-value b,
+body[data-theme="light"] .entries .amount,
+body[data-theme="light"] .breakdown .value,
+body[data-theme="light"] .mini-stats strong { color: #181410; font-weight: 720; }
+body[data-theme="light"] .text-button { color: #533097; font-weight: 680; }
+body[data-theme="light"] .secondary-button { color: #3f3832; border-color: rgba(38, 29, 22, 0.24); }
+
+/* Light mode uses black for primary actions and selected states instead of warm gradients. */
+body[data-theme="light"] .fab {
+  color: #fff;
+  background: #171411;
+  box-shadow: 0 10px 24px rgba(23, 20, 17, 0.24), 0 3px 9px rgba(23, 20, 17, 0.18);
+}
+body[data-theme="light"] .fab::before {
+  background: radial-gradient(circle, rgba(23, 20, 17, 0.16), transparent 70%);
+}
+body[data-theme="light"] .fab:hover {
+  background: #000;
+  box-shadow: 0 13px 28px rgba(23, 20, 17, 0.3);
+}
+body[data-theme="light"] .primary-button,
+body[data-theme="light"] .mini-button,
+body[data-theme="light"] #editRangeBudget.budget-cta {
+  color: #fff;
+  border-color: #171411;
+  background: #171411;
+  box-shadow: 0 7px 18px rgba(23, 20, 17, 0.18);
+}
+body[data-theme="light"] .primary-button:hover,
+body[data-theme="light"] .mini-button:hover,
+body[data-theme="light"] #editRangeBudget.budget-cta:hover {
+  color: #fff;
+  border-color: #000;
+  background: #000;
+  box-shadow: 0 9px 22px rgba(23, 20, 17, 0.24);
+}
+body[data-theme="light"] .scope-tabs button.on,
+body[data-theme="light"] .calendar-day.selected {
+  color: #fff;
+  border-color: #171411;
+  background: #171411;
+  box-shadow: none;
+}
+body[data-theme="light"] .bottom-nav-item.on {
+  color: #fff;
+  background: #171411;
+}
+body[data-theme="light"] .bottom-nav-item.on::before { background: #000; }
+body[data-theme="light"] .chip[aria-pressed="true"] {
+  color: #fff;
+  border-color: #171411;
+  background: #171411;
+}
+body[data-theme="light"] .period-card[aria-pressed="true"] {
+  color: #171411;
+  border-color: #171411;
+  background: rgba(23, 20, 17, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(23, 20, 17, 0.2);
+}
+body[data-theme="light"] .period-card[aria-pressed="true"] .period-glyph { color: #171411; }
+body[data-theme="light"] .theme-option.selected {
+  border-color: #171411;
+  background: rgba(23, 20, 17, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(23, 20, 17, 0.1);
+}
+body[data-theme="light"] .theme-option.selected i { border-color: #171411; }
+
+/* Tooltips keep a dark surface in Light mode, so their text must explicitly stay white. */
+body[data-theme="light"] .tooltip {
+  color: #fff;
+  border-color: #171411;
+  background: rgba(23, 20, 17, 0.98);
+  box-shadow: 0 12px 28px rgba(23, 20, 17, 0.24);
+}
+body[data-theme="light"] .tooltip::after {
+  border-color: #171411;
+  background: rgba(23, 20, 17, 0.98);
+}
+
+/* Light mode stays visually clean: remove inherited brown/gold gradients from other tabs. */
+body[data-theme="light"] .profile-card,
+body[data-theme="light"] .records-summary > div,
+body[data-theme="light"] .analytics-overview > div,
+body[data-theme="light"] .analytics-overview > div:first-child,
+body[data-theme="light"] .detail-hero,
+body[data-theme="light"] .date-filter-button,
+body[data-theme="light"] .calendar-dialog,
+body[data-theme="light"] .about-dialog {
+  background: #fffdf8;
+}
+body[data-theme="light"] .profile-avatar,
+body[data-theme="light"] .developer-avatar,
+body[data-theme="light"] .settings-link-icon {
+  color: #fff;
+  border-color: #171411;
+  background: #171411;
+  box-shadow: 0 8px 20px rgba(23, 20, 17, 0.16);
+}
+body[data-theme="light"] .stepper,
+body[data-theme="light"] .detail-icon,
+body[data-theme="light"] .settings-link-row {
+  color: #171411;
+  background: #fff;
+}
+body[data-theme="light"] .stepper:hover:not([disabled]),
+body[data-theme="light"] .settings-link-row:hover {
+  color: #000;
+  border-color: #171411;
+  background: #f3eee7;
+}
+body[data-theme="light"] .budget-bar span,
+body[data-theme="light"] .breakdown .track i,
+body[data-theme="light"] .analytics-bar i,
+body[data-theme="light"] .onboard-progress .dot.on {
+  background: #171411;
+}
+body[data-theme="light"] .budget-bar.over span { background: var(--danger); }
+body[data-theme="light"] .chart-bar { fill: #171411; }
+body[data-theme="light"] .chart-day.selected .chart-bar,
+body[data-theme="light"] .chart-zero-selected { fill: var(--purple-deep); }
+body[data-theme="light"] .period-card[aria-pressed="true"],
+body[data-theme="light"] .theme-option.selected {
+  background-image: none;
+}
+
+/* Explains why optional personal fields exist and where their data stays. */
+.profile-data-note {
+  margin: -2px 0 0;
+  padding: 10px 11px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.45;
+  border-left: 2px solid var(--gold);
+  border-radius: 0 9px 9px 0;
+  background: color-mix(in srgb, var(--gold) 6%, transparent);
+}
+body[data-theme="light"] .profile-data-note { color: #554e47; }

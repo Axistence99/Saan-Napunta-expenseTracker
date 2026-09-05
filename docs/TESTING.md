@@ -124,17 +124,24 @@ cd android && ./gradlew assembleDebug
 
 ## Themes
 
-1. A new profile starts in Philippine Cash; Settings shows Goldrora, Monochrome and Philippine Cash.
+1. A new profile starts in Philippine Cash; Settings shows Goldrora, Monochrome, Philippine Cash, Light and Dark.
 2. Selecting a card updates the entire interface immediately and marks only that card selected.
-3. Reload the page; the selected theme must persist from local configuration.
-4. Monochrome removes warm/purple accents while preserving readable contrast. Verify its
+3. Light sets the browser color scheme to light; every other option sets it to dark.
+4. In Light, primary, secondary and tertiary text must remain distinct and reach at least
+   4.5:1 contrast against the warm-paper cards; verify inputs, dates, charts and navigation.
+5. Light tooltips use white text on black, and the plus button, primary actions, active tabs,
+   selected dates, selected chips and selected navigation use black instead of warm gradients.
+6. Profile, Records, dialogs, steppers, progress fills and developer elements contain no inherited
+   brown-yellow background gradient in Light; theme preview thumbnails are the only exception.
+7. Reload the page; the selected theme must persist from local configuration.
+8. Monochrome removes warm/purple accents while preserving readable contrast. Verify its
    silver title treatment, stronger heading hierarchy, graphite cards, selected navigation,
    floating plus button, set-budget action, focus rings and selection glows.
-5. Philippine Cash changes those same action fills and glows to its six denomination colors.
-6. Philippine Cash shows a visible semi-transparent pile of plain solid-color note shapes.
+9. Philippine Cash changes those same action fills and glows to its six denomination colors.
+10. Philippine Cash shows a visible semi-transparent pile of plain solid-color note shapes.
    The blocks must have no internal artwork, text, borders, portraits, seals, serial numbers,
    denominations or copied banknote design, and must not change application data.
-7. Load a stored invalid theme value; the app must safely return to Philippine Cash.
+11. Load a stored invalid theme value; the app must safely return to Philippine Cash.
 
 ## Budget defaults and custom periods
 

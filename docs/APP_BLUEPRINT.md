@@ -247,10 +247,12 @@ A second bottom sheet with the same chrome.
 - Budget controls are intentionally absent; each budget is set directly on Home while viewing
   the specific day, week, month or year it belongs to.
 - **Currency** — locked to the Philippine peso, shown as a dashed read-only row with a padlock and a note that more are coming.
-- **Theme** — Philippine Cash is the default. Three instantly applied choices are available:
-  Goldrora (woven purple/gold aurora),
-  Monochrome (graphite surfaces with layered silver typography, stronger weights and spacing),
-  and Philippine Cash (1000-blue, 500-yellow, 200-green,
+- **Theme** — Philippine Cash is the default. Five instantly applied choices are available:
+  Goldrora (woven purple/gold aurora), Monochrome (graphite with layered silver typography),
+  Light (plain warm-paper cards, near-black text, white-on-black actions and black selected states;
+  inherited brown/gold gradients are removed from Profile, Records, dialogs and progress fills),
+  Dark (quiet conventional graphite), and
+  Philippine Cash (1000-blue, 500-yellow, 200-green,
   100-purple, 50-red and 20-orange denomination-inspired colors on a dense pile of overlapping,
   rotated note silhouettes). Every silhouette is a plain solid color with no internal artwork,
   text, border, portrait, seal, serial number, denomination or copied banknote design.
@@ -281,6 +283,7 @@ Expense {
 }
 
 Config {
+  schemaVersion number  current configuration migration version
   firstName    string   shown as "Hi, {firstName}"; may be empty
   lastName     string   may be empty
   birthdate    string   ISO day, may be empty
