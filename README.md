@@ -3,12 +3,6 @@
 > **Status: in active development.** This is a prototype, not a finished product. Features
 > and the data format may still change between commits.
 
-**In-app / launcher name:** Saan Napunta? · **Store listing title:** Saan Napunta - Expense Tracker
-(30 characters, the Play Store maximum — see [docs/STORE_LISTING.md](docs/STORE_LISTING.md)).
-
-A minimal, offline-first expense tracker built with the same stack as
-[Bawal Scroll](https://github.com/Axistence99/Bawal-Scroll) — no frameworks, no accounts, no network.
-
 - **Web prototype** — vanilla HTML/CSS/JS with `localStorage` persistence and a responsive
   woven-aurora background, sized for a phone screen.
 - **Native Android prototype** — Kotlin, plain `Activity` + programmatic views, data in
@@ -34,7 +28,6 @@ saan-napunta/
 ├── LICENSE
 ├── PRIVACY.md
 ├── CREDITS.md                 # creator, testers and product feedback credits
-├── TESTERS.md                 # dedicated application-testing acknowledgments
 ├── .gitignore
 ├── docs/
 │   ├── ARCHITECTURE.md
@@ -116,7 +109,6 @@ Requirements: JDK 17, Android SDK 35, `minSdk` 26. No runtime permissions are re
 | [docs/TESTING.md](docs/TESTING.md) | You are about to ship |
 | [docs/STORE_LISTING.md](docs/STORE_LISTING.md) | You are filling in the Play Console or App Store Connect |
 | [CREDITS.md](CREDITS.md) | You want to see who created, tested or gave feedback on the application |
-| [TESTERS.md](TESTERS.md) | You want the dedicated application tester list |
 
 ## Credits
 
@@ -124,7 +116,7 @@ Created and maintained by **Aleksis Ong**.
 
 Application testing was provided by **Geraldine Camarines** and **Xanjo Opeña**. Geraldine Camarines also contributed product suggestions and feedback.
 
-See the complete [project credits](CREDITS.md) and [tester acknowledgments](TESTERS.md).
+See the complete [project credits and tester acknowledgments](CREDITS.md).
 
 ## Privacy
 
