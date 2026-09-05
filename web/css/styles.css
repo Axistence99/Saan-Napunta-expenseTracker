@@ -2134,3 +2134,124 @@ body.calendar-open { overflow: hidden; }
   .calendar-dialog { border-radius: 24px; }
 }
 .chart-day:not([data-chart-date]) .chart-hit { cursor: default; }
+
+/* Clickable Settings row that opens non-editable developer information. */
+.settings-link-row {
+  width: 100%;
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  color: var(--ink);
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(139, 92, 246, 0.07);
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+.settings-link-row:hover {
+  border-color: var(--line-warm);
+  background: rgba(139, 92, 246, 0.12);
+}
+.settings-link-row:active { transform: scale(0.99); }
+.settings-link-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(139, 92, 246, 0.18), rgba(255, 126, 0, 0.1));
+}
+.settings-link-copy { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.settings-link-copy b { font-size: 0.86rem; }
+.settings-link-copy small {
+  overflow: hidden;
+  color: var(--grey);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.settings-link-chevron { color: var(--grey-dim); }
+
+/* Developer popup sits above Settings and keeps its information compact on phones. */
+body.about-open { overflow: hidden; }
+.about-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(7px);
+}
+.about-dialog {
+  width: min(100%, 410px);
+  max-height: calc(100svh - 36px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  color: var(--ink);
+  border: 1px solid var(--line-warm);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(139, 92, 246, 0.18), transparent 42%),
+    linear-gradient(160deg, #1b1324, #100c15 72%);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.62);
+  animation: tipIn 180ms ease;
+}
+.about-dialog .view-kicker { margin-bottom: 4px; }
+.developer-identity {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.025);
+}
+.developer-avatar {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: #1d0e07;
+  font-size: 0.9rem;
+  font-weight: 850;
+  border-radius: 16px;
+  background: conic-gradient(from 210deg, var(--orange), var(--yellow), var(--purple), var(--orange));
+}
+.developer-identity > div { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.developer-identity strong { font-size: 1rem; }
+.developer-identity span { color: var(--grey); font-size: 0.75rem; }
+.about-description {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+.about-privacy {
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  padding: 13px;
+  color: var(--gold);
+  border: 1px solid var(--line-warm);
+  border-radius: 15px;
+  background: rgba(233, 196, 106, 0.055);
+}
+.about-privacy p { margin: 0; color: var(--muted); font-size: 0.78rem; line-height: 1.45; }
+.developer-credit {
+  margin: -3px 0 0;
+  color: var(--grey);
+  font-size: 0.72rem;
+  text-align: center;
+}

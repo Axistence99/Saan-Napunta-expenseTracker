@@ -1770,6 +1770,27 @@ $("weekStartSelect").addEventListener("change", async (event) => {
   await storage.writeConfig(config);
 });
 
+/** Opens developer information above Settings and moves keyboard focus into the dialog. */
+function openAboutDeveloper() {
+  $("aboutDeveloperModal").hidden = false;
+  document.body.classList.add("about-open");
+  setTimeout(() => $("closeAboutDeveloper").focus(), 0);
+}
+
+/** Closes developer information and returns focus to its Settings option. */
+function closeAboutDeveloper() {
+  $("aboutDeveloperModal").hidden = true;
+  document.body.classList.remove("about-open");
+  $("aboutDeveloperButton").focus();
+}
+
+$("aboutDeveloperButton").addEventListener("click", openAboutDeveloper);
+$("closeAboutDeveloper").addEventListener("click", closeAboutDeveloper);
+$("aboutDeveloperDone").addEventListener("click", closeAboutDeveloper);
+$("aboutDeveloperModal").addEventListener("click", (event) => {
+  if (event.target === $("aboutDeveloperModal")) closeAboutDeveloper();
+});
+
 $("clearButton").addEventListener("click", () => {
   if (!confirm("Erase every expense stored in this browser?")) return;
   commit(() => {
@@ -1796,6 +1817,10 @@ document.addEventListener("keydown", (event) => {
     }
     if (!$("calendarModal").hidden) {
       closeCalendarModal();
+      return;
+    }
+    if (!$("aboutDeveloperModal").hidden) {
+      closeAboutDeveloper();
       return;
     }
     $("entrySheet").hidden = true;

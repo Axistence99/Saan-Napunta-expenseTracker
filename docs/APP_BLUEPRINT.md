@@ -248,6 +248,9 @@ A second bottom sheet with the same chrome.
   the specific day, week, month or year it belongs to.
 - **Currency** — locked to the Philippine peso, shown as a dashed read-only row with a padlock and a note that more are coming.
 - **Week starts on** — Monday (default) or Sunday.
+- **About the developer** — a clickable row opens a focused popup with the creator identity,
+  short product description, “Private by design. No account, no sync, no analytics.” and
+  “Made by Aleksis Ong”. These lines no longer appear at the bottom of Home.
 - **Erase all data** — outlined button that turns red on hover, with a confirmation prompt.
 - Footer note: "Everything lives in this browser's local storage. Clearing site data deletes
   it permanently." (Reword appropriately per platform.)

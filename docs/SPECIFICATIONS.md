@@ -53,6 +53,7 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 - No budget fields; custom budgets are set on Home for the exact active period
 - Currency: locked to ₱ (other currencies deferred to a later release)
 - Week start: Monday (default) or Sunday
+- About the developer opens a popup containing creator, product and privacy information
 - Erase all data, with confirmation
 
 ## Categories

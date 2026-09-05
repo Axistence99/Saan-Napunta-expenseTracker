@@ -2142,6 +2142,127 @@ body.calendar-open { overflow: hidden; }
 }
 .chart-day:not([data-chart-date]) .chart-hit { cursor: default; }
 
+/* Clickable Settings row that opens non-editable developer information. */
+.settings-link-row {
+  width: 100%;
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  color: var(--ink);
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(139, 92, 246, 0.07);
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+.settings-link-row:hover {
+  border-color: var(--line-warm);
+  background: rgba(139, 92, 246, 0.12);
+}
+.settings-link-row:active { transform: scale(0.99); }
+.settings-link-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(139, 92, 246, 0.18), rgba(255, 126, 0, 0.1));
+}
+.settings-link-copy { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.settings-link-copy b { font-size: 0.86rem; }
+.settings-link-copy small {
+  overflow: hidden;
+  color: var(--grey);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.settings-link-chevron { color: var(--grey-dim); }
+
+/* Developer popup sits above Settings and keeps its information compact on phones. */
+body.about-open { overflow: hidden; }
+.about-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(7px);
+}
+.about-dialog {
+  width: min(100%, 410px);
+  max-height: calc(100svh - 36px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  color: var(--ink);
+  border: 1px solid var(--line-warm);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(139, 92, 246, 0.18), transparent 42%),
+    linear-gradient(160deg, #1b1324, #100c15 72%);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.62);
+  animation: tipIn 180ms ease;
+}
+.about-dialog .view-kicker { margin-bottom: 4px; }
+.developer-identity {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.025);
+}
+.developer-avatar {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: #1d0e07;
+  font-size: 0.9rem;
+  font-weight: 850;
+  border-radius: 16px;
+  background: conic-gradient(from 210deg, var(--orange), var(--yellow), var(--purple), var(--orange));
+}
+.developer-identity > div { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.developer-identity strong { font-size: 1rem; }
+.developer-identity span { color: var(--grey); font-size: 0.75rem; }
+.about-description {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+.about-privacy {
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  padding: 13px;
+  color: var(--gold);
+  border: 1px solid var(--line-warm);
+  border-radius: 15px;
+  background: rgba(233, 196, 106, 0.055);
+}
+.about-privacy p { margin: 0; color: var(--muted); font-size: 0.78rem; line-height: 1.45; }
+.developer-credit {
+  margin: -3px 0 0;
+  color: var(--grey);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
   </style>
 </head>
 <body>
@@ -2240,8 +2361,6 @@ body.calendar-open { overflow: hidden; }
     <p class="development-warning" role="note">
       Work in progress &middot; not a finished product. Features and stored data may change during development.
     </p>
-    <p class="privacy-note">Private by design. No account, no sync, no analytics.</p>
-    <p class="credit">Made by Aleksis Ong</p>
     </section>
 
     <!-- Records tab: scoped trend graph, category analytics and popup date-filtered ledger. -->
@@ -2718,9 +2837,46 @@ body.calendar-open { overflow: hidden; }
         </select>
       </label>
 
+      <!-- Opens developer and privacy information without crowding the Home screen. -->
+      <button class="settings-link-row" id="aboutDeveloperButton" type="button" aria-haspopup="dialog">
+        <span class="settings-link-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0M19 5v4M17 7h4"/></svg>
+        </span>
+        <span class="settings-link-copy"><b>About the developer</b><small>Creator, privacy and application information</small></span>
+        <svg class="settings-link-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+
       <button class="secondary-button" id="clearButton" type="button">Erase all data</button>
       <p class="panel-note">Everything lives in this browser's local storage. Clearing site data deletes it permanently.</p>
     </div>
+  </div>
+
+  <!-- Developer information dialog opened from Settings. -->
+  <div class="about-modal" id="aboutDeveloperModal" hidden>
+    <section class="about-dialog" role="dialog" aria-modal="true" aria-labelledby="aboutDeveloperTitle">
+      <div class="panel-heading">
+        <div>
+          <p class="view-kicker">Saan Napunta?</p>
+          <h2 id="aboutDeveloperTitle">About the developer</h2>
+        </div>
+        <button class="close-button" id="closeAboutDeveloper" type="button" aria-label="Close developer information">&times;</button>
+      </div>
+
+      <div class="developer-identity">
+        <span class="developer-avatar" aria-hidden="true">AO</span>
+        <div><strong>Aleksis Ong</strong><span>Creator and developer</span></div>
+      </div>
+
+      <p class="about-description">Saan Napunta? is an offline-first Philippine peso expense tracker designed to make everyday spending easier to understand.</p>
+
+      <div class="about-privacy">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.9 8.1 7 10 4.1-1.9 7-5.4 7-10V6Z"/><path d="m9 12 2 2 4-4"/></svg>
+        <p>Private by design. No account, no sync, no analytics.</p>
+      </div>
+
+      <p class="developer-credit">Made by Aleksis Ong</p>
+      <button class="primary-button" id="aboutDeveloperDone" type="button">Done</button>
+    </section>
   </div>
 
   <!-- Full-screen local receipt-photo viewer. -->
@@ -4950,6 +5106,27 @@ $("weekStartSelect").addEventListener("change", async (event) => {
   await storage.writeConfig(config);
 });
 
+/** Opens developer information above Settings and moves keyboard focus into the dialog. */
+function openAboutDeveloper() {
+  $("aboutDeveloperModal").hidden = false;
+  document.body.classList.add("about-open");
+  setTimeout(() => $("closeAboutDeveloper").focus(), 0);
+}
+
+/** Closes developer information and returns focus to its Settings option. */
+function closeAboutDeveloper() {
+  $("aboutDeveloperModal").hidden = true;
+  document.body.classList.remove("about-open");
+  $("aboutDeveloperButton").focus();
+}
+
+$("aboutDeveloperButton").addEventListener("click", openAboutDeveloper);
+$("closeAboutDeveloper").addEventListener("click", closeAboutDeveloper);
+$("aboutDeveloperDone").addEventListener("click", closeAboutDeveloper);
+$("aboutDeveloperModal").addEventListener("click", (event) => {
+  if (event.target === $("aboutDeveloperModal")) closeAboutDeveloper();
+});
+
 $("clearButton").addEventListener("click", () => {
   if (!confirm("Erase every expense stored in this browser?")) return;
   commit(() => {
@@ -4976,6 +5153,10 @@ document.addEventListener("keydown", (event) => {
     }
     if (!$("calendarModal").hidden) {
       closeCalendarModal();
+      return;
+    }
+    if (!$("aboutDeveloperModal").hidden) {
+      closeAboutDeveloper();
       return;
     }
     $("entrySheet").hidden = true;
