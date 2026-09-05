@@ -247,10 +247,20 @@ A second bottom sheet with the same chrome.
 - Budget controls are intentionally absent; each budget is set directly on Home while viewing
   the specific day, week, month or year it belongs to.
 - **Currency** — locked to the Philippine peso, shown as a dashed read-only row with a padlock and a note that more are coming.
+- **Theme** — Philippine Cash is the default. Three instantly applied choices are available:
+  Goldrora (woven purple/gold aurora),
+  Monochrome (graphite surfaces with layered silver typography, stronger weights and spacing),
+  and Philippine Cash (1000-blue, 500-yellow, 200-green,
+  100-purple, 50-red and 20-orange denomination-inspired colors on a dense pile of overlapping,
+  rotated note silhouettes). Every silhouette is a plain solid color with no internal artwork,
+  text, border, portrait, seal, serial number, denomination or copied banknote design.
+  Theme-aware tokens also recolor action buttons,
+  the add-button halo, budget prompts, selection rings and other glows. Theme changes never
+  modify ledger data.
 - **Week starts on** — Monday (default) or Sunday.
-- **About the developer** — a clickable row opens a focused popup with the creator identity,
-  short product description, “Private by design. No account, no sync, no analytics.” and
-  “Made by Aleksis Ong”. These lines no longer appear at the bottom of Home.
+- **About the developer** — a clickable row opens a focused popup with the creator identity
+  and a short product description. The redundant privacy promise and “Made by” footer are not
+  repeated inside this popup or at the bottom of Home.
 - **Erase all data** — outlined button that turns red on hover, with a confirmation prompt.
 - Footer note: "Everything lives in this browser's local storage. Clearing site data deletes
   it permanently." (Reword appropriately per platform.)
@@ -283,6 +293,7 @@ Config {
   budgetDefaults object  independent scope defaults, e.g. { day: 500, week: 3000, month: 12000, year: 0 }
   budgets        object  exact-period custom budgets, e.g. { "m:2026-08": 15000, "d:2026-08-23": 1200 }
   currency     string   always "₱" while other currencies are locked
+  theme        string   "gradient" | "monochrome" | "cash"
   weekStart    number   0 = Sunday, 1 = Monday
   onboarded    boolean  false shows the onboarding flow
 }

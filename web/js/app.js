@@ -18,6 +18,11 @@ const CONFIG_KEY = "saan-napunta-config";
  */
 const CURRENCY = "\u20b1";
 const CURRENCIES = [CURRENCY];
+const THEMES = {
+  gradient: "Goldrora",
+  monochrome: "Monochrome",
+  cash: "Philippine Cash"
+};
 
 const DEFAULT_CONFIG = {
   firstName: "",
@@ -32,6 +37,7 @@ const DEFAULT_CONFIG = {
   budgetDefaults: { day: 0, week: 0, month: 0, year: 0 }, // independent defaults for each scope
   budgets: {}, // exact-period budgets keyed by range, e.g. "m:2026-08" or "d:2026-08-23"
   currency: CURRENCY,
+  theme: "cash",
   weekStart: 1,
   onboarded: false
 };
@@ -253,6 +259,7 @@ function sanitiseConfig(raw) {
     budgetPeriod: PERIODS[raw.budgetPeriod] ? raw.budgetPeriod : "month",
     budgetDefaults: sanitiseDefaults(raw),
     budgets: sanitiseBudgets(raw.budgets),
+    theme: THEMES[raw.theme] ? raw.theme : "cash",
     weekStart: Number(raw.weekStart) === 0 ? 0 : 1,
     onboarded: Boolean(raw.onboarded)
   };
@@ -1171,6 +1178,7 @@ function paint(agg) {
   syncRangeBudgetField(agg.range);
   $("amountSymbol").textContent = config.currency;
   $("weekStartSelect").value = String(config.weekStart);
+  renderThemeOptions();
   $("firstNameInput").value = config.firstName || config.name || "";
   $("lastNameInput").value = config.lastName || "";
   if (!$("provinceInput").options.length) fillProvinces($("provinceInput"));
@@ -1763,6 +1771,32 @@ $("profileForm").addEventListener("submit", async (event) => {
   await storage.writeConfig(config);
   render({ allowSkeleton: false });
   toast("Profile saved.", "ok");
+});
+
+/** Applies a validated visual theme without changing any expense or profile data. */
+function applyTheme(theme) {
+  const selected = THEMES[theme] ? theme : "cash";
+  document.body.dataset.theme = selected;
+  document.documentElement.style.colorScheme = "dark";
+}
+
+/** Updates theme cards so their visible and accessible selection states stay synchronized. */
+function renderThemeOptions() {
+  document.querySelectorAll("#themeOptions [data-theme-option]").forEach((button) => {
+    const selected = button.dataset.themeOption === config.theme;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-checked", String(selected));
+  });
+}
+
+$("themeOptions").addEventListener("click", async (event) => {
+  const option = event.target.closest("[data-theme-option]");
+  if (!option || option.dataset.themeOption === config.theme) return;
+  config = { ...config, theme: option.dataset.themeOption };
+  applyTheme(config.theme);
+  renderThemeOptions();
+  await storage.writeConfig(config);
+  toast(`${THEMES[config.theme]} theme applied.`, "ok");
 });
 
 $("weekStartSelect").addEventListener("change", async (event) => {
@@ -2558,6 +2592,7 @@ function wireSync() {
 
   config = loadedConfig;
   entries = loadedEntries;
+  applyTheme(config.theme);
 
   // If anything had to be corrected on read, write the clean version straight back.
   if (localStorage.getItem(CONFIG_KEY) && localStorage.getItem(CONFIG_KEY) !== JSON.stringify(config)) {

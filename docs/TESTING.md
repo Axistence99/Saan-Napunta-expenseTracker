@@ -122,6 +122,20 @@ cd android && ./gradlew assembleDebug
    bottom sheet; Done, close, backdrop and Escape dismiss it.
 6. The popup supports multiple dates, and tapping a selected date again removes it.
 
+## Themes
+
+1. A new profile starts in Philippine Cash; Settings shows Goldrora, Monochrome and Philippine Cash.
+2. Selecting a card updates the entire interface immediately and marks only that card selected.
+3. Reload the page; the selected theme must persist from local configuration.
+4. Monochrome removes warm/purple accents while preserving readable contrast. Verify its
+   silver title treatment, stronger heading hierarchy, graphite cards, selected navigation,
+   floating plus button, set-budget action, focus rings and selection glows.
+5. Philippine Cash changes those same action fills and glows to its six denomination colors.
+6. Philippine Cash shows a visible semi-transparent pile of plain solid-color note shapes.
+   The blocks must have no internal artwork, text, borders, portraits, seals, serial numbers,
+   denominations or copied banknote design, and must not change application data.
+7. Load a stored invalid theme value; the app must safely return to Philippine Cash.
+
 ## Budget defaults and custom periods
 
 1. **Profile defaults** — set Daily ₱500, Weekly ₱3,000 and Monthly ₱12,000 in Profile.

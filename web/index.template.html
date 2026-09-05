@@ -6,9 +6,26 @@
   <title>Saan Napunta - Expense Tracker</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body>
+<body data-theme="cash">
   <!-- Ambient background layer shared by every tab and modal. -->
-  <div class="live-gradient" aria-hidden="true"></div>
+  <div class="live-gradient" aria-hidden="true">
+    <!-- Plain colored note silhouettes appear only in the Philippine Cash theme. -->
+    <div class="cash-note-stack">
+      <!-- Repeated blank silhouettes create a scattered pile without reproducing banknote artwork. -->
+      <span class="cash-note cash-note-blue"></span><span class="cash-note cash-note-yellow"></span>
+      <span class="cash-note cash-note-green"></span><span class="cash-note cash-note-purple"></span>
+      <span class="cash-note cash-note-red"></span><span class="cash-note cash-note-orange"></span>
+      <span class="cash-note cash-note-green"></span><span class="cash-note cash-note-blue"></span>
+      <span class="cash-note cash-note-red"></span><span class="cash-note cash-note-yellow"></span>
+      <span class="cash-note cash-note-purple"></span><span class="cash-note cash-note-orange"></span>
+      <span class="cash-note cash-note-yellow"></span><span class="cash-note cash-note-green"></span>
+      <span class="cash-note cash-note-blue"></span><span class="cash-note cash-note-red"></span>
+      <span class="cash-note cash-note-orange"></span><span class="cash-note cash-note-purple"></span>
+      <span class="cash-note cash-note-red"></span><span class="cash-note cash-note-blue"></span>
+      <span class="cash-note cash-note-green"></span><span class="cash-note cash-note-yellow"></span>
+      <span class="cash-note cash-note-purple"></span><span class="cash-note cash-note-orange"></span>
+    </div>
+  </div>
 
   <!-- Session-dismissible warning shown while the product is still under development. -->
   <div class="dev-banner" id="devBanner" role="status">
@@ -570,6 +587,31 @@
       <span class="locked-note">More currencies are coming in a later update.</span>
       </div>
 
+      <!-- Visual themes change presentation only; expense and profile data stay untouched. -->
+      <section class="theme-settings" aria-labelledby="themeSettingsTitle">
+        <div class="field-head">
+          <span class="field-label" id="themeSettingsTitle">Theme</span>
+          <span class="field-hint">Applied instantly</span>
+        </div>
+        <div class="theme-options" id="themeOptions" role="radiogroup" aria-label="Application theme">
+          <button class="theme-option" type="button" role="radio" data-theme-option="gradient" aria-checked="false">
+            <span class="theme-preview preview-gradient" aria-hidden="true"></span>
+            <span><b>Goldrora</b><small>Woven purple and gold aurora</small></span>
+            <i aria-hidden="true"></i>
+          </button>
+          <button class="theme-option" type="button" role="radio" data-theme-option="monochrome" aria-checked="false">
+            <span class="theme-preview preview-monochrome" aria-hidden="true"></span>
+            <span><b>Monochrome</b><small>Layered silver type and graphite</small></span>
+            <i aria-hidden="true"></i>
+          </button>
+          <button class="theme-option" type="button" role="radio" data-theme-option="cash" aria-checked="true">
+            <span class="theme-preview preview-cash" aria-hidden="true"></span>
+            <span><b>Philippine Cash</b><small>Plain denomination-colored blocks</small></span>
+            <i aria-hidden="true"></i>
+          </button>
+        </div>
+      </section>
+
       <label>
         Week starts on
         <select id="weekStartSelect">
@@ -583,7 +625,7 @@
         <span class="settings-link-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0M19 5v4M17 7h4"/></svg>
         </span>
-        <span class="settings-link-copy"><b>About the developer</b><small>Creator, privacy and application information</small></span>
+        <span class="settings-link-copy"><b>About the developer</b><small>Creator and application information</small></span>
         <svg class="settings-link-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
       </button>
 
@@ -610,12 +652,6 @@
 
       <p class="about-description">Saan Napunta? is an offline-first Philippine peso expense tracker designed to make everyday spending easier to understand.</p>
 
-      <div class="about-privacy">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.9 8.1 7 10 4.1-1.9 7-5.4 7-10V6Z"/><path d="m9 12 2 2 4-4"/></svg>
-        <p>Private by design. No account, no sync, no analytics.</p>
-      </div>
-
-      <p class="developer-credit">Made by Aleksis Ong</p>
       <button class="primary-button" id="aboutDeveloperDone" type="button">Done</button>
     </section>
   </div>
