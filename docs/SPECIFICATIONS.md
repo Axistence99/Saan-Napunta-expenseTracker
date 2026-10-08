@@ -89,7 +89,7 @@ drawables on Android). No emoji, no icon font, no image assets.
 - Native Android long-press shortcuts: Add Expense and Records
 - Native Android widget: today total, monthly total and Add Expense
 - iOS Safari Add to Home Screen supported; native WidgetKit and App Intents are deferred
-- Current PWA icons are placeholders until final owner-provided artwork is available
+- PWA, Apple Touch and native Android launcher icons use the owner-provided wallet artwork
 
 ## Non-goals for v1
 

@@ -1,5 +1,5 @@
 /* Offline application shell for the installable Saan Napunta? web app. */
-const CACHE_NAME = "saan-napunta-shell-v1";
+const CACHE_NAME = "saan-napunta-shell-v2";
 const APP_SHELL = [
   "./",
   "./index.html",

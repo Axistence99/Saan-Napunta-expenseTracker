@@ -7,11 +7,11 @@
 - Standalone display mode
 - Portrait orientation
 - Philippine Cash launch colors
-- Temporary 192 px, 512 px, maskable and Apple Touch icons
+- Owner-provided artwork rendered as 192 px, 512 px, maskable and Apple Touch icons
 - Add Expense shortcut
 - Records shortcut
 
-The final owner-provided icon should replace the files under `web/icons/` without changing filenames.
+The source artwork is preserved at `branding/app-icon-source.png`; generated web and Android derivatives keep platform-specific dimensions and safe padding.
 
 ## Offline reopening
 
