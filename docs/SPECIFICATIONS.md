@@ -81,6 +81,16 @@ drawables on Android). No emoji, no icon font, no image assets.
 - Budget meter fills to 100 % maximum and turns red once the total exceeds the budget.
 - Editing an entry's date moves the dashboard to that entry's month.
 
+## Installation and Home Screen integration
+
+- Installable PWA with standalone portrait display
+- Service worker supports offline reopening after one successful online visit
+- Android PWA shortcuts: Add Expense and Records
+- Native Android long-press shortcuts: Add Expense and Records
+- Native Android widget: today total, monthly total and Add Expense
+- iOS Safari Add to Home Screen supported; native WidgetKit and App Intents are deferred
+- Current PWA icons are placeholders until final owner-provided artwork is available
+
 ## Non-goals for v1
 
 Accounts, cloud sync, multi-currency conversion, income tracking, recurring bills,

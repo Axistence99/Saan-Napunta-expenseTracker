@@ -18,6 +18,13 @@
     <string name="monthly_budget">Monthly budget</string>
     <string name="erase_all">Erase all data</string>
 
+    <!-- Android launcher shortcuts and Home Screen widget. -->
+    <string name="shortcut_add_short">Add expense</string>
+    <string name="shortcut_add_long">Record a new expense</string>
+    <string name="shortcut_records_short">Records</string>
+    <string name="shortcut_records_long">Open spending records</string>
+    <string name="widget_description">Today’s and monthly Philippine peso spending</string>
+
     <!-- Empty-state and author attribution shown on the dashboard. -->
     <string name="empty_entries">No expenses yet. Tap + to record your first expense.</string>
     <string name="credit">Made by Aleksis Ong</string>

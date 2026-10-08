@@ -122,6 +122,18 @@ cd android && ./gradlew assembleDebug
    bottom sheet; Done, close, backdrop and Escape dismiss it.
 6. The popup supports multiple dates, and tapping a selected date again removes it.
 
+## PWA, shortcuts and Android widget
+
+1. Install from Android Chrome; the app opens in standalone portrait mode.
+2. Visit once online, close the browser, go offline and reopen from the Home Screen.
+3. Android PWA long-press shows Add Expense and Records; each route opens the correct view.
+4. A first-run shortcut waits until onboarding finishes, then applies its requested route.
+5. Native Android long-press shows Add expense and Records.
+6. Add the native widget; today and monthly totals match the Android ledger.
+7. Tap the widget Add Expense button; `EntryActivity` opens.
+8. Save or delete an Android expense; every placed widget refreshes.
+9. iOS Safari Add to Home Screen uses the temporary Apple Touch icon and standalone metadata.
+
 ## Themes
 
 1. A new profile starts in Philippine Cash; Settings shows Goldrora, Monochrome, Philippine Cash, Light and Dark.

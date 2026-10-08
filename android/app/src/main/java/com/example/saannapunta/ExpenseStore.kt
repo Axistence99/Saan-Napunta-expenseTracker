@@ -79,7 +79,8 @@ data class Expense(
  * plenty for a personal expense log and keeps the app dependency-free.
  */
 class ExpenseStore(context: Context) {
-    private val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private val appContext = context.applicationContext
+    private val prefs = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     /** Reads and decodes the complete local ledger; malformed JSON produces an empty list. */
     fun all(): MutableList<Expense> {
@@ -124,7 +125,10 @@ class ExpenseStore(context: Context) {
     /** Legacy monthly budget stored independently from the expense JSON array. */
     var budget: Double
         get() = prefs.getFloat(BUDGET_KEY, 0f).toDouble()
-        set(value) = prefs.edit().putFloat(BUDGET_KEY, value.toFloat()).apply()
+        set(value) {
+            prefs.edit().putFloat(BUDGET_KEY, value.toFloat()).apply()
+            SpendingWidget.updateAll(appContext)
+        }
 
     /** Currency symbol used by the older Android prototype UI. */
     var currency: String
@@ -136,6 +140,7 @@ class ExpenseStore(context: Context) {
         val array = JSONArray()
         items.forEach { array.put(it.toJson()) }
         prefs.edit().putString(ENTRIES_KEY, array.toString()).apply()
+        SpendingWidget.updateAll(appContext)
     }
 }
 

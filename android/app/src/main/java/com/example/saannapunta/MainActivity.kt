@@ -46,6 +46,7 @@ class MainActivity : Activity() {
     private lateinit var breakdownList: LinearLayout
     private lateinit var entriesList: LinearLayout
     private lateinit var monthSpinner: Spinner
+    private lateinit var dashboardScroll: ScrollView
     // Prevents the Spinner's initial selection callback from triggering a second refresh.
     private var suppressSpinner = true
 
@@ -61,7 +62,7 @@ class MainActivity : Activity() {
         )
 
         // The dashboard is scrollable so cards remain usable on short phone screens.
-        val scroll = ScrollView(this).apply { isFillViewport = true }
+        dashboardScroll = ScrollView(this).apply { isFillViewport = true }
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(20), dp(28), dp(20), dp(120))
@@ -83,8 +84,8 @@ class MainActivity : Activity() {
         content.addView(footerText(getString(R.string.privacy_note), R.color.text_muted))
         content.addView(footerText(getString(R.string.credit), R.color.text_muted))
 
-        scroll.addView(content, ViewGroup.LayoutParams(MATCH, WRAP))
-        root.addView(scroll, FrameLayout.LayoutParams(MATCH, MATCH))
+        dashboardScroll.addView(content, ViewGroup.LayoutParams(MATCH, WRAP))
+        root.addView(dashboardScroll, FrameLayout.LayoutParams(MATCH, MATCH))
         // Overlay the add-expense action above the bottom-right corner of the content.
         root.addView(buildFab(), FrameLayout.LayoutParams(dp(64), dp(64), Gravity.END or Gravity.BOTTOM).apply {
             marginEnd = dp(22)
@@ -92,6 +93,24 @@ class MainActivity : Activity() {
         })
 
         setContentView(root)
+        handleLauncherAction(intent)
+    }
+
+    /** Handles a launcher shortcut delivered while this Activity is already open. */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleLauncherAction(intent)
+    }
+
+    /** Routes native long-press shortcut actions to Add Expense or the Records section. */
+    private fun handleLauncherAction(source: Intent?) {
+        when (source?.action) {
+            ACTION_ADD_EXPENSE -> startActivity(Intent(this, EntryActivity::class.java))
+            ACTION_OPEN_RECORDS -> entriesList.post {
+                dashboardScroll.smoothScrollTo(0, entriesList.top)
+            }
+        }
     }
 
     /** Reloads totals after returning from the add/edit screen. */
@@ -512,6 +531,8 @@ class MainActivity : Activity() {
     }
 
     companion object {
+        const val ACTION_ADD_EXPENSE = "com.example.saannapunta.ADD_EXPENSE"
+        const val ACTION_OPEN_RECORDS = "com.example.saannapunta.OPEN_RECORDS"
         private const val MATCH = ViewGroup.LayoutParams.MATCH_PARENT
         private const val WRAP = ViewGroup.LayoutParams.WRAP_CONTENT
     }

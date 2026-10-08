@@ -18,6 +18,8 @@
 - Day / week / month / year views with a period navigator
 - Philippine peso only for now; the data model stays currency-aware for a later update
 - Erase-all-data control; nothing leaves the device unless you opt in
+- Installable PWA with offline reopening and Add Expense / Records shortcuts
+- Native Android long-press shortcuts and spending summary Home Screen widget
 - **Optional Google sign-in** for cross-device sync — off by default, app is fully usable without it
 
 ## Project layout
@@ -108,6 +110,8 @@ Requirements: JDK 17, Android SDK 35, `minSdk` 26. No runtime permissions are re
 | [docs/SPECIFICATIONS.md](docs/SPECIFICATIONS.md) | You need the product rules and category list |
 | [docs/TESTING.md](docs/TESTING.md) | You are about to ship |
 | [docs/STORE_LISTING.md](docs/STORE_LISTING.md) | You are filling in the Play Console or App Store Connect |
+| [docs/PWA.md](docs/PWA.md) | You are working on installation, shortcuts, offline caching or widgets |
+| [ios/README.md](ios/README.md) | You are planning the future native iOS app, WidgetKit or App Intents |
 | [CREDITS.md](CREDITS.md) | You want to see who created, tested or gave feedback on the application |
 
 ## Credits

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static actions shown when the user long-presses the Android launcher icon. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="add_expense"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_add"
+        android:shortcutShortLabel="@string/shortcut_add_short"
+        android:shortcutLongLabel="@string/shortcut_add_long">
+        <intent
+            android:action="com.example.saannapunta.ADD_EXPENSE"
+            android:targetPackage="com.example.saannapunta"
+            android:targetClass="com.example.saannapunta.MainActivity" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="open_records"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_records"
+        android:shortcutShortLabel="@string/shortcut_records_short"
+        android:shortcutLongLabel="@string/shortcut_records_long">
+        <intent
+            android:action="com.example.saannapunta.OPEN_RECORDS"
+            android:targetPackage="com.example.saannapunta"
+            android:targetClass="com.example.saannapunta.MainActivity" />
+    </shortcut>
+</shortcuts>

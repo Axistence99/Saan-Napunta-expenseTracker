@@ -36,13 +36,14 @@ This document tracks the 22 approved improvements. Work is delivered in local ph
 
 ## Phase 4 — PWA and web security
 
-- [ ] Add a manifest, installable icons, standalone display mode and offline service worker.
+- [x] Add a manifest, temporary installable icons, standalone display mode and offline service worker.
 - [ ] Add an appropriate Content Security Policy for the deployed build.
 - [ ] Audit every privacy and marketing claim against optional sync behavior.
 - [ ] Verify strict Firebase rules and add emulator/rules tests before enabling production sync.
 
 ## Phase 5 — Android parity and release preparation
 
+- [x] Add native Android long-press shortcuts and a spending summary Home Screen widget.
 - [ ] Bring native Android screens, records, budgets, profile, themes, detail view, photos and optional sync to web parity.
 - [ ] Replace `com.example.saannapunta` before store release; the owner elected to defer the final identifier.
 - [ ] Add release build/signing documentation, store checks and Android automated tests.

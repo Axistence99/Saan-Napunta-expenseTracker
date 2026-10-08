@@ -26,6 +26,13 @@ const THEMES = {
   light: "Light",
   dark: "Dark"
 };
+const THEME_COLORS = {
+  gradient: "#07050b",
+  monochrome: "#050505",
+  cash: "#061116",
+  light: "#eee8de",
+  dark: "#07080b"
+};
 
 const DEFAULT_CONFIG = {
   schemaVersion: SCHEMA_VERSION,
@@ -1831,6 +1838,7 @@ function applyTheme(theme) {
   const selected = THEMES[theme] ? theme : "cash";
   document.body.dataset.theme = selected;
   document.documentElement.style.colorScheme = selected === "light" ? "light" : "dark";
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", THEME_COLORS[selected]);
 }
 
 /** Updates theme cards so their visible and accessible selection states stay synchronized. */
@@ -2428,6 +2436,7 @@ async function finishOnboarding({ budget }) {
       : "You can set a budget for any period from Home.",
     "ok"
   );
+  applyLaunchRoute();
 }
 
 /** Attaches validation, navigation, budget and optional sign-in handlers. */
@@ -2632,6 +2641,31 @@ function wireSync() {
 }
 
 /* ============================================================
+   PWA launch routes and offline shell
+   ============================================================ */
+
+/** Handles manifest shortcut URLs after the profile is ready. */
+function applyLaunchRoute() {
+  if (!config.onboarded) return;
+  const url = new URL(window.location.href);
+  if (url.searchParams.get("view") === "records") showAppView("records");
+  if (url.searchParams.get("action") === "add") openEntrySheet();
+  if (url.searchParams.has("view") || url.searchParams.has("action")) {
+    url.searchParams.delete("view");
+    url.searchParams.delete("action");
+    history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  }
+}
+
+/** Registers the same-origin service worker used for offline reopening. */
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
+  navigator.serviceWorker.register("./sw.js").catch((error) => {
+    console.warn("[pwa] service worker registration failed", error);
+  });
+}
+
+/* ============================================================
    Boot
    ============================================================ */
 
@@ -2663,7 +2697,9 @@ function wireSync() {
     applyInputLimits();
     wireSync();
     wireOnboarding();
-    maybeShowOnboarding();
+    const onboardingShown = maybeShowOnboarding();
+    if (!onboardingShown) applyLaunchRoute();
+    registerServiceWorker();
   }, 260);
 })();
 
