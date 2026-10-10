@@ -30,6 +30,7 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 - By-category card: active-range label and share bars sorted high → low
 - Recent card: entries grouped by day with a per-day subtotal
 - Emphasized floating action button: larger plus, persistent “Record expense” callout and short entrance pulse
+- Bottom-tab and Settings navigation writes browser history so Android/iOS Back returns to the previous tab before exiting
 
 ### Records
 - Day / Week / Month / Year controls independently scope overview totals, trend and category analytics

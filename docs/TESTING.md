@@ -20,6 +20,8 @@ python3 -m http.server 8080 --directory web
 1. **First run** — empty state shows "Tap + to record your first gastos." and ₱0.00.
 - **FAB emphasis** — the larger plus and Record expense callout remain visible above the
   bottom navigation; the entrance pulse stops after three cycles and is absent in reduced motion.
+- **Mobile Back** — navigate Home → Records → Profile, then press Back twice; Records and Home
+  return in order. Open Settings and press Back; Settings closes without exiting the PWA.
 2. **Add** — tap +, enter 250, pick Transport, save. Total, Today, Entries and the
    category bar all update; a toast confirms.
 3. **Validation** — save with an empty or 0 amount → toast, sheet stays open.

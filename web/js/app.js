@@ -1726,7 +1726,7 @@ $("entryForm").addEventListener("change", () => {
   if (!$("entrySheet").hidden) entryDirty = true;
 });
 $("closeEntry").addEventListener("click", () => closeEntrySheet());
-$("closeSettings").addEventListener("click", () => { $("settingsPanel").hidden = true; tooltip.hide(); });
+$("closeSettings").addEventListener("click", closeSettingsFromUi);
 
 $("scopeTabs").addEventListener("click", (event) => {
   const tab = event.target.closest("button[data-scope]");
@@ -1906,6 +1906,7 @@ $("clearButton").addEventListener("click", () => {
   sheet.addEventListener("click", (event) => {
     if (event.target === sheet) {
       if (sheet === $("entrySheet")) closeEntrySheet();
+      else if (sheet === $("settingsPanel")) closeSettingsFromUi();
       else sheet.hidden = true;
       tooltip.hide();
     }
@@ -1930,8 +1931,11 @@ document.addEventListener("keydown", (event) => {
       closeAboutDeveloper();
       return;
     }
+    if (!$("settingsPanel").hidden) {
+      closeSettingsFromUi();
+      return;
+    }
     if (!$("entrySheet").hidden && !closeEntrySheet()) return;
-    $("settingsPanel").hidden = true;
     closeDetailSheet();
     tooltip.hide();
   }
@@ -1942,6 +1946,7 @@ document.addEventListener("keydown", (event) => {
    ============================================================ */
 
 let activeAppView = "home";
+let appHistoryReady = false;
 let recordsDays = new Set([todayKey()]);
 let recordsMonth = todayKey().slice(0, 7);
 let recordsAnalytics = { scope: "month", anchor: todayKey() };
@@ -1956,9 +1961,18 @@ function setBottomNavState(name) {
   });
 }
 
-/** Shows one main tab, hides the others and scrolls to its top. */
-function showAppView(name) {
+/** Stores the current tab in browser history so mobile Back returns to the previous tab. */
+function pushAppHistory(viewName, settingsOpen = false) {
+  if (!appHistoryReady) return;
+  const state = history.state || {};
+  if (state.saanView === viewName && Boolean(state.saanSettings) === settingsOpen) return;
+  history.pushState({ ...state, saanView: viewName, saanSettings: settingsOpen }, "");
+}
+
+/** Shows one main tab, optionally recording the navigation as a browser history entry. */
+function showAppView(name, { fromHistory = false } = {}) {
   if (!$(name + "View")) return;
+  const changed = activeAppView !== name || !$("settingsPanel").hidden;
   activeAppView = name;
   document.querySelectorAll(".app-view").forEach((section) => {
     section.hidden = section.dataset.view !== name;
@@ -1967,19 +1981,41 @@ function showAppView(name) {
   setBottomNavState(name);
   if (name === "records") renderRecordsView();
   if (name === "profile") renderProfileView();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (!fromHistory && changed) pushAppHistory(name, false);
+  window.scrollTo({ top: 0, behavior: fromHistory ? "auto" : "smooth" });
 }
 
-/** Opens the Settings sheet and marks its navigation item active. */
-function openSettingsFromNav() {
+/** Opens Settings and adds it to history so mobile Back closes it first. */
+function openSettingsFromNav({ fromHistory = false } = {}) {
+  const alreadyOpen = !$("settingsPanel").hidden;
   $("settingsPanel").hidden = false;
   setBottomNavState("settings");
+  if (!fromHistory && !alreadyOpen) pushAppHistory(activeAppView, true);
 }
 
 /** Restores navigation highlight after the Settings sheet closes. */
 function restoreBottomNavState() {
   setBottomNavState(activeAppView);
 }
+
+/** Closes Settings through browser history when it owns the current history entry. */
+function closeSettingsFromUi() {
+  if (history.state?.saanSettings) history.back();
+  else {
+    $("settingsPanel").hidden = true;
+    restoreBottomNavState();
+  }
+  tooltip.hide();
+}
+
+/** Restores the previous in-app tab instead of allowing mobile Back to exit immediately. */
+window.addEventListener("popstate", (event) => {
+  const state = event.state;
+  if (!state || !state.saanView) return;
+  $("settingsPanel").hidden = true;
+  showAppView(state.saanView, { fromHistory: true });
+  if (state.saanSettings) openSettingsFromNav({ fromHistory: true });
+});
 
 /** Formats graph-axis values into compact peso labels such as ₱1.2k. */
 function compactMoney(value) {
@@ -2320,11 +2356,6 @@ $("recordsToday").addEventListener("click", () => {
   recordsAnalytics = { ...recordsAnalytics, anchor: today };
   renderRecordsView();
 });
-$("closeSettings").addEventListener("click", restoreBottomNavState);
-$("settingsPanel").addEventListener("click", (event) => {
-  if (event.target === $("settingsPanel")) restoreBottomNavState();
-});
-
 /* Static tooltips that never change */
 $("addButton").setAttribute("data-tip", "Record a new expense");
 $("rangePrev").setAttribute("data-tip", "Previous period");
@@ -2646,7 +2677,7 @@ function wireSync() {
   });
 
   $("syncNow").addEventListener("click", () => sync.syncNow());
-  $("syncPill").addEventListener("click", () => { $("settingsPanel").hidden = false; });
+  $("syncPill").addEventListener("click", () => openSettingsFromNav());
 
   sync.init();
 }
@@ -2664,7 +2695,7 @@ function applyLaunchRoute() {
   if (url.searchParams.has("view") || url.searchParams.has("action")) {
     url.searchParams.delete("view");
     url.searchParams.delete("action");
-    history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    history.replaceState(history.state, "", `${url.pathname}${url.search}${url.hash}`);
   }
 }
 
@@ -2692,6 +2723,8 @@ function registerServiceWorker() {
   config = loadedConfig;
   entries = loadedEntries;
   applyTheme(config.theme);
+  history.replaceState({ ...(history.state || {}), saanView: "home", saanSettings: false }, "");
+  appHistoryReady = true;
 
   // If anything had to be corrected on read, write the clean version straight back.
   if (localStorage.getItem(CONFIG_KEY) && localStorage.getItem(CONFIG_KEY) !== JSON.stringify(config)) {

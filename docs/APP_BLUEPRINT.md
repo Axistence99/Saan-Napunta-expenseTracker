@@ -198,6 +198,11 @@ Vertical scroll, top to bottom:
    without animating forever. The plus is a larger SVG icon, never a text glyph. Hover lifts
    the action, press scales it, and reduced-motion mode removes the pulse.
 
+8. **Mobile Back behavior** — Home, Records and Profile create in-app history entries. The
+   device/browser Back action restores the previous tab instead of immediately leaving the
+   installed PWA. Settings also owns a history entry, so Back closes it and restores the tab
+   beneath it. Back from the initial Home entry may exit normally.
+
 ## 4b. Screen: Expense detail
 
 Tapping a row in the history opens a read-only detail sheet rather than the editor, because
