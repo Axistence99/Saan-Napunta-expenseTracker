@@ -3045,6 +3045,44 @@ body[data-theme="light"] .theme-option.selected {
 }
 body[data-theme="light"] .profile-data-note { color: #554e47; }
 
+/* Mobile performance mode: keep each theme's appearance but avoid continuously repainting
+   blurred animated layers while the user scrolls on a touch device. */
+@media (max-width: 600px), (hover: none) and (pointer: coarse) {
+  .live-gradient::before,
+  .live-gradient::after,
+  .cash-note {
+    animation: none !important;
+  }
+
+  .live-gradient::before { filter: blur(52px) saturate(0.95); }
+
+  .summary-card,
+  .panel,
+  .sheet-card,
+  .bottom-nav,
+  .sheet,
+  .onboard,
+  .calendar-modal,
+  .about-modal {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  body.loaded .panel,
+  .app-view,
+  .entries li.row button {
+    animation: none;
+  }
+
+  .fab,
+  .bottom-nav-item,
+  .theme-option,
+  .calendar-day,
+  .chart-bar {
+    transition-duration: 90ms;
+  }
+}
+
   </style>
 </head>
 <body data-theme="cash">

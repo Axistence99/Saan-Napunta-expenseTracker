@@ -30,7 +30,8 @@ This document tracks the 22 approved improvements. Work is delivered in local ph
 ## Phase 3 — Themes, accessibility and mobile performance
 
 - [ ] Add theme preview with Apply/Cancel or instant-apply Undo.
-- [ ] Reduce decorative work on low-power/mobile devices and pause animation behind open dialogs.
+- [x] Reduce decorative animation and backdrop-filter work on mobile/coarse-pointer devices.
+- [ ] Pause any remaining animation behind open dialogs.
 - [ ] Add a dedicated high-contrast, reduced-transparency accessibility theme.
 - [ ] Audit keyboard, screen-reader, focus, reduced-motion and color-only states.
 

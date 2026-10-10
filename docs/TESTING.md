@@ -154,6 +154,8 @@ cd android && ./gradlew assembleDebug
    The blocks must have no internal artwork, text, borders, portraits, seals, serial numbers,
    denominations or copied banknote design, and must not change application data.
 11. Load a stored invalid theme value; the app must safely return to Philippine Cash.
+12. On a phone or coarse-pointer emulator, theme backgrounds remain static, backdrop blur is
+    disabled, scrolling stays smooth, and all cards remain readable in every theme.
 
 ## Budget defaults and custom periods
 
