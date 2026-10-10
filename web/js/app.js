@@ -1588,13 +1588,20 @@ $("deleteEntry").addEventListener("click", () => {
    Settings and wiring
    ============================================================ */
 
-/* The development warning stays dismissed for the session only, never permanently. */
-const DEV_BANNER_KEY = "saan-napunta-dev-banner";
-if (sessionStorage.getItem(DEV_BANNER_KEY) === "dismissed") $("devBanner").hidden = true;
-$("dismissDevBanner").addEventListener("click", () => {
+/** Shows the blocking development disclosure once on every application start. */
+function showDevelopmentNotice() {
+  $("devBanner").hidden = false;
+  document.body.classList.add("development-notice-open");
+  setTimeout(() => $("dismissDevBanner").focus(), 0);
+}
+
+/** Acknowledges the disclosure for this page lifetime only. */
+function dismissDevelopmentNotice() {
   $("devBanner").hidden = true;
-  sessionStorage.setItem(DEV_BANNER_KEY, "dismissed");
-});
+  document.body.classList.remove("development-notice-open");
+}
+
+$("dismissDevBanner").addEventListener("click", dismissDevelopmentNotice);
 
 /* ---------- amount steppers ---------- */
 
@@ -1907,6 +1914,10 @@ $("clearButton").addEventListener("click", () => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    if (!$("devBanner").hidden) {
+      dismissDevelopmentNotice();
+      return;
+    }
     if (!$("lightbox").hidden) {
       closeLightbox();
       return;
@@ -2700,6 +2711,7 @@ function registerServiceWorker() {
     const onboardingShown = maybeShowOnboarding();
     if (!onboardingShown) applyLaunchRoute();
     registerServiceWorker();
+    showDevelopmentNotice();
   }, 260);
 })();
 

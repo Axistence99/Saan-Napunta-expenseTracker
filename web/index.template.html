@@ -34,16 +34,6 @@
     </div>
   </div>
 
-  <!-- Session-dismissible warning shown while the product is still under development. -->
-  <div class="dev-banner" id="devBanner" role="status">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
-      <path d="M12 9v4M12 17h.01"/>
-    </svg>
-    <span><b>Development build.</b> This app is still being built. Features may change and your data can be lost between updates.</span>
-    <button type="button" id="dismissDevBanner" aria-label="Dismiss warning">&times;</button>
-  </div>
-
   <!-- Main application shell: one visible tab at a time. -->
   <main class="shell">
     <!-- Home tab: active-range total, budgets, category breakdown and recent entries. -->
@@ -304,8 +294,9 @@
   </main>
 
   <!-- Global add-expense action, kept above the fixed bottom navigation. -->
-  <button class="fab" id="addButton" type="button" aria-label="Add expense">
-    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" focusable="false">
+  <button class="fab" id="addButton" type="button" aria-label="Record a new expense">
+    <span class="fab-label" aria-hidden="true">Record expense</span>
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" focusable="false">
       <path d="M12 5v14M5 12h14"/>
     </svg>
   </button>
@@ -554,6 +545,13 @@
         <h2>Settings</h2>
         <button class="close-button" id="closeSettings" type="button" aria-label="Close settings">×</button>
       </div>
+
+      <!-- Permanent copy of the opening development disclosure. -->
+      <div class="settings-development-note" role="note">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+        <p><b>Development build.</b> This app is still being built. Features may change and your data can be lost between updates.</p>
+      </div>
+
       <section class="account" id="accountBlock">
         <div class="account-intro" id="accountIntro">
           <strong>Back up &amp; sync</strong>
@@ -651,6 +649,21 @@
       <button class="secondary-button" id="clearButton" type="button">Erase all data</button>
       <p class="panel-note">Everything lives in this browser's local storage. Clearing site data deletes it permanently.</p>
     </div>
+  </div>
+
+  <!-- Opening disclosure shown in the center every time the application starts. -->
+  <div class="development-modal" id="devBanner" hidden>
+    <section class="development-dialog" role="dialog" aria-modal="true" aria-labelledby="developmentDialogTitle">
+      <span class="development-dialog-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+      </span>
+      <div>
+        <p class="view-kicker">Important notice</p>
+        <h2 id="developmentDialogTitle">Development build</h2>
+      </div>
+      <p><b>Development build.</b> This app is still being built. Features may change and your data can be lost between updates.</p>
+      <button class="primary-button" type="button" id="dismissDevBanner">I understand</button>
+    </section>
   </div>
 
   <!-- Developer information dialog opened from Settings. -->

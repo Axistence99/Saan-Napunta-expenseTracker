@@ -1097,40 +1097,6 @@ textarea.invalid {
    Development warning
    ============================================================ */
 
-.dev-banner {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  width: min(100%, 460px);
-  margin: 0 auto;
-  padding: 11px 14px;
-  font-size: 0.78rem;
-  line-height: 1.4;
-  color: #ffe9bd;
-  border: 1px solid rgba(233, 196, 106, 0.4);
-  border-radius: 0 0 16px 16px;
-  border-top: none;
-  background: linear-gradient(180deg, rgba(107, 74, 47, 0.55), rgba(58, 38, 24, 0.5));
-}
-
-.dev-banner svg { flex: none; margin-top: 1px; color: var(--yellow); }
-.dev-banner b { color: var(--yellow); }
-
-.dev-banner button {
-  flex: none;
-  margin: -4px -4px 0 auto;
-  padding: 2px 6px;
-  font-size: 1.1rem;
-  line-height: 1;
-  color: var(--gold);
-  border: none;
-  background: none;
-  cursor: pointer;
-}
-.dev-banner button:hover { color: var(--ink); }
-
 .onboard-warning {
   margin: 0;
   padding: 9px 11px;
@@ -3083,6 +3049,156 @@ body[data-theme="light"] .profile-data-note { color: #554e47; }
   }
 }
 
+/* Centered opening disclosure replaces the old top-of-page development banner. */
+body.development-notice-open { overflow: hidden; }
+.development-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.78);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.development-dialog {
+  width: min(100%, 390px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 13px;
+  padding: 24px 21px 20px;
+  color: var(--ink);
+  text-align: center;
+  border: 1px solid var(--line-warm);
+  border-radius: 24px;
+  background: var(--surface);
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.62);
+  animation: tipIn 180ms ease;
+}
+.development-dialog-icon {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+  border: 1px solid var(--line-warm);
+  border-radius: 17px;
+  background: color-mix(in srgb, var(--gold) 8%, transparent);
+}
+.development-dialog .view-kicker { margin: 0 0 5px; }
+.development-dialog h2 { color: var(--ink); font-size: 1.05rem; }
+.development-dialog > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+.development-dialog > p b { color: var(--gold); }
+.development-dialog .primary-button { width: 100%; margin-top: 2px; }
+
+/* Permanent copy inside Settings so the disclosure remains available after dismissal. */
+.settings-development-note {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  padding: 12px;
+  color: var(--gold);
+  border: 1px solid var(--line-warm);
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--gold) 6%, transparent);
+}
+.settings-development-note p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+.settings-development-note b { color: var(--gold); }
+
+body[data-theme="light"] .development-dialog {
+  color: #171411;
+  background: #fffdf8;
+  box-shadow: 0 22px 60px rgba(23, 20, 17, 0.24);
+}
+body[data-theme="light"] .development-dialog > p,
+body[data-theme="light"] .settings-development-note p { color: #554e47; }
+
+@media (max-width: 600px), (hover: none) and (pointer: coarse) {
+  .development-modal {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .development-dialog { animation: none; }
+}
+
+/* Extended FAB cue makes the primary record-expense action obvious without adding another card. */
+.fab {
+  animation: fabAttention 1.05s ease-in-out 1.1s 3;
+}
+.fab svg { position: relative; z-index: 2; }
+.fab-label {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 10px);
+  z-index: 2;
+  min-width: 118px;
+  padding: 9px 12px;
+  transform: translateY(-50%);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 760;
+  letter-spacing: 0.02em;
+  text-align: center;
+  white-space: nowrap;
+  border: 1px solid var(--line-warm);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+}
+.fab-label::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -5px;
+  width: 8px;
+  height: 8px;
+  transform: translateY(-50%) rotate(45deg);
+  border-top: 1px solid var(--line-warm);
+  border-right: 1px solid var(--line-warm);
+  background: var(--surface);
+}
+@keyframes fabAttention {
+  0%, 100% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-3px) scale(1.06); }
+  70% { transform: translateY(0) scale(0.98); }
+}
+.fab:hover .fab-label,
+.fab:focus-visible .fab-label {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+body[data-theme="light"] .fab-label {
+  color: #fff;
+  border-color: #171411;
+  background: #171411;
+}
+body[data-theme="light"] .fab-label::after {
+  border-color: #171411;
+  background: #171411;
+}
+body[data-theme="light"] .fab:hover .fab-label,
+body[data-theme="light"] .fab:focus-visible .fab-label { color: #fff; }
+@media (max-width: 360px) {
+  .fab-label { min-width: 104px; padding: 8px 10px; font-size: 0.66rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fab { animation: none; }
+}
+
   </style>
 </head>
 <body data-theme="cash">
@@ -3104,16 +3220,6 @@ body[data-theme="light"] .profile-data-note { color: #554e47; }
       <span class="cash-note cash-note-green"></span><span class="cash-note cash-note-yellow"></span>
       <span class="cash-note cash-note-purple"></span><span class="cash-note cash-note-orange"></span>
     </div>
-  </div>
-
-  <!-- Session-dismissible warning shown while the product is still under development. -->
-  <div class="dev-banner" id="devBanner" role="status">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
-      <path d="M12 9v4M12 17h.01"/>
-    </svg>
-    <span><b>Development build.</b> This app is still being built. Features may change and your data can be lost between updates.</span>
-    <button type="button" id="dismissDevBanner" aria-label="Dismiss warning">&times;</button>
   </div>
 
   <!-- Main application shell: one visible tab at a time. -->
@@ -3376,8 +3482,9 @@ body[data-theme="light"] .profile-data-note { color: #554e47; }
   </main>
 
   <!-- Global add-expense action, kept above the fixed bottom navigation. -->
-  <button class="fab" id="addButton" type="button" aria-label="Add expense">
-    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" focusable="false">
+  <button class="fab" id="addButton" type="button" aria-label="Record a new expense">
+    <span class="fab-label" aria-hidden="true">Record expense</span>
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" focusable="false">
       <path d="M12 5v14M5 12h14"/>
     </svg>
   </button>
@@ -3626,6 +3733,13 @@ body[data-theme="light"] .profile-data-note { color: #554e47; }
         <h2>Settings</h2>
         <button class="close-button" id="closeSettings" type="button" aria-label="Close settings">×</button>
       </div>
+
+      <!-- Permanent copy of the opening development disclosure. -->
+      <div class="settings-development-note" role="note">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+        <p><b>Development build.</b> This app is still being built. Features may change and your data can be lost between updates.</p>
+      </div>
+
       <section class="account" id="accountBlock">
         <div class="account-intro" id="accountIntro">
           <strong>Back up &amp; sync</strong>
@@ -3723,6 +3837,21 @@ body[data-theme="light"] .profile-data-note { color: #554e47; }
       <button class="secondary-button" id="clearButton" type="button">Erase all data</button>
       <p class="panel-note">Everything lives in this browser's local storage. Clearing site data deletes it permanently.</p>
     </div>
+  </div>
+
+  <!-- Opening disclosure shown in the center every time the application starts. -->
+  <div class="development-modal" id="devBanner" hidden>
+    <section class="development-dialog" role="dialog" aria-modal="true" aria-labelledby="developmentDialogTitle">
+      <span class="development-dialog-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+      </span>
+      <div>
+        <p class="view-kicker">Important notice</p>
+        <h2 id="developmentDialogTitle">Development build</h2>
+      </div>
+      <p><b>Development build.</b> This app is still being built. Features may change and your data can be lost between updates.</p>
+      <button class="primary-button" type="button" id="dismissDevBanner">I understand</button>
+    </section>
   </div>
 
   <!-- Developer information dialog opened from Settings. -->
@@ -5792,13 +5921,20 @@ $("deleteEntry").addEventListener("click", () => {
    Settings and wiring
    ============================================================ */
 
-/* The development warning stays dismissed for the session only, never permanently. */
-const DEV_BANNER_KEY = "saan-napunta-dev-banner";
-if (sessionStorage.getItem(DEV_BANNER_KEY) === "dismissed") $("devBanner").hidden = true;
-$("dismissDevBanner").addEventListener("click", () => {
+/** Shows the blocking development disclosure once on every application start. */
+function showDevelopmentNotice() {
+  $("devBanner").hidden = false;
+  document.body.classList.add("development-notice-open");
+  setTimeout(() => $("dismissDevBanner").focus(), 0);
+}
+
+/** Acknowledges the disclosure for this page lifetime only. */
+function dismissDevelopmentNotice() {
   $("devBanner").hidden = true;
-  sessionStorage.setItem(DEV_BANNER_KEY, "dismissed");
-});
+  document.body.classList.remove("development-notice-open");
+}
+
+$("dismissDevBanner").addEventListener("click", dismissDevelopmentNotice);
 
 /* ---------- amount steppers ---------- */
 
@@ -6111,6 +6247,10 @@ $("clearButton").addEventListener("click", () => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    if (!$("devBanner").hidden) {
+      dismissDevelopmentNotice();
+      return;
+    }
     if (!$("lightbox").hidden) {
       closeLightbox();
       return;
@@ -6904,6 +7044,7 @@ function registerServiceWorker() {
     const onboardingShown = maybeShowOnboarding();
     if (!onboardingShown) applyLaunchRoute();
     registerServiceWorker();
+    showDevelopmentNotice();
   }, 260);
 })();
 

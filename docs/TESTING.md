@@ -4,12 +4,22 @@ Manual checklist — both builds are dependency-free, so there is no test runner
 
 ## Web
 
+### Development disclosure
+
+1. Every fresh page/app opening shows the warning centered above all other content.
+2. **I understand** closes it; reopening/reloading the app shows it again.
+3. The Home screen has no top warning banner.
+4. Settings contains a permanent readable copy in every theme.
+5. Escape closes the popup and returns normal app interaction.
+
 ```bash
 python3 tools/build_web_preview.py
 python3 -m http.server 8080 --directory web
 ```
 
 1. **First run** — empty state shows "Tap + to record your first gastos." and ₱0.00.
+- **FAB emphasis** — the larger plus and Record expense callout remain visible above the
+  bottom navigation; the entrance pulse stops after three cycles and is absent in reduced motion.
 2. **Add** — tap +, enter 250, pick Transport, save. Total, Today, Entries and the
    category bar all update; a toast confirms.
 3. **Validation** — save with an empty or 0 amount → toast, sheet stays open.

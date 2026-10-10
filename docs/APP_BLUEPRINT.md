@@ -145,6 +145,14 @@ amounts, categories and notes sync."
 On completion the profile is saved and the dashboard appears with a "Hi, {name}"
 greeting above the month label. Onboarding never appears again unless data is erased.
 
+## 3c. Opening development notice
+
+Every application start presents a centered modal before normal interaction. It states:
+“Development build. This app is still being built. Features may change and your data can be
+lost between updates.” The user dismisses it with **I understand**. It is not stored as a
+permanent dismissal, so a new app opening shows it again. The former top-of-Home banner is
+removed, while a compact permanent copy remains in Settings.
+
 ## 4. Screen: Dashboard (the only main screen)
 
 Vertical scroll, top to bottom:
@@ -184,12 +192,11 @@ Vertical scroll, top to bottom:
 
 5. **Footer** — a gold development-build warning, the privacy line, and the credit line.
 
-7. **Floating action button** — a 60 px circle pinned to the bottom-right of the content
-   column, 18 px from the edge on phones and clear of the home indicator. Warm gradient
-   (yellow into orange into a darker orange) with a top-left specular highlight, an inset
-   rim light, and a soft purple halo behind it so it separates from the warm background.
-   The plus is an **SVG icon, never a text glyph** — a typed "+" sits optically high in most
-   fonts and cannot be centred reliably. Hover lifts it 2 px, press scales it to 0.93.
+7. **Floating action button** — a 60 px theme-aware circle pinned to the bottom-right of the
+   content column and clear of the Home indicator. A connected **Record expense** callout
+   makes the primary action explicit, while a three-cycle entrance pulse attracts attention
+   without animating forever. The plus is a larger SVG icon, never a text glyph. Hover lifts
+   the action, press scales it, and reduced-motion mode removes the pulse.
 
 ## 4b. Screen: Expense detail
 
@@ -242,6 +249,7 @@ pressing Escape closes without saving.
 
 A second bottom sheet with the same chrome.
 
+- **Development disclosure** — permanent compact copy of the opening warning.
 - **Back up & sync** — account card, described in 10b.
 - Profile editing is intentionally absent; it lives in the Profile tab.
 - Budget controls are intentionally absent; each budget is set directly on Home while viewing

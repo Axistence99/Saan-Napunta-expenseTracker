@@ -8,6 +8,12 @@
 
 ## Screens
 
+### Opening development notice
+- Centered blocking popup appears on every app start
+- Contains the development-risk disclosure and an **I understand** action
+- The old top-of-Home banner is removed
+- A permanent copy of the same disclosure remains visible in Settings
+
 ### Onboarding (first launch)
 1. Profile — first name (required), last name, birthdate, province (82 provinces grouped by
    region, plus Metro Manila), sex at birth, occupation (Student / Employee /
@@ -23,7 +29,7 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 - Summary card: active-period label, big total, budget meter, Today and Entries; a highlighted set-budget action appears when neither a custom nor matching default budget exists
 - By-category card: active-range label and share bars sorted high → low
 - Recent card: entries grouped by day with a per-day subtotal
-- Floating action button: add expense
+- Emphasized floating action button: larger plus, persistent “Record expense” callout and short entrance pulse
 
 ### Records
 - Day / Week / Month / Year controls independently scope overview totals, trend and category analytics
