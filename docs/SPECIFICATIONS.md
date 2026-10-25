@@ -31,6 +31,7 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 - Recent card: entries grouped by day with a per-day subtotal
 - Emphasized floating action button: larger plus, persistent “Record expense” callout and short entrance pulse
 - Bottom-tab and Settings navigation writes browser history so Android/iOS Back returns to the previous tab before exiting
+- The Day / Week / Month / Year Home scope persists and reopens as the next-launch landing view
 
 ### Records
 - Day / Week / Month / Year controls independently scope overview totals, trend and category analytics
@@ -38,6 +39,7 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 - A compact **Choose dates** button near the top opens the calendar as a mobile bottom sheet
 - The popup calendar supports multiple dates; tapping a selected date again removes it
 - Totals and the record list combine all selected dates without keeping the calendar in the scroll flow
+- Every Records row shows the local clock time when the expense was originally recorded
 
 ### Entry sheet / EntryActivity
 - Amount field with currency symbol (numeric keypad, required, must be > 0)

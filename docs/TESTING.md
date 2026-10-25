@@ -22,6 +22,10 @@ python3 -m http.server 8080 --directory web
   bottom navigation; the entrance pulse stops after three cycles and is absent in reduced motion.
 - **Mobile Back** — navigate Home → Records → Profile, then press Back twice; Records and Home
   return in order. Open Settings and press Back; Settings closes without exiting the PWA.
+- **Editor Back** — open Add Expense and press the device Back button. The editor closes instead
+  of exiting. Change a field first; cancelling the discard confirmation keeps the editor open.
+- **Remembered scope** — select Day, Week or Year, reload/reopen, and verify that scope returns
+  with the current date as its anchor.
 2. **Add** — tap +, enter 250, pick Transport, save. Total, Today, Entries and the
    category bar all update; a toast confirms.
 3. **Validation** — save with an empty or 0 amount → toast, sheet stays open.
@@ -133,6 +137,8 @@ cd android && ./gradlew assembleDebug
 5. The full calendar is absent from the normal scroll flow. **Choose dates** opens it as a
    bottom sheet; Done, close, backdrop and Escape dismiss it.
 6. The popup supports multiple dates, and tapping a selected date again removes it.
+7. Each selected-date record shows `Recorded h:mm AM/PM` (or the device locale equivalent)
+   from its persisted creation timestamp; editing must not replace the original time.
 
 ## PWA, shortcuts and Android widget
 

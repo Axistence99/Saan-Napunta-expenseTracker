@@ -309,7 +309,8 @@ Config {
   budgetDefaults object  independent scope defaults, e.g. { day: 500, week: 3000, month: 12000, year: 0 }
   budgets        object  exact-period custom budgets, e.g. { "m:2026-08": 15000, "d:2026-08-23": 1200 }
   currency     string   always "₱" while other currencies are locked
-  theme        string   "gradient" | "monochrome" | "cash"
+  theme        string   "gradient" | "monochrome" | "cash" | "light" | "dark"
+  lastScope    string   last Home view: "day" | "week" | "month" | "year"
   weekStart    number   0 = Sunday, 1 = Monday
   onboarded    boolean  false shows the onboarding flow
 }

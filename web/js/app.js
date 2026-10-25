@@ -11,7 +11,7 @@
 
 const ENTRIES_KEY = "saan-napunta-entries";
 const CONFIG_KEY = "saan-napunta-config";
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 /**
  * Locked to the Philippine peso for now. The config field and every formatting path stay
  * currency-aware, so enabling more later means extending this list and restoring the
@@ -49,6 +49,7 @@ const DEFAULT_CONFIG = {
   budgets: {}, // exact-period budgets keyed by range, e.g. "m:2026-08" or "d:2026-08-23"
   currency: CURRENCY,
   theme: "cash",
+  lastScope: "month",
   weekStart: 1,
   onboarded: false
 };
@@ -196,6 +197,15 @@ function migrateConfigV2ToV3(raw) {
   };
 }
 
+/** Adds the persisted Home range scope used as the next-launch landing view. */
+function migrateConfigV3ToV4(raw) {
+  return {
+    ...raw,
+    lastScope: SCOPES.includes(raw.lastScope) ? raw.lastScope : "month",
+    schemaVersion: 4
+  };
+}
+
 /** Runs every required migration in order and safely normalizes unknown version values. */
 function migrateConfig(raw) {
   let next = raw && typeof raw === "object" ? { ...raw } : {};
@@ -204,7 +214,11 @@ function migrateConfig(raw) {
     next = migrateConfigV1ToV2(next);
     version = 2;
   }
-  if (version < 3) next = migrateConfigV2ToV3(next);
+  if (version < 3) {
+    next = migrateConfigV2ToV3(next);
+    version = 3;
+  }
+  if (version < 4) next = migrateConfigV3ToV4(next);
   return { ...next, schemaVersion: SCHEMA_VERSION };
 }
 
@@ -305,6 +319,7 @@ function sanitiseConfig(raw) {
     budgetDefaults: sanitiseDefaults(raw),
     budgets: sanitiseBudgets(raw.budgets),
     theme: THEMES[raw.theme] ? raw.theme : "cash",
+    lastScope: SCOPES.includes(raw.lastScope) ? raw.lastScope : "month",
     weekStart: Number(raw.weekStart) === 0 ? 0 : 1,
     onboarded: Boolean(raw.onboarded)
   };
@@ -1260,6 +1275,12 @@ function formatStamp(ms) {
   });
 }
 
+/** Formats the original record timestamp as a compact local clock time. */
+function recordedTime(ms) {
+  if (!ms) return "";
+  return new Date(ms).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+}
+
 /** Builds one escaped definition-list row for the expense detail sheet. */
 function detailRow(term, value) {
   return `<div><dt>${escapeHtml(term)}</dt><dd>${escapeHtml(value)}</dd></div>`;
@@ -1449,6 +1470,7 @@ function openEntrySheet(id = null) {
   renderPhotoStrip();
   entryDirty = false;
   $("entrySheet").hidden = false;
+  pushAppLayer("entry");
   setTimeout(() => $("amountInput").focus(), 60);
 }
 
@@ -1461,6 +1483,19 @@ function closeEntrySheet(force = false) {
   draftPhotos = [];
   entryDirty = false;
   return true;
+}
+
+/** Uses the editor's history entry so mobile Back and the close button behave identically. */
+function closeEntryFromUi() {
+  if (history.state?.saanLayer === "entry") history.back();
+  else closeEntrySheet();
+}
+
+/** Removes a saved/deleted editor layer without asking to discard an already committed draft. */
+function closeCommittedEntry() {
+  const ownsHistory = history.state?.saanLayer === "entry";
+  closeEntrySheet(true);
+  if (ownsHistory) history.back();
 }
 
 /* ============================================================
@@ -1534,7 +1569,7 @@ $("entryForm").addEventListener("submit", (event) => {
   const wasEditing = editingId;
   const photos = draftPhotos.slice();
   view = { ...view, anchor: payload.date };
-  closeEntrySheet(true);
+  closeCommittedEntry();
 
   commit(
     () => {
@@ -1576,7 +1611,7 @@ function savePhotos(id, photos) {
 $("deleteEntry").addEventListener("click", () => {
   const id = editingId;
   if (!id) return;
-  closeEntrySheet(true);
+  closeCommittedEntry();
   commit(() => {
     entries = entries.map((e) => (e.id === id ? tombstone(e) : e));
     media.remove(id);
@@ -1725,14 +1760,20 @@ $("entryForm").addEventListener("input", () => {
 $("entryForm").addEventListener("change", () => {
   if (!$("entrySheet").hidden) entryDirty = true;
 });
-$("closeEntry").addEventListener("click", () => closeEntrySheet());
+$("closeEntry").addEventListener("click", closeEntryFromUi);
 $("closeSettings").addEventListener("click", closeSettingsFromUi);
 
-$("scopeTabs").addEventListener("click", (event) => {
+$("scopeTabs").addEventListener("click", async (event) => {
   const tab = event.target.closest("button[data-scope]");
   if (!tab || tab.dataset.scope === view.scope) return;
   view = { scope: tab.dataset.scope, anchor: view.anchor };
+  config = { ...config, lastScope: view.scope };
   render();
+  try {
+    await storage.writeConfig(config);
+  } catch {
+    toast("Could not remember the selected view.", "error");
+  }
 });
 
 $("rangePrev").addEventListener("click", () => {
@@ -1905,7 +1946,7 @@ $("clearButton").addEventListener("click", () => {
 [$("entrySheet"), $("settingsPanel"), $("detailSheet")].forEach((sheet) => {
   sheet.addEventListener("click", (event) => {
     if (event.target === sheet) {
-      if (sheet === $("entrySheet")) closeEntrySheet();
+      if (sheet === $("entrySheet")) closeEntryFromUi();
       else if (sheet === $("settingsPanel")) closeSettingsFromUi();
       else sheet.hidden = true;
       tooltip.hide();
@@ -1935,7 +1976,10 @@ document.addEventListener("keydown", (event) => {
       closeSettingsFromUi();
       return;
     }
-    if (!$("entrySheet").hidden && !closeEntrySheet()) return;
+    if (!$("entrySheet").hidden) {
+      closeEntryFromUi();
+      return;
+    }
     closeDetailSheet();
     tooltip.hide();
   }
@@ -1965,8 +2009,14 @@ function setBottomNavState(name) {
 function pushAppHistory(viewName, settingsOpen = false) {
   if (!appHistoryReady) return;
   const state = history.state || {};
-  if (state.saanView === viewName && Boolean(state.saanSettings) === settingsOpen) return;
-  history.pushState({ ...state, saanView: viewName, saanSettings: settingsOpen }, "");
+  if (state.saanView === viewName && Boolean(state.saanSettings) === settingsOpen && !state.saanLayer) return;
+  history.pushState({ ...state, saanView: viewName, saanSettings: settingsOpen, saanLayer: null }, "");
+}
+
+/** Adds an editor/detail layer so hardware Back closes it before leaving the installed app. */
+function pushAppLayer(layerName) {
+  if (!appHistoryReady || history.state?.saanLayer === layerName) return;
+  history.pushState({ ...(history.state || {}), saanView: activeAppView, saanSettings: false, saanLayer: layerName }, "");
 }
 
 /** Shows one main tab, optionally recording the navigation as a browser history entry. */
@@ -2012,6 +2062,16 @@ function closeSettingsFromUi() {
 window.addEventListener("popstate", (event) => {
   const state = event.state;
   if (!state || !state.saanView) return;
+
+  /* Hardware Back first closes the editor. A cancelled discard recreates its history entry. */
+  if (!$("entrySheet").hidden) {
+    const closed = closeEntrySheet();
+    if (!closed) {
+      pushAppLayer("entry");
+      return;
+    }
+  }
+
   $("settingsPanel").hidden = true;
   showAppView(state.saanView, { fromHistory: true });
   if (state.saanSettings) openSettingsFromNav({ fromHistory: true });
@@ -2276,7 +2336,12 @@ function renderRecordsView() {
   selected.forEach((entry) => {
     const category = catById(entry.category);
     const title = entry.item || entry.merchant || category.label;
-    const subtitle = [prettyDay(entry.date), category.label, entry.note].filter(Boolean).join(" · ");
+    const subtitle = [
+      prettyDay(entry.date),
+      recordedTime(entry.created) ? `Recorded ${recordedTime(entry.created)}` : "",
+      category.label,
+      entry.note
+    ].filter(Boolean).join(" · ");
     const li = document.createElement("li");
     li.className = "row";
     const button = document.createElement("button");
@@ -2722,6 +2787,7 @@ function registerServiceWorker() {
 
   config = loadedConfig;
   entries = loadedEntries;
+  view = { scope: config.lastScope, anchor: todayKey() };
   applyTheme(config.theme);
   history.replaceState({ ...(history.state || {}), saanView: "home", saanSettings: false }, "");
   appHistoryReady = true;
