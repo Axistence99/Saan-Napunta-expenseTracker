@@ -154,15 +154,19 @@ cd android && ./gradlew assembleDebug
 
 ## PWA, shortcuts and Android widget
 
-1. Install from Android Chrome; the app opens in standalone portrait mode.
-2. Visit once online, close the browser, go offline and reopen from the Home Screen.
-3. Android PWA long-press shows Add Expense and Records; each route opens the correct view.
-4. A first-run shortcut waits until onboarding finishes, then applies its requested route.
-5. Native Android long-press shows Add expense and Records.
-6. Add the native widget; today and monthly totals match the Android ledger.
-7. Tap the widget Add Expense button; `EntryActivity` opens.
-8. Save or delete an Android expense; every placed widget refreshes.
-9. iOS Safari Add to Home Screen uses the temporary Apple Touch icon and standalone metadata.
+1. Open `/install.html` on Android, iOS and desktop; verify the correct device-specific panel appears.
+2. On eligible Android/desktop Chrome, the custom Install button opens the browser's real install prompt.
+3. On iOS, the page shows Safari Share → Add to Home Screen instructions and Copy link feedback.
+4. Settings → Install this app opens the installation page.
+5. Install from Android Chrome; the app opens in standalone portrait mode.
+6. Visit once online, close the browser, go offline and reopen from the Home Screen.
+7. Android PWA long-press shows Add Expense and Records; each route opens the correct view.
+8. A first-run shortcut waits until onboarding finishes, then applies its requested route.
+9. Native Android long-press shows Add expense and Records.
+10. Add the native widget; today and monthly totals match the Android ledger.
+11. Tap the widget Add Expense button; `EntryActivity` opens.
+12. Save or delete an Android expense; every placed widget refreshes.
+13. iOS Safari Add to Home Screen uses the owner-provided Apple Touch icon and standalone metadata.
 
 ## Themes
 

@@ -23,7 +23,7 @@
  */
 
 /* Versioned cache bucket. Changing the suffix causes the activate handler to remove v1, v2, etc. */
-const CACHE_NAME = "saan-napunta-shell-v3";
+const CACHE_NAME = "saan-napunta-shell-v4";
 
 /*
  * Minimum files required to launch, identify and reinstall the application offline.
@@ -32,6 +32,7 @@ const CACHE_NAME = "saan-napunta-shell-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./install.html",
   "./delete-data.html",
   "./manifest.webmanifest",
   "./icons/icon-192.png",

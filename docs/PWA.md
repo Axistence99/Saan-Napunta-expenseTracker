@@ -1,5 +1,15 @@
 # PWA, Home Screen Shortcuts and Widgets
 
+## Short installation page
+
+The public installer is:
+
+```text
+https://axistence99.github.io/Saan-Napunta-expenseTracker/install.html
+```
+
+It detects Android, iOS/iPadOS, desktop, and standalone mode. Android/desktop receives the browser's official install prompt when available; iOS receives Safari Add to Home Screen instructions. Settings links directly to this page.
+
 ## Web installation
 
 `web/manifest.webmanifest` makes the GitHub Pages build installable with:

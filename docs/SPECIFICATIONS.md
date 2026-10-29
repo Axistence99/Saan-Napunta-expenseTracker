@@ -95,6 +95,8 @@ drawables on Android). No emoji, no icon font, no image assets.
 ## Installation and Home Screen integration
 
 - Installable PWA with standalone portrait display
+- Device-aware `install.html` page with Android/desktop prompt and iOS Safari instructions
+- Settings includes an Install this app link
 - Service worker supports offline reopening after one successful online visit
 - Android PWA shortcuts: Add Expense and Records
 - Native Android long-press shortcuts: Add Expense and Records

@@ -3449,3 +3449,4 @@ body[data-theme="gradient"] .developer-avatar {
   border-color: var(--gold);
   box-shadow: 0 8px 24px rgba(225, 185, 87, 0.12);
 }
+.settings-link-row { text-decoration: none; }

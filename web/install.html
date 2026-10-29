@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#061116" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Install Saan Napunta?</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <style>
+    :root {
+      --ink: #f7f2df;
+      --muted: #aab7b8;
+      --gold: #d3ad38;
+      --line: rgba(222, 219, 187, 0.17);
+      --panel: rgba(9, 27, 31, 0.92);
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      min-height: 100svh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: max(20px, env(safe-area-inset-top)) 18px max(20px, env(safe-area-inset-bottom));
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 8% 10%, rgba(47, 113, 143, 0.32), transparent 38%),
+        radial-gradient(circle at 92% 90%, rgba(128, 97, 163, 0.25), transparent 40%),
+        #061116;
+    }
+    main {
+      width: min(100%, 440px);
+      padding: 24px 20px 20px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: var(--panel);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand img { width: 76px; height: 76px; border-radius: 20px; }
+    h1 { margin: 0; font-size: 1.65rem; letter-spacing: -0.035em; }
+    .subtitle { margin: 5px 0 0; color: var(--muted); font-size: 0.82rem; line-height: 1.45; }
+    .device-pill {
+      display: inline-flex;
+      margin: 18px 0 0;
+      padding: 6px 10px;
+      color: var(--gold);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid rgba(211, 173, 56, 0.3);
+      border-radius: 999px;
+      background: rgba(211, 173, 56, 0.07);
+    }
+    section { margin-top: 16px; }
+    h2 { margin: 0 0 9px; font-size: 0.92rem; }
+    p, li { color: var(--muted); font-size: 0.82rem; line-height: 1.55; }
+    ol { margin: 8px 0 0; padding-left: 21px; }
+    li + li { margin-top: 6px; }
+    .primary, .secondary {
+      width: 100%;
+      min-height: 48px;
+      display: grid;
+      place-items: center;
+      margin-top: 12px;
+      padding: 12px 15px;
+      font: inherit;
+      font-weight: 750;
+      text-decoration: none;
+      border-radius: 15px;
+      cursor: pointer;
+    }
+    .primary { color: #171106; border: 1px solid var(--gold); background: var(--gold); }
+    .primary:disabled { opacity: 0.5; cursor: wait; }
+    .secondary { color: var(--ink); border: 1px solid var(--line); background: transparent; }
+    .share-symbol {
+      display: inline-grid;
+      place-items: center;
+      width: 25px;
+      height: 25px;
+      margin: 0 3px;
+      color: #4da3ff;
+      font-size: 1.15rem;
+      vertical-align: middle;
+      border: 1px solid #4da3ff;
+      border-radius: 7px;
+    }
+    .status { min-height: 1.3em; margin: 10px 0 0; text-align: center; font-size: 0.72rem; }
+    .privacy { margin: 16px 0 0; font-size: 0.68rem; text-align: center; }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: max(20px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      padding: 9px 13px;
+      color: #fff;
+      font-size: 0.76rem;
+      border-radius: 999px;
+      background: #171411;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="brand">
+      <img src="icons/icon-192.png" alt="Saan Napunta? wallet icon" />
+      <div>
+        <h1>Install Saan Napunta?</h1>
+        <p class="subtitle">Open your Philippine peso expense tracker from the Home Screen and reopen it offline.</p>
+      </div>
+    </div>
+
+    <span class="device-pill" id="deviceLabel">Checking your device…</span>
+
+    <section id="installedPanel" hidden>
+      <h2>Already installed</h2>
+      <p>This app is currently running from your Home Screen or standalone application window.</p>
+      <a class="primary" href="./">Open Saan Napunta?</a>
+    </section>
+
+    <section id="androidPanel" hidden>
+      <h2>Install on Android</h2>
+      <p id="androidHelp">Use Chrome’s secure installation prompt to add the app.</p>
+      <button class="primary" id="installButton" type="button" disabled>Preparing install…</button>
+      <ol id="androidFallback" hidden>
+        <li>Open this page in Google Chrome.</li>
+        <li>Tap Chrome’s three-dot menu.</li>
+        <li>Select <b>Install app</b> or <b>Add to Home screen</b>.</li>
+      </ol>
+    </section>
+
+    <section id="iosPanel" hidden>
+      <h2>Install on iPhone or iPad</h2>
+      <ol>
+        <li>Open this page in <b>Safari</b>.</li>
+        <li>Tap Share <span class="share-symbol" aria-label="Share icon">↑</span>.</li>
+        <li>Scroll down and tap <b>Add to Home Screen</b>.</li>
+        <li>Tap <b>Add</b> in the upper-right corner.</li>
+      </ol>
+      <button class="secondary" id="copyLinkButton" type="button">Copy installation link</button>
+    </section>
+
+    <section id="desktopPanel" hidden>
+      <h2>Install on this computer</h2>
+      <p>Use the install icon in the browser address bar, or open the browser menu and choose <b>Install Saan Napunta?</b>.</p>
+      <button class="primary" id="desktopInstallButton" type="button" disabled>Preparing install…</button>
+    </section>
+
+    <a class="secondary" href="./">Continue in browser</a>
+    <p class="status" id="installStatus" role="status" aria-live="polite"></p>
+    <p class="privacy">Installation is optional. Your expense data remains in this browser unless you enable sync.</p>
+  </main>
+
+  <script>
+    let deferredInstallPrompt = null;
+    const $ = (id) => document.getElementById(id);
+    const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/i.test(ua);
+
+    function showPanel(id, label) {
+      $(id).hidden = false;
+      $("deviceLabel").textContent = label;
+    }
+
+    if (standalone) showPanel("installedPanel", "Installed app");
+    else if (isIOS) showPanel("iosPanel", "iPhone / iPad");
+    else if (isAndroid) showPanel("androidPanel", "Android");
+    else showPanel("desktopPanel", "Desktop browser");
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      const button = isAndroid ? $("installButton") : $("desktopInstallButton");
+      button.disabled = false;
+      button.textContent = "Install Saan Napunta?";
+      $("androidFallback").hidden = true;
+      $("installStatus").textContent = "Installation is ready.";
+    });
+
+    async function requestInstall() {
+      if (!deferredInstallPrompt) return;
+      const prompt = deferredInstallPrompt;
+      deferredInstallPrompt = null;
+      await prompt.prompt();
+      const choice = await prompt.userChoice;
+      $("installStatus").textContent = choice.outcome === "accepted" ? "Installation started." : "Installation cancelled.";
+    }
+
+    $("installButton").addEventListener("click", requestInstall);
+    $("desktopInstallButton").addEventListener("click", requestInstall);
+
+    setTimeout(() => {
+      if (!deferredInstallPrompt && !standalone && isAndroid) {
+        $("installButton").hidden = true;
+        $("androidFallback").hidden = false;
+        $("installStatus").textContent = "If no prompt appears, use Chrome’s menu.";
+      }
+    }, 1800);
+
+    $("copyLinkButton").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        $("installStatus").textContent = "Installation link copied.";
+      } catch {
+        $("installStatus").textContent = "Copy the address from Safari’s address bar.";
+      }
+    });
+
+    window.addEventListener("appinstalled", () => {
+      $("installStatus").textContent = "Saan Napunta? was installed.";
+    });
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").catch(() => {
+        $("installStatus").textContent = "Offline setup is unavailable right now.";
+      });
+    }
+  </script>
+</body>
+</html>

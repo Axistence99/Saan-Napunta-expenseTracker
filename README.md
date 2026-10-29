@@ -73,6 +73,14 @@ saan-napunta/
                 └── xml/
 ```
 
+## Install the web app
+
+Use the device-aware installer:
+
+https://axistence99.github.io/Saan-Napunta-expenseTracker/install.html
+
+It offers the browser install prompt on supported Android/desktop browsers and Safari Add to Home Screen instructions on iPhone and iPad.
+
 ## Quick start: web prototype
 
 ```bash
