@@ -36,7 +36,7 @@
 
   <!-- Main application shell: one visible tab at a time. -->
   <main class="shell">
-    <!-- Home tab: active-range total, budgets, category breakdown and recent entries. -->
+    <!-- Home tab: active-range total, budgets and recent entries. Category analytics lives in Records. -->
     <section class="app-view" id="homeView" data-view="home">
     <div class="heading-row">
       <h1>Saan Napunta?</h1>
@@ -91,17 +91,6 @@
         <div><span>Today</span><strong id="todayTotal">₱0.00</strong></div>
         <div><span>Entries</span><strong id="entryCount">0</strong></div>
       </div>
-    </section>
-
-    <section class="panel" id="breakdownPanel">
-      <div class="panel-heading">
-        <div class="panel-title-group">
-          <h2>By category</h2>
-          <span class="range-count" id="categoryRangeLabel">Month</span>
-        </div>
-      </div>
-      <ul class="breakdown" id="breakdown"></ul>
-      <p class="empty-note" id="breakdownEmpty">No spending recorded for this month yet.</p>
     </section>
 
     <section class="panel">
@@ -528,10 +517,16 @@
         <input id="photoInput" type="file" accept="image/*" capture="environment" multiple hidden />
       </div>
 
-      <label>
-        Date
-        <input id="dateInput" type="date" required />
-      </label>
+      <div class="field-pair">
+        <label>
+          Date
+          <input id="dateInput" type="date" required />
+        </label>
+        <label>
+          Time of spending
+          <input id="timeInput" type="time" required />
+        </label>
+      </div>
 
       <button class="primary-button" id="saveEntry" type="submit">Save expense</button>
       <button class="text-button danger" id="deleteEntry" type="button" hidden>Delete this entry</button>
@@ -603,7 +598,7 @@
         <div class="theme-options" id="themeOptions" role="radiogroup" aria-label="Application theme">
           <button class="theme-option" type="button" role="radio" data-theme-option="gradient" aria-checked="false">
             <span class="theme-preview preview-gradient" aria-hidden="true"></span>
-            <span><b>Goldrora</b><small>Woven purple and gold aurora</small></span>
+            <span><b>Goldrora</b><small>Restrained black and gold aurora</small></span>
             <i aria-hidden="true"></i>
           </button>
           <button class="theme-option" type="button" role="radio" data-theme-option="monochrome" aria-checked="false">
@@ -651,6 +646,24 @@
     </div>
   </div>
 
+  <!-- Styled confirmation used instead of the browser's unthemeable confirm dialog. -->
+  <div class="discard-modal" id="discardChangesModal" hidden>
+    <section class="discard-dialog" role="alertdialog" aria-modal="true" aria-labelledby="discardChangesTitle" aria-describedby="discardChangesDescription">
+      <span class="discard-dialog-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19Z"/><path d="M12 9v5M12 18h.01"/></svg>
+      </span>
+      <div class="discard-dialog-copy">
+        <p class="view-kicker">Unsaved expense</p>
+        <h2 id="discardChangesTitle">Discard your changes?</h2>
+        <p id="discardChangesDescription">Your amount, category, description, date, and attached photos have not been saved.</p>
+      </div>
+      <div class="discard-dialog-actions">
+        <button class="secondary-button" id="keepEditing" type="button">Keep editing</button>
+        <button class="danger-button" id="discardChanges" type="button">Discard changes</button>
+      </div>
+    </section>
+  </div>
+
   <!-- Opening disclosure shown in the center every time the application starts. -->
   <div class="development-modal" id="devBanner" hidden>
     <section class="development-dialog" role="dialog" aria-modal="true" aria-labelledby="developmentDialogTitle">
@@ -678,13 +691,26 @@
       </div>
 
       <div class="developer-identity">
-        <span class="developer-avatar" aria-hidden="true">AO</span>
+        <img class="developer-avatar" src="images/developer-aleksis.jpg" alt="Aleksis Ong" />
         <div><strong>Aleksis Ong</strong><span>Creator and developer</span></div>
       </div>
 
       <p class="about-description">Saan Napunta? is a Philippine peso expense tracker that works offline and helps you clearly see where your money goes.</p>
 
       <button class="primary-button" id="aboutDeveloperDone" type="button">Done</button>
+    </section>
+  </div>
+
+  <!-- Hover/long-press preview for receipt photos attached to a Home Recent item. -->
+  <div class="photo-peek" id="photoPeek" hidden>
+    <section class="photo-peek-card" role="dialog" aria-modal="false" aria-labelledby="photoPeekTitle">
+      <div class="panel-heading">
+        <div><p class="view-kicker">Expense media</p><h2 id="photoPeekTitle">Receipt photos</h2></div>
+        <button class="close-button" id="closePhotoPeek" type="button" aria-label="Close photo preview">&times;</button>
+      </div>
+      <p class="photo-peek-label" id="photoPeekLabel"></p>
+      <div class="photo-peek-grid" id="photoPeekGrid"></div>
+      <p class="photo-peek-help" id="photoPeekHelp">Tap a photo to enlarge it.</p>
     </section>
   </div>
 

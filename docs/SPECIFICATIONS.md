@@ -27,8 +27,9 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 ### Dashboard
 - Header: centered app title; Settings is available only from the bottom navigation
 - Summary card: active-period label, big total, budget meter, Today and Entries; a highlighted set-budget action appears when neither a custom nor matching default budget exists
-- By-category card: active-range label and share bars sorted high → low
+- Category spending is intentionally located in Records analytics rather than duplicated on Home
 - Recent card: entries grouped by day with a per-day subtotal
+- Hovering a Recent item previews its local photos on desktop; touch long-press opens a photo preview modal
 - Emphasized floating action button: larger plus, persistent “Record expense” callout and short entrance pulse
 - Bottom-tab and Settings navigation writes browser history so Android/iOS Back returns to the previous tab before exiting
 - The Day / Week / Month / Year Home scope persists and reopens as the next-launch landing view
@@ -45,11 +46,12 @@ Skippable at any step. Sets `onboarded: true` so it never returns.
 - Amount field with currency symbol (numeric keypad, required, must be > 0)
 - Category chips (single select, defaults to Food)
 - Date picker (defaults to today)
-- Merchant presets per category, or free text
+- Editable time of spending (defaults to the current local time and cannot be in the future today)
 - Item name, 60 characters
 - Description, 200 characters
 - Up to 3 photos, device-only
 - Save; Delete shown only when editing
+- Closing a changed draft opens an in-app themed discard dialog instead of a browser-native confirm popup
 
 ### Profile
 - Editable profile fields
@@ -107,7 +109,7 @@ receipt photos, shared wallets.
 
 ## Visual language
 
-Violet-black base (`#07050B`) with a non-linear woven-aurora background: off-axis radial
-mesh, an organic conic color ribbon and subtle topographic contour rings. Ink `#F5EFE6`,
-grey `#9A93A6`, purple `#8B5CF6`, orange `#FF7E00`, yellow `#FFC53D`, gold `#E9C46A`,
-brown `#6B4A2F`, danger `#E5484D`. 22 px rounded cards on a translucent panel with blur.
+Theme-aware visual system with Philippine Cash as default. Goldrora uses a restrained black
+backdrop, one soft gold aurora and mostly solid-gold controls rather than a multicolor mesh.
+Monochrome, Light and Dark provide alternate contrast treatments. Core tokens retain ink,
+grey, muted plum, gold, brown and danger roles. Cards use 22 px rounded surfaces.

@@ -23,7 +23,7 @@
  */
 
 /* Versioned cache bucket. Changing the suffix causes the activate handler to remove v1, v2, etc. */
-const CACHE_NAME = "saan-napunta-shell-v2";
+const CACHE_NAME = "saan-napunta-shell-v3";
 
 /*
  * Minimum files required to launch, identify and reinstall the application offline.
@@ -37,7 +37,8 @@ const APP_SHELL = [
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/icon-maskable-512.png",
-  "./icons/apple-touch-icon.png"
+  "./icons/apple-touch-icon.png",
+  "./images/developer-aleksis.jpg"
 ];
 
 /*

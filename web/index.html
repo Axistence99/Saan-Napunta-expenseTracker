@@ -305,16 +305,8 @@ h2 { margin: 0; font-size: 0.95rem; letter-spacing: 0.02em; text-transform: uppe
 
 .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
-.breakdown, .entries { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.entries { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
 
-.breakdown li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
-.breakdown .glyph { font-size: 1.1rem; text-align: center; }
-.breakdown .cat-name { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-.breakdown .cat-name b { font-weight: 600; font-size: 0.92rem; }
-.breakdown .track { height: 6px; border-radius: 999px; background: rgba(244, 236, 226, 0.12); overflow: hidden; }
-.breakdown .track i { display: block; height: 100%; background: linear-gradient(90deg, var(--purple), var(--orange) 70%, var(--yellow)); }
-.breakdown .value { text-align: right; font-variant-numeric: tabular-nums; }
-.breakdown .value small { display: block; color: var(--muted); font-size: 0.72rem; }
 
 .entries li button {
   width: 100%;
@@ -507,9 +499,11 @@ select option { color: #111; }
   transform: translateX(-50%);
   padding: 10px 16px;
   font-size: 0.85rem;
+  color: #f8f5ef;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(22, 15, 30, 0.95);
+  background: rgba(18, 17, 20, 0.97);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
   animation: sheetUp 180ms ease;
 }
 
@@ -908,7 +902,6 @@ body.loaded .panel:nth-of-type(2) { animation-delay: 60ms; }
 
 .icon { display: block; flex: none; }
 
-.breakdown .glyph,
 .entries .glyph {
   display: grid;
   place-items: center;
@@ -1255,24 +1248,28 @@ textarea.invalid {
 /* Native date and time inputs are the worst offenders on phones: they carry an intrinsic
    width, refuse to shrink inside a grid cell, and render a black picker icon on our dark
    background. */
-input[type="date"] {
+input[type="date"],
+input[type="time"] {
   width: 100%;
   min-width: 0;
   appearance: none;
   -webkit-appearance: none;
 }
 
-input[type="date"]::-webkit-date-and-time-value {
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value {
   text-align: left;
   min-height: 1.2em;
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator {
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(78%) sepia(38%) saturate(560%) hue-rotate(345deg) brightness(102%);
   cursor: pointer;
   opacity: 0.9;
 }
-input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 
 /* Grid children default to min-width:auto, which lets long content force overflow. */
 .field-pair > label,
@@ -1325,8 +1322,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 .shell { padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)); }
 
 /* Long merchant names and notes should ellipsis, never widen the row. */
-.entries .meta,
-.breakdown .cat-name { min-width: 0; }
+.entries .meta { min-width: 0; }
 .entries .meta b {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2207,16 +2203,16 @@ body.about-open { overflow: hidden; }
   background: rgba(255, 255, 255, 0.025);
 }
 .developer-avatar {
-  width: 52px;
-  height: 52px;
+  width: 72px;
+  height: 72px;
   flex: none;
-  display: grid;
-  place-items: center;
-  color: var(--action-ink);
-  font-size: 0.9rem;
-  font-weight: 850;
-  border-radius: 16px;
-  background: conic-gradient(from 210deg, var(--orange), var(--yellow), var(--purple), var(--orange));
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  border: 2px solid var(--line-warm);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
 }
 .developer-identity > div { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .developer-identity strong { font-size: 1rem; }
@@ -2266,8 +2262,9 @@ body.about-open { overflow: hidden; }
 }
 .preview-gradient {
   background:
-    radial-gradient(circle at 18% 20%, #8b5cf6, transparent 46%),
-    conic-gradient(from 210deg, #07050b, #6b4a2f, #ff7e00, #e9c46a, #4c1d95, #07050b);
+    radial-gradient(circle at 68% 34%, rgba(242, 203, 103, 0.72), transparent 34%),
+    radial-gradient(circle at 26% 72%, rgba(178, 132, 43, 0.34), transparent 42%),
+    #0c0a0e;
 }
 .preview-monochrome {
   background:
@@ -2541,7 +2538,6 @@ body[data-theme="monochrome"] .panel-heading h2::after {
   background: linear-gradient(90deg, #eee, transparent);
 }
 body[data-theme="monochrome"] .entries .meta b,
-body[data-theme="monochrome"] .breakdown .cat-name b,
 body[data-theme="monochrome"] .analytics-category-main b,
 body[data-theme="monochrome"] .profile-card h2 {
   color: #f4f4f4;
@@ -2604,8 +2600,7 @@ body[data-theme="monochrome"] .mini-stats strong,
 body[data-theme="monochrome"] .records-summary strong,
 body[data-theme="monochrome"] .analytics-overview strong,
 body[data-theme="monochrome"] .analytics-category-value b,
-body[data-theme="monochrome"] .entries .amount,
-body[data-theme="monochrome"] .breakdown .value {
+body[data-theme="monochrome"] .entries .amount {
   color: #fff;
   font-weight: 720;
 }
@@ -2803,7 +2798,6 @@ body[data-theme="light"] .records-summary strong {
 }
 body[data-theme="light"] h2,
 body[data-theme="light"] .entries .meta b,
-body[data-theme="light"] .breakdown .cat-name b,
 body[data-theme="light"] .analytics-category-main b {
   color: #29231f;
   font-weight: 700;
@@ -2875,7 +2869,6 @@ body[data-theme="light"] .analytics-range-nav strong,
 body[data-theme="light"] .calendar-nav small { color: #5b534c; }
 body[data-theme="light"] .analytics-category-value b,
 body[data-theme="light"] .entries .amount,
-body[data-theme="light"] .breakdown .value,
 body[data-theme="light"] .mini-stats strong { color: #181410; font-weight: 720; }
 body[data-theme="light"] .text-button { color: #533097; font-weight: 680; }
 body[data-theme="light"] .secondary-button { color: #3f3832; border-color: rgba(38, 29, 22, 0.24); }
@@ -2984,7 +2977,6 @@ body[data-theme="light"] .settings-link-row:hover {
   background: #f3eee7;
 }
 body[data-theme="light"] .budget-bar span,
-body[data-theme="light"] .breakdown .track i,
 body[data-theme="light"] .analytics-bar i,
 body[data-theme="light"] .onboard-progress .dot.on {
   background: #171411;
@@ -3199,6 +3191,279 @@ body[data-theme="light"] .fab:focus-visible .fab-label { color: #fff; }
   .fab { animation: none; }
 }
 
+/* Theme-aware unsaved-draft confirmation replaces the browser-native confirm popup. */
+body.discard-dialog-open { overflow: hidden; }
+.discard-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 13;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.78);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.discard-dialog {
+  width: min(100%, 410px);
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 15px;
+  padding: 22px;
+  color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--danger) 44%, var(--line));
+  border-radius: 24px;
+  background: var(--surface);
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.62);
+  animation: tipIn 170ms ease;
+}
+.discard-dialog-icon {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 34%, transparent);
+  border-radius: 17px;
+  background: color-mix(in srgb, var(--danger) 9%, transparent);
+}
+.discard-dialog-copy { min-width: 0; }
+.discard-dialog-copy .view-kicker { margin: 0 0 5px; color: var(--danger); }
+.discard-dialog-copy h2 { color: var(--ink); font-size: 1.04rem; }
+.discard-dialog-copy > p:last-child {
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.discard-dialog-actions {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 9px;
+  margin-top: 3px;
+}
+.danger-button {
+  padding: 13px 12px;
+  color: #fff;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  border: 1px solid var(--danger);
+  border-radius: 14px;
+  background: var(--danger);
+  cursor: pointer;
+}
+.danger-button:hover,
+.danger-button:focus-visible {
+  filter: brightness(1.08);
+  outline: 2px solid color-mix(in srgb, var(--danger) 38%, transparent);
+  outline-offset: 2px;
+}
+body[data-theme="light"] .discard-dialog {
+  color: #171411;
+  background: #fffdf8;
+  box-shadow: 0 22px 60px rgba(23, 20, 17, 0.24);
+}
+body[data-theme="light"] .discard-dialog-copy > p:last-child { color: #554e47; }
+@media (max-width: 380px) {
+  .discard-dialog { grid-template-columns: 46px minmax(0, 1fr); padding: 19px 17px; }
+  .discard-dialog-icon { width: 46px; height: 46px; border-radius: 14px; }
+  .discard-dialog-actions { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px), (hover: none) and (pointer: coarse) {
+  .discard-modal { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .discard-dialog { animation: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .discard-dialog { animation: none; }
+}
+body[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator,
+body[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: grayscale(1) brightness(0.35);
+}
+
+/* App chrome should behave like controls, while expense content and form text remain copyable. */
+button,
+nav,
+.chip,
+.theme-option,
+.scope-tabs,
+.bottom-nav,
+.fab,
+.tooltip,
+.icon,
+svg[aria-hidden="true"],
+[role="tab"],
+[role="dialog"] h2,
+.sheet h2,
+.calendar-weekdays,
+.view-kicker {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Receipt preview: anchored card for mouse hover, centered dialog for touch long-press. */
+.photo-peek {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+}
+.photo-peek-card {
+  position: absolute;
+  width: min(310px, calc(100vw - 24px));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  color: var(--ink);
+  border: 1px solid var(--line-warm);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.5);
+  animation: tipIn 150ms ease;
+}
+.photo-peek:not(.modal) .close-button,
+.photo-peek:not(.modal) .photo-peek-help { display: none; }
+.photo-peek.modal {
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.76);
+}
+.photo-peek.modal .photo-peek-card {
+  position: relative;
+  inset: auto !important;
+  width: min(390px, 100%);
+  padding: 18px;
+}
+.photo-peek-label {
+  overflow: hidden;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.photo-peek-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+.photo-peek-thumb {
+  padding: 0;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: rgba(0, 0, 0, 0.3);
+  cursor: zoom-in;
+}
+.photo-peek-thumb img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.photo-peek-help { margin: 0; color: var(--grey-dim); font-size: 0.68rem; text-align: center; }
+body[data-theme="light"] .photo-peek-card { color: #171411; background: #fffdf8; }
+body[data-theme="light"] .photo-peek-label { color: #5e564f; }
+@media (prefers-reduced-motion: reduce) {
+  .photo-peek-card { animation: none; }
+}
+body.photo-peek-open { overflow: hidden; }
+
+/* Toasts intentionally remain dark in Light mode, so their status copy stays bright. */
+body[data-theme="light"] .toast,
+body[data-theme="light"] .toast.ok,
+body[data-theme="light"] .toast.error {
+  color: #fff;
+  border-color: #3a3531;
+  background: #171411;
+}
+body[data-theme="light"] .toast.error { border-color: #e06a73; }
+
+/* Goldrora: restrained black-and-gold styling with one soft aurora, not a multicolor mesh. */
+body[data-theme="gradient"] {
+  --black: #09080a;
+  --ink: #f7f1df;
+  --grey: #aaa398;
+  --grey-dim: #777169;
+  --muted: rgba(247, 241, 223, 0.68);
+  --purple: #756384;
+  --purple-deep: #3d3247;
+  --orange: #c18b32;
+  --orange-dark: #8b6221;
+  --yellow: #f0cf75;
+  --gold: #e1b957;
+  --brown: #6d5531;
+  --brown-deep: #31271a;
+  --action-ink: #211804;
+  --action-end: #9c7025;
+  --glow-primary: rgba(225, 185, 87, 0.24);
+  --glow-primary-hover: rgba(225, 185, 87, 0.32);
+  --glow-primary-soft: rgba(225, 185, 87, 0.13);
+  --glow-secondary: rgba(225, 185, 87, 0.18);
+  --glow-secondary-fade: rgba(225, 185, 87, 0);
+  --glow-gold: rgba(225, 185, 87, 0.34);
+  --line-warm: rgba(225, 185, 87, 0.28);
+  --panel: rgba(18, 15, 18, 0.9);
+  --surface: #171316;
+}
+body[data-theme="gradient"] .live-gradient {
+  background:
+    radial-gradient(ellipse 72% 48% at 82% 8%, rgba(225, 185, 87, 0.2), transparent 65%),
+    radial-gradient(ellipse 56% 42% at 5% 92%, rgba(109, 85, 49, 0.15), transparent 68%),
+    #09080a;
+}
+body[data-theme="gradient"] .live-gradient::before {
+  inset: -25%;
+  opacity: 0.42;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(240, 207, 117, 0.5), rgba(156, 112, 37, 0.14) 42%, transparent 70%);
+  filter: blur(82px);
+  mix-blend-mode: screen;
+  animation: goldroraDrift 30s ease-in-out infinite alternate;
+}
+body[data-theme="gradient"] .live-gradient::after { display: none; }
+@keyframes goldroraDrift {
+  from { transform: translate3d(-8%, -5%, 0) scale(0.92); }
+  to { transform: translate3d(10%, 8%, 0) scale(1.08); }
+}
+body[data-theme="gradient"] .primary-button,
+body[data-theme="gradient"] .mini-button,
+body[data-theme="gradient"] #editRangeBudget.budget-cta,
+body[data-theme="gradient"] .scope-tabs button.on,
+body[data-theme="gradient"] .calendar-day.selected,
+body[data-theme="gradient"] .fab {
+  color: var(--action-ink);
+  border-color: var(--gold);
+  background: var(--gold);
+}
+body[data-theme="gradient"] .fab:hover,
+body[data-theme="gradient"] .primary-button:hover,
+body[data-theme="gradient"] #editRangeBudget.budget-cta:hover { background: var(--yellow); }
+body[data-theme="gradient"] .bottom-nav-item.on {
+  color: var(--gold);
+  background: rgba(225, 185, 87, 0.1);
+}
+body[data-theme="gradient"] .bottom-nav-item.on::before,
+body[data-theme="gradient"] .budget-bar span,
+body[data-theme="gradient"] .analytics-bar i,
+body[data-theme="gradient"] .onboard-progress .dot.on { background: var(--gold); }
+body[data-theme="gradient"] .profile-card,
+body[data-theme="gradient"] .records-summary > div,
+body[data-theme="gradient"] .analytics-overview > div,
+body[data-theme="gradient"] .date-filter-button,
+body[data-theme="gradient"] .detail-hero,
+body[data-theme="gradient"] .settings-link-icon {
+  background-image: none;
+  background-color: var(--panel);
+}
+body[data-theme="gradient"] .profile-avatar,
+body[data-theme="gradient"] .developer-avatar {
+  border-color: var(--gold);
+  box-shadow: 0 8px 24px rgba(225, 185, 87, 0.12);
+}
+
   </style>
 </head>
 <body data-theme="cash">
@@ -3224,7 +3489,7 @@ body[data-theme="light"] .fab:focus-visible .fab-label { color: #fff; }
 
   <!-- Main application shell: one visible tab at a time. -->
   <main class="shell">
-    <!-- Home tab: active-range total, budgets, category breakdown and recent entries. -->
+    <!-- Home tab: active-range total, budgets and recent entries. Category analytics lives in Records. -->
     <section class="app-view" id="homeView" data-view="home">
     <div class="heading-row">
       <h1>Saan Napunta?</h1>
@@ -3279,17 +3544,6 @@ body[data-theme="light"] .fab:focus-visible .fab-label { color: #fff; }
         <div><span>Today</span><strong id="todayTotal">₱0.00</strong></div>
         <div><span>Entries</span><strong id="entryCount">0</strong></div>
       </div>
-    </section>
-
-    <section class="panel" id="breakdownPanel">
-      <div class="panel-heading">
-        <div class="panel-title-group">
-          <h2>By category</h2>
-          <span class="range-count" id="categoryRangeLabel">Month</span>
-        </div>
-      </div>
-      <ul class="breakdown" id="breakdown"></ul>
-      <p class="empty-note" id="breakdownEmpty">No spending recorded for this month yet.</p>
     </section>
 
     <section class="panel">
@@ -3716,10 +3970,16 @@ body[data-theme="light"] .fab:focus-visible .fab-label { color: #fff; }
         <input id="photoInput" type="file" accept="image/*" capture="environment" multiple hidden />
       </div>
 
-      <label>
-        Date
-        <input id="dateInput" type="date" required />
-      </label>
+      <div class="field-pair">
+        <label>
+          Date
+          <input id="dateInput" type="date" required />
+        </label>
+        <label>
+          Time of spending
+          <input id="timeInput" type="time" required />
+        </label>
+      </div>
 
       <button class="primary-button" id="saveEntry" type="submit">Save expense</button>
       <button class="text-button danger" id="deleteEntry" type="button" hidden>Delete this entry</button>
@@ -3791,7 +4051,7 @@ body[data-theme="light"] .fab:focus-visible .fab-label { color: #fff; }
         <div class="theme-options" id="themeOptions" role="radiogroup" aria-label="Application theme">
           <button class="theme-option" type="button" role="radio" data-theme-option="gradient" aria-checked="false">
             <span class="theme-preview preview-gradient" aria-hidden="true"></span>
-            <span><b>Goldrora</b><small>Woven purple and gold aurora</small></span>
+            <span><b>Goldrora</b><small>Restrained black and gold aurora</small></span>
             <i aria-hidden="true"></i>
           </button>
           <button class="theme-option" type="button" role="radio" data-theme-option="monochrome" aria-checked="false">
@@ -3839,6 +4099,24 @@ body[data-theme="light"] .fab:focus-visible .fab-label { color: #fff; }
     </div>
   </div>
 
+  <!-- Styled confirmation used instead of the browser's unthemeable confirm dialog. -->
+  <div class="discard-modal" id="discardChangesModal" hidden>
+    <section class="discard-dialog" role="alertdialog" aria-modal="true" aria-labelledby="discardChangesTitle" aria-describedby="discardChangesDescription">
+      <span class="discard-dialog-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19Z"/><path d="M12 9v5M12 18h.01"/></svg>
+      </span>
+      <div class="discard-dialog-copy">
+        <p class="view-kicker">Unsaved expense</p>
+        <h2 id="discardChangesTitle">Discard your changes?</h2>
+        <p id="discardChangesDescription">Your amount, category, description, date, and attached photos have not been saved.</p>
+      </div>
+      <div class="discard-dialog-actions">
+        <button class="secondary-button" id="keepEditing" type="button">Keep editing</button>
+        <button class="danger-button" id="discardChanges" type="button">Discard changes</button>
+      </div>
+    </section>
+  </div>
+
   <!-- Opening disclosure shown in the center every time the application starts. -->
   <div class="development-modal" id="devBanner" hidden>
     <section class="development-dialog" role="dialog" aria-modal="true" aria-labelledby="developmentDialogTitle">
@@ -3866,13 +4144,26 @@ body[data-theme="light"] .fab:focus-visible .fab-label { color: #fff; }
       </div>
 
       <div class="developer-identity">
-        <span class="developer-avatar" aria-hidden="true">AO</span>
+        <img class="developer-avatar" src="images/developer-aleksis.jpg" alt="Aleksis Ong" />
         <div><strong>Aleksis Ong</strong><span>Creator and developer</span></div>
       </div>
 
       <p class="about-description">Saan Napunta? is a Philippine peso expense tracker that works offline and helps you clearly see where your money goes.</p>
 
       <button class="primary-button" id="aboutDeveloperDone" type="button">Done</button>
+    </section>
+  </div>
+
+  <!-- Hover/long-press preview for receipt photos attached to a Home Recent item. -->
+  <div class="photo-peek" id="photoPeek" hidden>
+    <section class="photo-peek-card" role="dialog" aria-modal="false" aria-labelledby="photoPeekTitle">
+      <div class="panel-heading">
+        <div><p class="view-kicker">Expense media</p><h2 id="photoPeekTitle">Receipt photos</h2></div>
+        <button class="close-button" id="closePhotoPeek" type="button" aria-label="Close photo preview">&times;</button>
+      </div>
+      <p class="photo-peek-label" id="photoPeekLabel"></p>
+      <div class="photo-peek-grid" id="photoPeekGrid"></div>
+      <p class="photo-peek-help" id="photoPeekHelp">Tap a photo to enlarge it.</p>
     </section>
   </div>
 
@@ -4675,6 +4966,7 @@ function normaliseEntry(entry) {
     merchant: cleanText(entry.merchant, LIMITS.merchant),
     item: cleanText(entry.item, LIMITS.item),
     note: cleanText(entry.note, LIMITS.note),
+    spentTime: /^([01]\d|2[0-3]):[0-5]\d$/.test(entry.spentTime || "") ? entry.spentTime : "",
     photoCount: clampNumber(entry.photoCount, 0, MAX_PHOTOS) ?? 0,
     updatedAt: Number(entry.updatedAt || entry.created || 0)
   };
@@ -4778,6 +5070,15 @@ function validateEntryDate(value) {
   return null;
 }
 
+/** Validates the editable time and prevents a future clock time when the date is today. */
+function validateEntryTime(dateValue, timeValue) {
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(timeValue || "")) return "Pick a valid time.";
+  if (dateValue === todayKey() && timeValue > currentTimeKey()) {
+    return "You cannot log an expense at a future time.";
+  }
+  return null;
+}
+
 /** Parses and validates an expense or budget amount, returning either a value or error. */
 function validateAmount(raw, { max = LIMITS.maxAmount, allowZero = false } = {}) {
   const value = Number(raw);
@@ -4843,6 +5144,15 @@ function applyInputLimits() {
   [$("firstName"), $("lastName"), $("firstNameInput"), $("lastNameInput")].forEach((node) => {
     node.maxLength = LIMITS.name;
   });
+  syncTimeInputLimit();
+}
+
+/** Limits today's time picker to now while leaving past dates unrestricted. */
+function syncTimeInputLimit() {
+  const time = $("timeInput");
+  if (!time) return;
+  if ($("dateInput").value === todayKey()) time.max = currentTimeKey();
+  else time.removeAttribute("max");
 }
 
 /* ============================================================
@@ -5136,14 +5446,11 @@ function aggregatesFor(range) {
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.created - a.created));
 
   const total = list.reduce((acc, e) => acc + Number(e.amount), 0);
-  const byCategory = new Map();
   const byDay = new Map();
   const byMonth = new Map();
 
   list.forEach((entry) => {
     const amount = Number(entry.amount);
-    const cat = byCategory.get(entry.category) || { total: 0, count: 0 };
-    byCategory.set(entry.category, { total: cat.total + amount, count: cat.count + 1 });
     byDay.set(entry.date, (byDay.get(entry.date) || 0) + amount);
     const m = entry.date.slice(0, 7);
     byMonth.set(m, (byMonth.get(m) || 0) + amount);
@@ -5153,7 +5460,6 @@ function aggregatesFor(range) {
     range,
     list,
     total,
-    byCategory: [...byCategory.entries()].sort((a, b) => b[1].total - a[1].total),
     byDay,
     byMonth,
     today: byDay.get(todayKey()) || 0,
@@ -5195,6 +5501,22 @@ function monthKey(date) {
 function todayKey() {
   const now = new Date();
   return `${monthKey(now)}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+/** Returns the browser-local current clock time as a 24-hour HH:MM form value. */
+function currentTimeKey() {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+}
+
+/** Converts a stored 24-hour HH:MM time into the device's readable local clock format. */
+function prettyTime(value) {
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(value || "")) return "";
+  const [hour, minute] = value.split(":").map(Number);
+  return new Date(2000, 0, 1, hour, minute).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit"
+  });
 }
 
 /** Formats a numeric value using the locked Philippine peso symbol. */
@@ -5334,17 +5656,6 @@ function paintSkeleton() {
     $(id).innerHTML = bar("70%", 16);
   });
 
-  $("breakdownEmpty").hidden = true;
-  $("breakdown").innerHTML = [72, 54, 38]
-    .map(
-      (w) => `<li class="sk-row">
-        <span class="sk sk-dot"></span>
-        <span class="cat-name">${bar("46%", 12)}${bar(`${w}%`, 6, 3)}</span>
-        <span class="value">${bar("64px", 12)}</span>
-      </li>`
-    )
-    .join("");
-
   $("entriesEmpty").hidden = true;
   $("entries").innerHTML = [1, 2, 3, 4]
     .map(
@@ -5461,35 +5772,104 @@ function renderSummary(agg) {
   );
 }
 
-/** Renders category totals and percentage bars for the active Home range. */
-function renderBreakdown(agg) {
-  const target = $("breakdown");
-  const scopeName = { day: "Day", week: "Week", month: "Month", year: "Year" }[agg.range.scope];
-  $("categoryRangeLabel").textContent = `${scopeName} · ${agg.range.label}`;
-  $("breakdownEmpty").hidden = agg.byCategory.length > 0;
-  $("breakdownEmpty").textContent = `No spending recorded for ${agg.range.label}.`;
-  target.innerHTML = agg.byCategory
-    .map(([id, stat]) => {
-      const meta = catById(id);
-      const share = agg.total ? Math.round((stat.total / agg.total) * 100) : 0;
-      const tip = `${stat.count} ${stat.count === 1 ? "entry" : "entries"} · ${money(stat.total / stat.count)} average · ${share}% of ${agg.range.label}`;
-      return `<li data-tip="${escapeHtml(tip)}" tabindex="0">
-        <span class="glyph">${icon(meta.id)}</span>
-        <span class="cat-name">
-          <b>${meta.label}</b>
-          <span class="track"><i style="width:${share}%"></i></span>
-        </span>
-        <span class="value">${money(stat.total)}<small>${share}%</small></span>
-      </li>`;
-    })
-    .join("");
-}
-
 const PHOTO_ICON =
   '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" ' +
   'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
   '<rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.2"/>' +
   '<path d="M8 6l1.5-2h5L16 6"/></svg>';
+
+let photoPeekId = null;
+
+/** Shows attached receipt thumbnails beside a hovered row or as a touch-friendly modal. */
+function showPhotoPeek(entry, anchor, modal = false) {
+  const photos = media.get(entry.id);
+  if (!photos.length) return false;
+
+  photoPeekId = entry.id;
+  const peek = $("photoPeek");
+  const card = peek.querySelector(".photo-peek-card");
+  peek.classList.toggle("modal", modal);
+  card.setAttribute("aria-modal", String(modal));
+  $("photoPeekLabel").textContent = entry.item || catById(entry.category).label;
+  const grid = $("photoPeekGrid");
+  grid.innerHTML = "";
+
+  photos.forEach((src, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "photo-peek-thumb";
+    button.setAttribute("aria-label", `Open attached photo ${index + 1}`);
+    const image = document.createElement("img");
+    image.src = src;
+    image.alt = `Attached expense photo ${index + 1}`;
+    button.appendChild(image);
+    button.addEventListener("click", () => openLightbox(src));
+    grid.appendChild(button);
+  });
+
+  tooltip.hide();
+  peek.hidden = false;
+  if (modal) {
+    document.body.classList.add("photo-peek-open");
+    setTimeout(() => $("closePhotoPeek").focus(), 0);
+  } else if (anchor) {
+    const target = anchor.getBoundingClientRect();
+    const width = Math.min(310, window.innerWidth - 24);
+    card.style.left = `${Math.max(12, Math.min(window.innerWidth - width - 12, target.left))}px`;
+    card.style.top = `${target.top > 230 ? Math.max(12, target.top - 206) : Math.min(window.innerHeight - 190, target.bottom + 8)}px`;
+  }
+  return true;
+}
+
+/** Closes the hover preview or long-press modal and clears temporary positioning. */
+function closePhotoPeek() {
+  const peek = $("photoPeek");
+  if (peek.hidden) return;
+  peek.hidden = true;
+  peek.classList.remove("modal");
+  peek.querySelector(".photo-peek-card").removeAttribute("style");
+  document.body.classList.remove("photo-peek-open");
+  photoPeekId = null;
+}
+
+/** Adds desktop hover and touch long-press photo behavior without replacing normal row taps. */
+function wireRecentPhotoPreview(button, entry) {
+  let hoverTimer = null;
+  let longPressTimer = null;
+  let suppressNextClick = false;
+  const hasLocalPhotos = () => entry.photoCount > 0 && media.get(entry.id).length > 0;
+
+  button.addEventListener("pointerenter", (event) => {
+    if (event.pointerType !== "mouse" || !hasLocalPhotos()) return;
+    hoverTimer = setTimeout(() => showPhotoPeek(entry, button, false), 320);
+  });
+  button.addEventListener("pointerleave", () => {
+    clearTimeout(hoverTimer);
+    if (!$("photoPeek").classList.contains("modal") && photoPeekId === entry.id) closePhotoPeek();
+  });
+  button.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "mouse" || !hasLocalPhotos()) return;
+    longPressTimer = setTimeout(() => {
+      suppressNextClick = true;
+      showPhotoPeek(entry, null, true);
+      navigator.vibrate?.(18);
+    }, 520);
+  });
+  ["pointerup", "pointercancel", "pointerleave"].forEach((type) => {
+    button.addEventListener(type, () => clearTimeout(longPressTimer));
+  });
+  button.addEventListener("contextmenu", (event) => {
+    if (suppressNextClick) event.preventDefault();
+  });
+  button.addEventListener("click", (event) => {
+    if (suppressNextClick) {
+      event.preventDefault();
+      suppressNextClick = false;
+      return;
+    }
+    openDetailSheet(entry.id);
+  });
+}
 
 /** Renders active-range expenses grouped by day, or by month in Year view. */
 function renderEntries(agg) {
@@ -5520,9 +5900,11 @@ function renderEntries(agg) {
     li.className = entry.pending ? "row pending" : entry.failed ? "row failed" : "row";
 
     const title = entry.item || entry.merchant || meta.label;
-    const subtitle = [entry.item && entry.merchant ? entry.merchant : "", entry.note]
-      .filter(Boolean)
-      .join(" · ") || meta.label;
+    const subtitle = [
+      entry.spentTime ? prettyTime(entry.spentTime) : "",
+      entry.item && entry.merchant ? entry.merchant : "",
+      entry.note
+    ].filter(Boolean).join(" · ") || meta.label;
 
     const button = document.createElement("button");
     button.type = "button";
@@ -5543,7 +5925,7 @@ function renderEntries(agg) {
       <span class="amount">${money(entry.amount)}${
         entry.photoCount ? `<small class="photo-badge">${PHOTO_ICON}${entry.photoCount}</small>` : ""
       }</span>`;
-    button.addEventListener("click", () => openDetailSheet(entry.id));
+    wireRecentPhotoPreview(button, entry);
     li.appendChild(button);
     target.appendChild(li);
   });
@@ -5566,7 +5948,6 @@ function render({ allowSkeleton = true } = {}) {
 /** Paints every data-driven screen section from one aggregate result. */
 function paint(agg) {
   renderSummary(agg);
-  renderBreakdown(agg);
   renderEntries(agg);
   syncRangeBudgetField(agg.range);
   $("amountSymbol").textContent = config.currency;
@@ -5639,6 +6020,7 @@ function openDetailSheet(id) {
     ["Category", meta.label],
     ["Date", prettyDay(entry.date)]
   ];
+  if (entry.spentTime) rows.push(["Time of spending", prettyTime(entry.spentTime)]);
   if (entry.merchant) rows.push(["Where", entry.merchant]);
   if (entry.item) rows.push(["Item", entry.item]);
   rows.push(["Description", entry.note || "—"]);
@@ -5703,6 +6085,13 @@ $("lightboxClose").addEventListener("click", closeLightbox);
 $("lightbox").addEventListener("click", (event) => {
   if (event.target !== $("lightboxImage")) closeLightbox();
 });
+$("closePhotoPeek").addEventListener("click", closePhotoPeek);
+$("photoPeek").addEventListener("click", (event) => {
+  if (event.target === $("photoPeek")) closePhotoPeek();
+});
+window.addEventListener("scroll", () => {
+  if (!$("photoPeek").hidden && !$("photoPeek").classList.contains("modal")) closePhotoPeek();
+}, { passive: true });
 
 $("editFromDetail").addEventListener("click", () => {
   const id = detailId;
@@ -5793,6 +6182,8 @@ function openEntrySheet(id = null) {
   $("itemInput").value = entry?.item || "";
   $("noteInput").value = entry?.note || "";
   $("dateInput").value = entry ? entry.date : todayKey();
+  $("timeInput").value = entry?.spentTime || (entry ? "" : currentTimeKey());
+  syncTimeInputLimit();
   $("saveEntry").textContent = entry ? "Save changes" : "Save expense";
   $("deleteEntry").hidden = !entry;
 
@@ -5807,19 +6198,44 @@ function openEntrySheet(id = null) {
   setTimeout(() => $("amountInput").focus(), 60);
 }
 
-/** Closes the editor, protecting any changed draft unless the caller already saved it. */
-function closeEntrySheet(force = false) {
-  if (!force && entryDirty && !confirm("Discard your unsaved expense changes?")) return false;
+/** Closes the editor after the caller has handled any unsaved-draft decision. */
+function closeEntrySheet() {
   $("entrySheet").hidden = true;
   tooltip.hide();
   editingId = null;
   draftPhotos = [];
   entryDirty = false;
-  return true;
+}
+
+/** Opens the theme-aware discard confirmation and moves focus to its safe action. */
+function showDiscardChangesDialog() {
+  $("discardChangesModal").hidden = false;
+  document.body.classList.add("discard-dialog-open");
+  setTimeout(() => $("keepEditing").focus(), 0);
+}
+
+/** Returns to the current expense draft without changing any entered values. */
+function keepEditingExpense() {
+  $("discardChangesModal").hidden = true;
+  document.body.classList.remove("discard-dialog-open");
+  setTimeout(() => $("amountInput").focus(), 0);
+}
+
+/** Discards the draft, closes the editor, and removes its temporary history entry. */
+function discardExpenseChanges() {
+  $("discardChangesModal").hidden = true;
+  document.body.classList.remove("discard-dialog-open");
+  const ownsHistory = history.state?.saanLayer === "entry";
+  closeEntrySheet();
+  if (ownsHistory) history.back();
 }
 
 /** Uses the editor's history entry so mobile Back and the close button behave identically. */
 function closeEntryFromUi() {
+  if (entryDirty) {
+    showDiscardChangesDialog();
+    return;
+  }
   if (history.state?.saanLayer === "entry") history.back();
   else closeEntrySheet();
 }
@@ -5827,7 +6243,7 @@ function closeEntryFromUi() {
 /** Removes a saved/deleted editor layer without asking to discard an already committed draft. */
 function closeCommittedEntry() {
   const ownsHistory = history.state?.saanLayer === "entry";
-  closeEntrySheet(true);
+  closeEntrySheet();
   if (ownsHistory) history.back();
 }
 
@@ -5886,6 +6302,15 @@ $("entryForm").addEventListener("submit", (event) => {
     return;
   }
 
+  const timeValue = $("timeInput").value;
+  const timeError = validateEntryTime(dateValue, timeValue);
+  if (timeError) {
+    setFieldError("timeInput", timeError);
+    toast(timeError, "error");
+    $("timeInput").focus();
+    return;
+  }
+
   // The merchant field is no longer captured; preserve whatever an existing record carries.
   const existing = editingId ? entries.find((e) => e.id === editingId) : null;
   const merchant = cleanText(existing?.merchant, LIMITS.merchant);
@@ -5896,6 +6321,7 @@ $("entryForm").addEventListener("submit", (event) => {
     item: cleanText($("itemInput").value, LIMITS.item),
     note: cleanText($("noteInput").value, LIMITS.note),
     date: dateValue,
+    spentTime: timeValue,
     photoCount: draftPhotos.length
   };
 
@@ -6093,7 +6519,13 @@ $("entryForm").addEventListener("input", () => {
 $("entryForm").addEventListener("change", () => {
   if (!$("entrySheet").hidden) entryDirty = true;
 });
+$("dateInput").addEventListener("change", syncTimeInputLimit);
 $("closeEntry").addEventListener("click", closeEntryFromUi);
+$("keepEditing").addEventListener("click", keepEditingExpense);
+$("discardChanges").addEventListener("click", discardExpenseChanges);
+$("discardChangesModal").addEventListener("click", (event) => {
+  if (event.target === $("discardChangesModal")) keepEditingExpense();
+});
 $("closeSettings").addEventListener("click", closeSettingsFromUi);
 
 $("scopeTabs").addEventListener("click", async (event) => {
@@ -6289,12 +6721,20 @@ $("clearButton").addEventListener("click", () => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    if (!$("discardChangesModal").hidden) {
+      keepEditingExpense();
+      return;
+    }
     if (!$("devBanner").hidden) {
       dismissDevelopmentNotice();
       return;
     }
     if (!$("lightbox").hidden) {
       closeLightbox();
+      return;
+    }
+    if (!$("photoPeek").hidden) {
+      closePhotoPeek();
       return;
     }
     if (!$("calendarModal").hidden) {
@@ -6396,13 +6836,14 @@ window.addEventListener("popstate", (event) => {
   const state = event.state;
   if (!state || !state.saanView) return;
 
-  /* Hardware Back first closes the editor. A cancelled discard recreates its history entry. */
+  /* Hardware Back first asks about a dirty editor and recreates its layer while deciding. */
   if (!$("entrySheet").hidden) {
-    const closed = closeEntrySheet();
-    if (!closed) {
+    if (entryDirty) {
       pushAppLayer("entry");
+      showDiscardChangesDialog();
       return;
     }
+    closeEntrySheet();
   }
 
   $("settingsPanel").hidden = true;
@@ -6671,6 +7112,7 @@ function renderRecordsView() {
     const title = entry.item || entry.merchant || category.label;
     const subtitle = [
       prettyDay(entry.date),
+      entry.spentTime ? `Spent ${prettyTime(entry.spentTime)}` : "",
       recordedTime(entry.created) ? `Recorded ${recordedTime(entry.created)}` : "",
       category.label,
       entry.note

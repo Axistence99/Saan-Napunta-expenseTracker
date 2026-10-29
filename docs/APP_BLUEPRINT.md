@@ -61,12 +61,11 @@ the warm ramp as its darker base. No greens or blues anywhere.
 
 ### Background
 
-A full-bleed “woven aurora” backdrop: four off-axis radial fields create the near-black mesh,
-while an irregular blurred conic ribbon folds purple into orange, gold and brown. Two very
-faint repeating-radial contour patterns add topographic texture without competing with cards.
-The ribbon slowly orbits and changes its organic border shape; contour rings drift separately.
-It is decorative and never interactive. Web animation stops under reduced-motion settings;
-the simpler native Android background continues using its battery-conscious low frame rate.
+Goldrora uses a restrained black backdrop with one soft gold aurora and a faint secondary
+brown-gold glow. It avoids the previous multicolor conic mesh and contour pattern. Primary
+actions and progress fills use mostly solid gold, with muted plum reserved for small secondary
+accents. The aurora drifts slowly on desktop and becomes static on mobile or under reduced
+motion. Other themes provide their own backgrounds and tokens.
 
 ### Type and shape
 
@@ -179,20 +178,17 @@ Vertical scroll, top to bottom:
      or "Custom budget for {period} — change" when an override exists. It opens an inline
      amount field with Save and Clear.
 
-3. **By-category card** — heading "BY CATEGORY" with the active range beneath it. Each row:
-   category glyph, category name above a thin share bar, and the amount with the percentage
-   underneath in small muted text. Sorted highest first. Empty state:
-   "No spending recorded for this month yet."
-
-4. **Recent card** — heading "RECENT" with a month picker dropdown on the right. Entries are
+3. **Recent card** — heading "RECENT" with a month picker dropdown on the right. Entries are
    grouped under day dividers showing the pretty day ("Today", "Yesterday", "Mon, Aug 18")
-   on the left and that day's subtotal on the right. Tapping a row opens the detail sheet (4b). Each entry row: category icon, name
-   with the note (or "No note") beneath it, and the amount right-aligned. Tapping a row opens
-   it for editing. Empty state: "Tap + to record your first gastos."
+   on the left and that day's subtotal on the right. Each entry row shows category icon, name,
+   time/description and amount. Tapping opens details. On a fine-pointer computer, hovering a
+   row with local photos reveals an anchored receipt preview; on touch, holding for about half
+   a second opens the same photos in a centered modal. A normal tap remains unchanged. Empty
+   state: "Tap + to record your first expense."
 
-5. **Footer** — a gold development-build warning, the privacy line, and the credit line.
+4. **Footer** — a compact work-in-progress reminder.
 
-7. **Floating action button** — a 60 px theme-aware circle pinned to the bottom-right of the
+5. **Floating action button** — a 60 px theme-aware circle pinned to the bottom-right of the
    content column and clear of the Home indicator. A connected **Record expense** callout
    makes the primary action explicit, while a three-cycle entrance pulse attracts attention
    without animating forever. The plus is a larger SVG icon, never a text glyph. Hover lifts
@@ -223,8 +219,10 @@ the common intent is to check something, not change it.
 
 ## 5. Screen: Add / Edit expense
 
-A bottom sheet on web, a full screen on Android. Dim, blurred backdrop; tapping it or
-pressing Escape closes without saving.
+A bottom sheet on web, a full screen on Android. Tapping the backdrop, pressing Escape,
+using the close button, or pressing mobile Back closes an untouched draft. A changed draft
+opens a centered, theme-aware **Discard your changes?** dialog with **Keep editing** and
+**Discard changes** actions; the browser-native confirm popup is never used.
 
 - Title: "Add expense" or "Edit expense", with a circular × close button.
 - **Amount** — a 52 px minus button, the field itself, and a 52 px plus button in one row.
@@ -261,7 +259,7 @@ A second bottom sheet with the same chrome.
   the specific day, week, month or year it belongs to.
 - **Currency** — locked to the Philippine peso, shown as a dashed read-only row with a padlock and a note that more are coming.
 - **Theme** — Philippine Cash is the default. Five instantly applied choices are available:
-  Goldrora (woven purple/gold aurora), Monochrome (graphite with layered silver typography),
+  Goldrora (restrained black/gold aurora with mostly solid-gold controls), Monochrome (graphite with layered silver typography),
   Light (plain warm-paper cards, near-black text, white-on-black actions and black selected states;
   inherited brown/gold gradients are removed from Profile, Records, dialogs and progress fills),
   Dark (quiet conventional graphite), and
@@ -273,9 +271,10 @@ A second bottom sheet with the same chrome.
   the add-button halo, budget prompts, selection rings and other glows. Theme changes never
   modify ledger data.
 - **Week starts on** — Monday (default) or Sunday.
-- **About the developer** — a clickable row opens a focused popup with the creator identity
-  and a short product description. The redundant privacy promise and “Made by” footer are not
-  repeated inside this popup or at the bottom of Home.
+- **About the developer** — a clickable row opens a focused popup with the owner-provided
+  developer photo, creator identity and a short product description. The optimized photo is
+  public on GitHub Pages and cached for offline viewing. The redundant privacy promise and
+  “Made by” footer are not repeated inside this popup or at the bottom of Home.
 - **Erase all data** — outlined button that turns red on hover, with a confirmation prompt.
 - Footer note: "Everything lives in this browser's local storage. Clearing site data deletes
   it permanently." (Reword appropriately per platform.)
@@ -291,7 +290,8 @@ Expense {
   item       string   what was bought, may be empty
   note       string   description, may be empty
   date       string   ISO day, "YYYY-MM-DD"
-  created    number   epoch millis, tiebreaker when sorting a single day
+  spentTime  string   editable local time of spending, "HH:MM"
+  created    number   immutable epoch millis recording when the entry was created
   photoCount number   0-3; the images themselves live outside the ledger
 }
 

@@ -23,13 +23,16 @@ python3 -m http.server 8080 --directory web
 - **Mobile Back** — navigate Home → Records → Profile, then press Back twice; Records and Home
   return in order. Open Settings and press Back; Settings closes without exiting the PWA.
 - **Editor Back** — open Add Expense and press the device Back button. The editor closes instead
-  of exiting. Change a field first; cancelling the discard confirmation keeps the editor open.
+  of exiting. Change a field first; the themed discard dialog appears. Keep editing preserves
+  every value, while Discard changes closes the editor. No browser-native confirm popup appears.
 - **Remembered scope** — select Day, Week or Year, reload/reopen, and verify that scope returns
   with the current date as its anchor.
-2. **Add** — tap +, enter 250, pick Transport, save. Total, Today, Entries and the
-   category bar all update; a toast confirms.
-3. **Validation** — save with an empty or 0 amount → toast, sheet stays open.
-4. **Edit** — tap an entry, change amount and category, save changes; list reflects both.
+2. **Add** — tap +, enter 250, pick Transport, save. Total, Today and Entries update; a
+   toast confirms. Records category analytics includes the new Transport expense.
+3. **Validation** — save with an empty or 0 amount → toast, sheet stays open. A future time
+   on today's date is also rejected next to the time field.
+4. **Edit** — tap an entry, change amount, category and time of spending, save changes; the
+   list and detail sheet reflect all three while the original Recorded time stays unchanged.
 5. **Delete** — open an entry, Delete this entry → row disappears, totals recompute.
 6. **Budget** — set 1000 from the active Home period; its meter fills. Add entries past
    1000 → the meter turns red. Switch scope and verify the other scope remains unset.
@@ -58,6 +61,10 @@ python3 -m http.server 8080 --directory web
 18. **Photos** — attach up to three images; a fourth cannot be added. Remove one and the
     adder returns. The row shows a camera badge with the count. Reopen the entry: the
     thumbnails are still there. Delete the entry and confirm the media bucket shrinks.
+- **Recent photo preview** — hover a photo-bearing Home row on desktop and verify anchored
+  thumbnails appear, then disappear on leave or scroll. On touch, hold for about 520 ms;
+  the modal opens, the resulting ordinary tap is suppressed once, and tapping a thumbnail
+  opens the lightbox.
 19. **Photo quota** — fill localStorage first; saving should keep the expense, drop the
     photos, and show "Expense saved, but there was no room for the photos."
 21. **Keyboard/a11y** — Escape closes sheets, tapping the backdrop closes them, the
@@ -174,6 +181,9 @@ cd android && ./gradlew assembleDebug
 11. Load a stored invalid theme value; the app must safely return to Philippine Cash.
 12. On a phone or coarse-pointer emulator, theme backgrounds remain static, backdrop blur is
     disabled, scrolling stays smooth, and all cards remain readable in every theme.
+13. Applying Light shows a dark toast with clearly visible white text for both success and error tones.
+14. Goldrora uses a black background, one soft gold aurora, solid-gold primary controls and no
+    multicolor conic mesh or topographic contour pattern.
 
 ## Budget defaults and custom periods
 

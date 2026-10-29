@@ -3,8 +3,8 @@
 > **Status: in active development.** This is a prototype, not a finished product. Features
 > and the data format may still change between commits.
 
-- **Web prototype** — vanilla HTML/CSS/JS with `localStorage` persistence and a responsive
-  woven-aurora background, sized for a phone screen.
+- **Web prototype** — vanilla HTML/CSS/JS with `localStorage` persistence, five responsive
+  themes and a phone-focused layout.
 - **Native Android prototype** — Kotlin, plain `Activity` + programmatic views, data in
   `SharedPreferences` as JSON. No Compose, no third-party dependencies.
 

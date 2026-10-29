@@ -103,7 +103,6 @@ Single screen plus two overlays. Key element IDs (JavaScript looks all of these 
 | Background | `.live-gradient` (CSS only, no id) |
 | Header | `.heading-row`, `.tagline` |
 | Summary card | `monthLabel`, `monthTotal`, `budgetMeter`, `budgetFill`, `budgetLeft`, `budgetCap`, `todayTotal`, `entryCount` |
-| Breakdown card | `breakdown` (ul), `breakdownEmpty`, `categoryRangeLabel` |
 | Entries card | `entries` (ul), `entriesEmpty`, `monthPicker` |
 | Add button | `addButton` (floating action button) |
 | Onboarding | `onboard`, `profileName`, `profileCurrency`, `stepOneNext`, `skipOnboarding`, `periodGrid`, `stepTwoBack`, `stepTwoNext`, `amountSub`, `onboardSymbol`, `onboardBudget`, `budgetPresets`, `budgetEquivalent`, `stepThreeBack`, `finishOnboarding`, `noBudget` |

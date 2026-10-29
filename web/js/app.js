@@ -342,6 +342,7 @@ function normaliseEntry(entry) {
     merchant: cleanText(entry.merchant, LIMITS.merchant),
     item: cleanText(entry.item, LIMITS.item),
     note: cleanText(entry.note, LIMITS.note),
+    spentTime: /^([01]\d|2[0-3]):[0-5]\d$/.test(entry.spentTime || "") ? entry.spentTime : "",
     photoCount: clampNumber(entry.photoCount, 0, MAX_PHOTOS) ?? 0,
     updatedAt: Number(entry.updatedAt || entry.created || 0)
   };
@@ -445,6 +446,15 @@ function validateEntryDate(value) {
   return null;
 }
 
+/** Validates the editable time and prevents a future clock time when the date is today. */
+function validateEntryTime(dateValue, timeValue) {
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(timeValue || "")) return "Pick a valid time.";
+  if (dateValue === todayKey() && timeValue > currentTimeKey()) {
+    return "You cannot log an expense at a future time.";
+  }
+  return null;
+}
+
 /** Parses and validates an expense or budget amount, returning either a value or error. */
 function validateAmount(raw, { max = LIMITS.maxAmount, allowZero = false } = {}) {
   const value = Number(raw);
@@ -510,6 +520,15 @@ function applyInputLimits() {
   [$("firstName"), $("lastName"), $("firstNameInput"), $("lastNameInput")].forEach((node) => {
     node.maxLength = LIMITS.name;
   });
+  syncTimeInputLimit();
+}
+
+/** Limits today's time picker to now while leaving past dates unrestricted. */
+function syncTimeInputLimit() {
+  const time = $("timeInput");
+  if (!time) return;
+  if ($("dateInput").value === todayKey()) time.max = currentTimeKey();
+  else time.removeAttribute("max");
 }
 
 /* ============================================================
@@ -803,14 +822,11 @@ function aggregatesFor(range) {
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.created - a.created));
 
   const total = list.reduce((acc, e) => acc + Number(e.amount), 0);
-  const byCategory = new Map();
   const byDay = new Map();
   const byMonth = new Map();
 
   list.forEach((entry) => {
     const amount = Number(entry.amount);
-    const cat = byCategory.get(entry.category) || { total: 0, count: 0 };
-    byCategory.set(entry.category, { total: cat.total + amount, count: cat.count + 1 });
     byDay.set(entry.date, (byDay.get(entry.date) || 0) + amount);
     const m = entry.date.slice(0, 7);
     byMonth.set(m, (byMonth.get(m) || 0) + amount);
@@ -820,7 +836,6 @@ function aggregatesFor(range) {
     range,
     list,
     total,
-    byCategory: [...byCategory.entries()].sort((a, b) => b[1].total - a[1].total),
     byDay,
     byMonth,
     today: byDay.get(todayKey()) || 0,
@@ -862,6 +877,22 @@ function monthKey(date) {
 function todayKey() {
   const now = new Date();
   return `${monthKey(now)}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+/** Returns the browser-local current clock time as a 24-hour HH:MM form value. */
+function currentTimeKey() {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+}
+
+/** Converts a stored 24-hour HH:MM time into the device's readable local clock format. */
+function prettyTime(value) {
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(value || "")) return "";
+  const [hour, minute] = value.split(":").map(Number);
+  return new Date(2000, 0, 1, hour, minute).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit"
+  });
 }
 
 /** Formats a numeric value using the locked Philippine peso symbol. */
@@ -1001,17 +1032,6 @@ function paintSkeleton() {
     $(id).innerHTML = bar("70%", 16);
   });
 
-  $("breakdownEmpty").hidden = true;
-  $("breakdown").innerHTML = [72, 54, 38]
-    .map(
-      (w) => `<li class="sk-row">
-        <span class="sk sk-dot"></span>
-        <span class="cat-name">${bar("46%", 12)}${bar(`${w}%`, 6, 3)}</span>
-        <span class="value">${bar("64px", 12)}</span>
-      </li>`
-    )
-    .join("");
-
   $("entriesEmpty").hidden = true;
   $("entries").innerHTML = [1, 2, 3, 4]
     .map(
@@ -1128,35 +1148,104 @@ function renderSummary(agg) {
   );
 }
 
-/** Renders category totals and percentage bars for the active Home range. */
-function renderBreakdown(agg) {
-  const target = $("breakdown");
-  const scopeName = { day: "Day", week: "Week", month: "Month", year: "Year" }[agg.range.scope];
-  $("categoryRangeLabel").textContent = `${scopeName} · ${agg.range.label}`;
-  $("breakdownEmpty").hidden = agg.byCategory.length > 0;
-  $("breakdownEmpty").textContent = `No spending recorded for ${agg.range.label}.`;
-  target.innerHTML = agg.byCategory
-    .map(([id, stat]) => {
-      const meta = catById(id);
-      const share = agg.total ? Math.round((stat.total / agg.total) * 100) : 0;
-      const tip = `${stat.count} ${stat.count === 1 ? "entry" : "entries"} · ${money(stat.total / stat.count)} average · ${share}% of ${agg.range.label}`;
-      return `<li data-tip="${escapeHtml(tip)}" tabindex="0">
-        <span class="glyph">${icon(meta.id)}</span>
-        <span class="cat-name">
-          <b>${meta.label}</b>
-          <span class="track"><i style="width:${share}%"></i></span>
-        </span>
-        <span class="value">${money(stat.total)}<small>${share}%</small></span>
-      </li>`;
-    })
-    .join("");
-}
-
 const PHOTO_ICON =
   '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" ' +
   'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
   '<rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.2"/>' +
   '<path d="M8 6l1.5-2h5L16 6"/></svg>';
+
+let photoPeekId = null;
+
+/** Shows attached receipt thumbnails beside a hovered row or as a touch-friendly modal. */
+function showPhotoPeek(entry, anchor, modal = false) {
+  const photos = media.get(entry.id);
+  if (!photos.length) return false;
+
+  photoPeekId = entry.id;
+  const peek = $("photoPeek");
+  const card = peek.querySelector(".photo-peek-card");
+  peek.classList.toggle("modal", modal);
+  card.setAttribute("aria-modal", String(modal));
+  $("photoPeekLabel").textContent = entry.item || catById(entry.category).label;
+  const grid = $("photoPeekGrid");
+  grid.innerHTML = "";
+
+  photos.forEach((src, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "photo-peek-thumb";
+    button.setAttribute("aria-label", `Open attached photo ${index + 1}`);
+    const image = document.createElement("img");
+    image.src = src;
+    image.alt = `Attached expense photo ${index + 1}`;
+    button.appendChild(image);
+    button.addEventListener("click", () => openLightbox(src));
+    grid.appendChild(button);
+  });
+
+  tooltip.hide();
+  peek.hidden = false;
+  if (modal) {
+    document.body.classList.add("photo-peek-open");
+    setTimeout(() => $("closePhotoPeek").focus(), 0);
+  } else if (anchor) {
+    const target = anchor.getBoundingClientRect();
+    const width = Math.min(310, window.innerWidth - 24);
+    card.style.left = `${Math.max(12, Math.min(window.innerWidth - width - 12, target.left))}px`;
+    card.style.top = `${target.top > 230 ? Math.max(12, target.top - 206) : Math.min(window.innerHeight - 190, target.bottom + 8)}px`;
+  }
+  return true;
+}
+
+/** Closes the hover preview or long-press modal and clears temporary positioning. */
+function closePhotoPeek() {
+  const peek = $("photoPeek");
+  if (peek.hidden) return;
+  peek.hidden = true;
+  peek.classList.remove("modal");
+  peek.querySelector(".photo-peek-card").removeAttribute("style");
+  document.body.classList.remove("photo-peek-open");
+  photoPeekId = null;
+}
+
+/** Adds desktop hover and touch long-press photo behavior without replacing normal row taps. */
+function wireRecentPhotoPreview(button, entry) {
+  let hoverTimer = null;
+  let longPressTimer = null;
+  let suppressNextClick = false;
+  const hasLocalPhotos = () => entry.photoCount > 0 && media.get(entry.id).length > 0;
+
+  button.addEventListener("pointerenter", (event) => {
+    if (event.pointerType !== "mouse" || !hasLocalPhotos()) return;
+    hoverTimer = setTimeout(() => showPhotoPeek(entry, button, false), 320);
+  });
+  button.addEventListener("pointerleave", () => {
+    clearTimeout(hoverTimer);
+    if (!$("photoPeek").classList.contains("modal") && photoPeekId === entry.id) closePhotoPeek();
+  });
+  button.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "mouse" || !hasLocalPhotos()) return;
+    longPressTimer = setTimeout(() => {
+      suppressNextClick = true;
+      showPhotoPeek(entry, null, true);
+      navigator.vibrate?.(18);
+    }, 520);
+  });
+  ["pointerup", "pointercancel", "pointerleave"].forEach((type) => {
+    button.addEventListener(type, () => clearTimeout(longPressTimer));
+  });
+  button.addEventListener("contextmenu", (event) => {
+    if (suppressNextClick) event.preventDefault();
+  });
+  button.addEventListener("click", (event) => {
+    if (suppressNextClick) {
+      event.preventDefault();
+      suppressNextClick = false;
+      return;
+    }
+    openDetailSheet(entry.id);
+  });
+}
 
 /** Renders active-range expenses grouped by day, or by month in Year view. */
 function renderEntries(agg) {
@@ -1187,9 +1276,11 @@ function renderEntries(agg) {
     li.className = entry.pending ? "row pending" : entry.failed ? "row failed" : "row";
 
     const title = entry.item || entry.merchant || meta.label;
-    const subtitle = [entry.item && entry.merchant ? entry.merchant : "", entry.note]
-      .filter(Boolean)
-      .join(" · ") || meta.label;
+    const subtitle = [
+      entry.spentTime ? prettyTime(entry.spentTime) : "",
+      entry.item && entry.merchant ? entry.merchant : "",
+      entry.note
+    ].filter(Boolean).join(" · ") || meta.label;
 
     const button = document.createElement("button");
     button.type = "button";
@@ -1210,7 +1301,7 @@ function renderEntries(agg) {
       <span class="amount">${money(entry.amount)}${
         entry.photoCount ? `<small class="photo-badge">${PHOTO_ICON}${entry.photoCount}</small>` : ""
       }</span>`;
-    button.addEventListener("click", () => openDetailSheet(entry.id));
+    wireRecentPhotoPreview(button, entry);
     li.appendChild(button);
     target.appendChild(li);
   });
@@ -1233,7 +1324,6 @@ function render({ allowSkeleton = true } = {}) {
 /** Paints every data-driven screen section from one aggregate result. */
 function paint(agg) {
   renderSummary(agg);
-  renderBreakdown(agg);
   renderEntries(agg);
   syncRangeBudgetField(agg.range);
   $("amountSymbol").textContent = config.currency;
@@ -1306,6 +1396,7 @@ function openDetailSheet(id) {
     ["Category", meta.label],
     ["Date", prettyDay(entry.date)]
   ];
+  if (entry.spentTime) rows.push(["Time of spending", prettyTime(entry.spentTime)]);
   if (entry.merchant) rows.push(["Where", entry.merchant]);
   if (entry.item) rows.push(["Item", entry.item]);
   rows.push(["Description", entry.note || "—"]);
@@ -1370,6 +1461,13 @@ $("lightboxClose").addEventListener("click", closeLightbox);
 $("lightbox").addEventListener("click", (event) => {
   if (event.target !== $("lightboxImage")) closeLightbox();
 });
+$("closePhotoPeek").addEventListener("click", closePhotoPeek);
+$("photoPeek").addEventListener("click", (event) => {
+  if (event.target === $("photoPeek")) closePhotoPeek();
+});
+window.addEventListener("scroll", () => {
+  if (!$("photoPeek").hidden && !$("photoPeek").classList.contains("modal")) closePhotoPeek();
+}, { passive: true });
 
 $("editFromDetail").addEventListener("click", () => {
   const id = detailId;
@@ -1460,6 +1558,8 @@ function openEntrySheet(id = null) {
   $("itemInput").value = entry?.item || "";
   $("noteInput").value = entry?.note || "";
   $("dateInput").value = entry ? entry.date : todayKey();
+  $("timeInput").value = entry?.spentTime || (entry ? "" : currentTimeKey());
+  syncTimeInputLimit();
   $("saveEntry").textContent = entry ? "Save changes" : "Save expense";
   $("deleteEntry").hidden = !entry;
 
@@ -1474,19 +1574,44 @@ function openEntrySheet(id = null) {
   setTimeout(() => $("amountInput").focus(), 60);
 }
 
-/** Closes the editor, protecting any changed draft unless the caller already saved it. */
-function closeEntrySheet(force = false) {
-  if (!force && entryDirty && !confirm("Discard your unsaved expense changes?")) return false;
+/** Closes the editor after the caller has handled any unsaved-draft decision. */
+function closeEntrySheet() {
   $("entrySheet").hidden = true;
   tooltip.hide();
   editingId = null;
   draftPhotos = [];
   entryDirty = false;
-  return true;
+}
+
+/** Opens the theme-aware discard confirmation and moves focus to its safe action. */
+function showDiscardChangesDialog() {
+  $("discardChangesModal").hidden = false;
+  document.body.classList.add("discard-dialog-open");
+  setTimeout(() => $("keepEditing").focus(), 0);
+}
+
+/** Returns to the current expense draft without changing any entered values. */
+function keepEditingExpense() {
+  $("discardChangesModal").hidden = true;
+  document.body.classList.remove("discard-dialog-open");
+  setTimeout(() => $("amountInput").focus(), 0);
+}
+
+/** Discards the draft, closes the editor, and removes its temporary history entry. */
+function discardExpenseChanges() {
+  $("discardChangesModal").hidden = true;
+  document.body.classList.remove("discard-dialog-open");
+  const ownsHistory = history.state?.saanLayer === "entry";
+  closeEntrySheet();
+  if (ownsHistory) history.back();
 }
 
 /** Uses the editor's history entry so mobile Back and the close button behave identically. */
 function closeEntryFromUi() {
+  if (entryDirty) {
+    showDiscardChangesDialog();
+    return;
+  }
   if (history.state?.saanLayer === "entry") history.back();
   else closeEntrySheet();
 }
@@ -1494,7 +1619,7 @@ function closeEntryFromUi() {
 /** Removes a saved/deleted editor layer without asking to discard an already committed draft. */
 function closeCommittedEntry() {
   const ownsHistory = history.state?.saanLayer === "entry";
-  closeEntrySheet(true);
+  closeEntrySheet();
   if (ownsHistory) history.back();
 }
 
@@ -1553,6 +1678,15 @@ $("entryForm").addEventListener("submit", (event) => {
     return;
   }
 
+  const timeValue = $("timeInput").value;
+  const timeError = validateEntryTime(dateValue, timeValue);
+  if (timeError) {
+    setFieldError("timeInput", timeError);
+    toast(timeError, "error");
+    $("timeInput").focus();
+    return;
+  }
+
   // The merchant field is no longer captured; preserve whatever an existing record carries.
   const existing = editingId ? entries.find((e) => e.id === editingId) : null;
   const merchant = cleanText(existing?.merchant, LIMITS.merchant);
@@ -1563,6 +1697,7 @@ $("entryForm").addEventListener("submit", (event) => {
     item: cleanText($("itemInput").value, LIMITS.item),
     note: cleanText($("noteInput").value, LIMITS.note),
     date: dateValue,
+    spentTime: timeValue,
     photoCount: draftPhotos.length
   };
 
@@ -1760,7 +1895,13 @@ $("entryForm").addEventListener("input", () => {
 $("entryForm").addEventListener("change", () => {
   if (!$("entrySheet").hidden) entryDirty = true;
 });
+$("dateInput").addEventListener("change", syncTimeInputLimit);
 $("closeEntry").addEventListener("click", closeEntryFromUi);
+$("keepEditing").addEventListener("click", keepEditingExpense);
+$("discardChanges").addEventListener("click", discardExpenseChanges);
+$("discardChangesModal").addEventListener("click", (event) => {
+  if (event.target === $("discardChangesModal")) keepEditingExpense();
+});
 $("closeSettings").addEventListener("click", closeSettingsFromUi);
 
 $("scopeTabs").addEventListener("click", async (event) => {
@@ -1956,12 +2097,20 @@ $("clearButton").addEventListener("click", () => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    if (!$("discardChangesModal").hidden) {
+      keepEditingExpense();
+      return;
+    }
     if (!$("devBanner").hidden) {
       dismissDevelopmentNotice();
       return;
     }
     if (!$("lightbox").hidden) {
       closeLightbox();
+      return;
+    }
+    if (!$("photoPeek").hidden) {
+      closePhotoPeek();
       return;
     }
     if (!$("calendarModal").hidden) {
@@ -2063,13 +2212,14 @@ window.addEventListener("popstate", (event) => {
   const state = event.state;
   if (!state || !state.saanView) return;
 
-  /* Hardware Back first closes the editor. A cancelled discard recreates its history entry. */
+  /* Hardware Back first asks about a dirty editor and recreates its layer while deciding. */
   if (!$("entrySheet").hidden) {
-    const closed = closeEntrySheet();
-    if (!closed) {
+    if (entryDirty) {
       pushAppLayer("entry");
+      showDiscardChangesDialog();
       return;
     }
+    closeEntrySheet();
   }
 
   $("settingsPanel").hidden = true;
@@ -2338,6 +2488,7 @@ function renderRecordsView() {
     const title = entry.item || entry.merchant || category.label;
     const subtitle = [
       prettyDay(entry.date),
+      entry.spentTime ? `Spent ${prettyTime(entry.spentTime)}` : "",
       recordedTime(entry.created) ? `Recorded ${recordedTime(entry.created)}` : "",
       category.label,
       entry.note
