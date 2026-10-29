@@ -3,6 +3,7 @@ package com.example.saannapunta
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputType
@@ -37,11 +38,13 @@ class EntryActivity : Activity() {
     // Draft values that are changed by the category chips and native date picker.
     private var selectedCategory = "food"
     private var selectedDate = todayKey()
+    private var selectedTime = currentTimeKey()
 
     // Input views are constructed in onCreate and read later by save().
     private lateinit var amountField: EditText
     private lateinit var noteField: EditText
     private lateinit var dateButton: Button
+    private lateinit var timeButton: Button
     private lateinit var chipRow: LinearLayout
 
     /** Loads optional edit data and constructs the scrollable expense form. */
@@ -53,6 +56,7 @@ class EntryActivity : Activity() {
         editing?.let {
             selectedCategory = it.category
             selectedDate = it.date
+            selectedTime = it.spentTime.ifBlank { currentTimeKey() }
         }
 
         // Layer the animated background behind the scrollable form.
@@ -107,6 +111,13 @@ class EntryActivity : Activity() {
             setOnClickListener { pickDate() }
         }
         card.addView(dateButton, LinearLayout.LayoutParams(MATCH, WRAP))
+
+        card.addView(label("Time of spending"))
+        timeButton = Button(this).apply {
+            text = prettyTime(selectedTime)
+            setOnClickListener { pickTime() }
+        }
+        card.addView(timeButton, LinearLayout.LayoutParams(MATCH, WRAP))
 
         card.addView(label("Note (optional)"))
         noteField = EditText(this).apply {
@@ -203,11 +214,33 @@ class EntryActivity : Activity() {
         ).show()
     }
 
+    /** Opens the native clock picker and stores the selected spending time as HH:MM. */
+    private fun pickTime() {
+        val parts = selectedTime.split(":").mapNotNull { it.toIntOrNull() }
+        val now = Calendar.getInstance()
+        val hour = parts.getOrNull(0) ?: now.get(Calendar.HOUR_OF_DAY)
+        val minute = parts.getOrNull(1) ?: now.get(Calendar.MINUTE)
+        TimePickerDialog(
+            this,
+            { _, selectedHour, selectedMinute ->
+                selectedTime = "%02d:%02d".format(selectedHour, selectedMinute)
+                timeButton.text = prettyTime(selectedTime)
+            },
+            hour,
+            minute,
+            android.text.format.DateFormat.is24HourFormat(this)
+        ).show()
+    }
+
     /** Validates the amount, upserts the expense, confirms success and closes the screen. */
     private fun save() {
         val amount = amountField.text.toString().toDoubleOrNull()
         if (amount == null || amount <= 0.0) {
             Toast.makeText(this, "Enter an amount greater than zero.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (selectedDate == todayKey() && selectedTime > currentTimeKey()) {
+            Toast.makeText(this, "You cannot log an expense at a future time.", Toast.LENGTH_SHORT).show()
             return
         }
         val entry = Expense(
@@ -218,6 +251,7 @@ class EntryActivity : Activity() {
             item = editing?.item.orEmpty(),
             note = noteField.text.toString().trim(),
             date = selectedDate,
+            spentTime = selectedTime,
             created = editing?.created ?: System.currentTimeMillis(),
             photoCount = editing?.photoCount ?: 0
         )

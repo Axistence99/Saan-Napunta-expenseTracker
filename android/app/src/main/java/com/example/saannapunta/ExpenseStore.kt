@@ -39,6 +39,7 @@ data class Expense(
     val item: String = "",
     val note: String,
     val date: String,
+    val spentTime: String = "",
     val created: Long,
     val photoCount: Int = 0
 ) {
@@ -54,6 +55,7 @@ data class Expense(
         .put("item", item)
         .put("note", note)
         .put("date", date)
+        .put("spentTime", spentTime)
         .put("created", created)
         .put("photoCount", photoCount)
 
@@ -68,6 +70,7 @@ data class Expense(
             item = json.optString("item", ""),
             note = json.optString("note", ""),
             date = json.optString("date", todayKey()),
+            spentTime = json.optString("spentTime", ""),
             created = json.optLong("created", 0L),
             photoCount = json.optInt("photoCount", 0)
         )
@@ -158,6 +161,23 @@ fun todayKey(): String {
         now.get(Calendar.MONTH) + 1,
         now.get(Calendar.DAY_OF_MONTH)
     )
+}
+
+/** Returns the device-local current time as HH:MM for the native time picker. */
+fun currentTimeKey(): String {
+    val now = Calendar.getInstance()
+    return "%02d:%02d".format(now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE))
+}
+
+/** Formats HH:MM using the device's 12/24-hour locale preference. */
+fun prettyTime(timeKey: String): String {
+    val parts = timeKey.split(":").mapNotNull { it.toIntOrNull() }
+    if (parts.size != 2) return timeKey
+    val calendar = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, parts[0])
+        set(Calendar.MINUTE, parts[1])
+    }
+    return java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT).format(calendar.time)
 }
 
 /** Converts YYYY-MM into a readable label such as August 2026. */

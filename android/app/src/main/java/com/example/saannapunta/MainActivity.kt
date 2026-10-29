@@ -372,6 +372,7 @@ class MainActivity : Activity() {
             })
             info.addView(TextView(this).apply {
                 text = listOf(
+                    if (entry.spentTime.isNotBlank()) prettyTime(entry.spentTime) else "",
                     if (entry.item.isNotBlank()) entry.merchant else "",
                     entry.note
                 ).filter { it.isNotBlank() }.joinToString(" \u00b7 ").ifBlank { meta.label }
