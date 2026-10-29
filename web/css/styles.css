@@ -3450,3 +3450,8 @@ body[data-theme="gradient"] .developer-avatar {
   box-shadow: 0 8px 24px rgba(225, 185, 87, 0.12);
 }
 .settings-link-row { text-decoration: none; }
+
+/* An installed standalone PWA no longer needs to advertise its own installer. */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  #installAppLink { display: none !important; }
+}

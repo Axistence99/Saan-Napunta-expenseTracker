@@ -155,9 +155,12 @@ cd android && ./gradlew assembleDebug
 ## PWA, shortcuts and Android widget
 
 1. Open `/install.html` on Android, iOS and desktop; verify the correct device-specific panel appears.
-2. On eligible Android/desktop Chrome, the custom Install button opens the browser's real install prompt.
-3. On iOS, the page shows Safari Share → Add to Home Screen instructions and Copy link feedback.
-4. Settings → Install this app opens the installation page.
+   On mobile, the desktop section is removed, the fallback link uses mobile wording, and nothing overflows at 320 px.
+2. On eligible Android/desktop Chrome, the custom Install button opens the browser's real install prompt. If `beforeinstallprompt` never fires, the enabled button and 1.8-second fallback show browser-menu instructions instead of staying on “Preparing install”.
+3. On iOS, Install on Home Screen appears above Open without installing, leads into the Safari
+   Share instructions, and Copy installation link provides feedback.
+4. Settings → Install this app opens the installation page in a normal browser. Launch the
+   installed PWA and verify this Settings row is hidden in standalone/fullscreen mode.
 5. Install from Android Chrome; the app opens in standalone portrait mode.
 6. Visit once online, close the browser, go offline and reopen from the Home Screen.
 7. Android PWA long-press shows Add Expense and Records; each route opens the correct view.

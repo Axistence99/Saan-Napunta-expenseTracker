@@ -103,6 +103,34 @@
       border-radius: 999px;
       background: #171411;
     }
+    @media (max-width: 520px) {
+      body {
+        place-items: start center;
+        padding: max(12px, env(safe-area-inset-top)) 10px max(14px, env(safe-area-inset-bottom));
+      }
+      main {
+        width: 100%;
+        min-height: calc(100svh - max(26px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+        padding: 20px 16px 16px;
+        border-radius: 22px;
+      }
+      .brand { align-items: flex-start; gap: 12px; }
+      .brand img { width: 64px; height: 64px; border-radius: 17px; }
+      h1 { font-size: clamp(1.35rem, 7vw, 1.65rem); }
+      .subtitle { font-size: 0.78rem; }
+      section { margin-top: 14px; }
+      .primary, .secondary { min-height: 50px; }
+      .mobile-install #continueLink {
+        margin-top: 18px;
+        color: var(--muted);
+        border-color: rgba(222, 219, 187, 0.12);
+      }
+      #iosInstallButton, #installButton { margin-top: 10px; }
+    }
+    @media (max-width: 340px) {
+      .brand { flex-direction: column; }
+      .brand img { width: 58px; height: 58px; }
+    }
   </style>
 </head>
 <body>
@@ -126,7 +154,7 @@
     <section id="androidPanel" hidden>
       <h2>Install on Android</h2>
       <p id="androidHelp">Use Chrome’s secure installation prompt to add the app.</p>
-      <button class="primary" id="installButton" type="button" disabled>Preparing install…</button>
+      <button class="primary" id="installButton" type="button">Install this app</button>
       <ol id="androidFallback" hidden>
         <li>Open this page in Google Chrome.</li>
         <li>Tap Chrome’s three-dot menu.</li>
@@ -136,7 +164,8 @@
 
     <section id="iosPanel" hidden>
       <h2>Install on iPhone or iPad</h2>
-      <ol>
+      <button class="primary" id="iosInstallButton" type="button">Install on Home Screen</button>
+      <ol id="iosInstallSteps">
         <li>Open this page in <b>Safari</b>.</li>
         <li>Tap Share <span class="share-symbol" aria-label="Share icon">↑</span>.</li>
         <li>Scroll down and tap <b>Add to Home Screen</b>.</li>
@@ -148,10 +177,10 @@
     <section id="desktopPanel" hidden>
       <h2>Install on this computer</h2>
       <p>Use the install icon in the browser address bar, or open the browser menu and choose <b>Install Saan Napunta?</b>.</p>
-      <button class="primary" id="desktopInstallButton" type="button" disabled>Preparing install…</button>
+      <button class="primary" id="desktopInstallButton" type="button">Install this app</button>
     </section>
 
-    <a class="secondary" href="./">Continue in browser</a>
+    <a class="secondary" id="continueLink" href="./">Continue in browser</a>
     <p class="status" id="installStatus" role="status" aria-live="polite"></p>
     <p class="privacy">Installation is optional. Your expense data remains in this browser unless you enable sync.</p>
   </main>
@@ -169,15 +198,29 @@
       $("deviceLabel").textContent = label;
     }
 
-    if (standalone) showPanel("installedPanel", "Installed app");
-    else if (isIOS) showPanel("iosPanel", "iPhone / iPad");
+    if (isIOS || isAndroid) {
+      document.body.classList.add("mobile-install");
+      $("desktopPanel").remove();
+      $("continueLink").textContent = "Open Saan Napunta? without installing";
+    }
+
+    if (standalone) {
+      showPanel("installedPanel", "Installed app");
+      $("continueLink").hidden = true;
+    } else if (isIOS) showPanel("iosPanel", "iPhone / iPad");
     else if (isAndroid) showPanel("androidPanel", "Android");
     else showPanel("desktopPanel", "Desktop browser");
+
+    $("iosInstallButton").addEventListener("click", () => {
+      $("iosInstallSteps").scrollIntoView({ behavior: "smooth", block: "center" });
+      $("installStatus").textContent = "Safari requires Share, then Add to Home Screen.";
+    });
 
     window.addEventListener("beforeinstallprompt", (event) => {
       event.preventDefault();
       deferredInstallPrompt = event;
       const button = isAndroid ? $("installButton") : $("desktopInstallButton");
+      if (!button) return;
       button.disabled = false;
       button.textContent = "Install Saan Napunta?";
       $("androidFallback").hidden = true;
@@ -185,7 +228,15 @@
     });
 
     async function requestInstall() {
-      if (!deferredInstallPrompt) return;
+      if (!deferredInstallPrompt) {
+        if (isAndroid) {
+          $("androidFallback").hidden = false;
+          $("installStatus").textContent = "Use Chrome’s menu if the install prompt is not available.";
+        } else {
+          $("installStatus").textContent = "Use the install icon in the address bar or choose Install app from the browser menu.";
+        }
+        return;
+      }
       const prompt = deferredInstallPrompt;
       deferredInstallPrompt = null;
       await prompt.prompt();
@@ -193,14 +244,18 @@
       $("installStatus").textContent = choice.outcome === "accepted" ? "Installation started." : "Installation cancelled.";
     }
 
-    $("installButton").addEventListener("click", requestInstall);
-    $("desktopInstallButton").addEventListener("click", requestInstall);
+    $("installButton")?.addEventListener("click", requestInstall);
+    $("desktopInstallButton")?.addEventListener("click", requestInstall);
 
     setTimeout(() => {
-      if (!deferredInstallPrompt && !standalone && isAndroid) {
-        $("installButton").hidden = true;
+      if (deferredInstallPrompt || standalone) return;
+      if (isAndroid) {
         $("androidFallback").hidden = false;
+        $("installButton").textContent = "Show install steps";
         $("installStatus").textContent = "If no prompt appears, use Chrome’s menu.";
+      } else if (!isIOS) {
+        $("desktopInstallButton").textContent = "Install from browser menu";
+        $("installStatus").textContent = "No automatic prompt is available. Use the address-bar install icon or browser menu.";
       }
     }, 1800);
 

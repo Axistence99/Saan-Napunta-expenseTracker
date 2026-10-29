@@ -2915,6 +2915,18 @@ function applyLaunchRoute() {
   }
 }
 
+/** Hides installation guidance when the app already runs from an installed Home Screen shell. */
+function updateInstallLinkVisibility() {
+  const standalone = window.matchMedia?.("(display-mode: standalone)").matches ||
+    window.matchMedia?.("(display-mode: fullscreen)").matches ||
+    navigator.standalone === true;
+  if ($("installAppLink")) $("installAppLink").hidden = Boolean(standalone);
+}
+
+window.addEventListener("appinstalled", updateInstallLinkVisibility);
+window.matchMedia?.("(display-mode: standalone)").addEventListener?.("change", updateInstallLinkVisibility);
+window.matchMedia?.("(display-mode: fullscreen)").addEventListener?.("change", updateInstallLinkVisibility);
+
 /** Registers the same-origin service worker used for offline reopening. */
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
@@ -2961,6 +2973,7 @@ function registerServiceWorker() {
     const onboardingShown = maybeShowOnboarding();
     if (!onboardingShown) applyLaunchRoute();
     registerServiceWorker();
+    updateInstallLinkVisibility();
     showDevelopmentNotice();
   }, 260);
 })();

@@ -8,7 +8,7 @@ The public installer is:
 https://axistence99.github.io/Saan-Napunta-expenseTracker/install.html
 ```
 
-It detects Android, iOS/iPadOS, desktop, and standalone mode. Android/desktop receives the browser's official install prompt when available; iOS receives Safari Add to Home Screen instructions. Settings links directly to this page.
+It detects Android, iOS/iPadOS, desktop, and standalone mode. Android/desktop receives the browser's official install prompt when available; when it is unavailable, the button immediately explains how to use the browser menu instead of remaining stuck on “Preparing install”. iOS receives a prominent Install on Home Screen button above the browser fallback, followed by Safari Share instructions. The layout adapts to narrow phones, removes the desktop section from mobile DOM, and changes the fallback link to mobile-specific wording. Settings links directly to this page only in a normal browser; the link is hidden when the app is already running in standalone/fullscreen mode.
 
 ## Web installation
 
