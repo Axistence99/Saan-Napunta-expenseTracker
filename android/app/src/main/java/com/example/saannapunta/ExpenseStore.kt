@@ -10,6 +10,9 @@ const val PREFS = "saan_napunta_prefs"
 const val ENTRIES_KEY = "entries"
 const val BUDGET_KEY = "monthly_budget"
 const val CURRENCY_KEY = "currency"
+const val REMINDER_ENABLED_KEY = "reminder_enabled"
+const val REMINDER_HOUR_KEY = "reminder_hour"
+const val REMINDER_MINUTE_KEY = "reminder_minute"
 
 /** Metadata needed to render one expense category in native Android views. */
 data class Category(val id: String, val label: String, val iconRes: Int)
@@ -137,6 +140,21 @@ class ExpenseStore(context: Context) {
     var currency: String
         get() = prefs.getString(CURRENCY_KEY, "\u20B1") ?: "\u20B1"
         set(value) = prefs.edit().putString(CURRENCY_KEY, value).apply()
+
+    /** Whether the user explicitly enabled the daily no-expense reminder. */
+    var reminderEnabled: Boolean
+        get() = prefs.getBoolean(REMINDER_ENABLED_KEY, false)
+        set(value) = prefs.edit().putBoolean(REMINDER_ENABLED_KEY, value).apply()
+
+    /** Local clock hour used when scheduling the reminder; noon is the default. */
+    var reminderHour: Int
+        get() = prefs.getInt(REMINDER_HOUR_KEY, 12).coerceIn(0, 23)
+        set(value) = prefs.edit().putInt(REMINDER_HOUR_KEY, value.coerceIn(0, 23)).apply()
+
+    /** Local clock minute used when scheduling the reminder. */
+    var reminderMinute: Int
+        get() = prefs.getInt(REMINDER_MINUTE_KEY, 0).coerceIn(0, 59)
+        set(value) = prefs.edit().putInt(REMINDER_MINUTE_KEY, value.coerceIn(0, 59)).apply()
 
     /** Serializes the supplied ledger and commits it asynchronously with apply(). */
     private fun persist(items: MutableList<Expense>) {

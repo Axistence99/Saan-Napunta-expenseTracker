@@ -99,6 +99,7 @@ drawables on Android). No emoji, no icon font, no image assets.
 - Android PWA shortcuts: Add Expense and Records
 - Native Android long-press shortcuts: Add Expense and Records
 - Native Android widget: today total, monthly total and Add Expense
+- Optional native Android daily reminder at a user-selected time; it appears only when no expense exists today
 - iOS Safari Add to Home Screen supported; native WidgetKit and App Intents are deferred
 - PWA, Apple Touch and native Android launcher icons use the owner-provided wallet artwork
 

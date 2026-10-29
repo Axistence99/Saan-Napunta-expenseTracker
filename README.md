@@ -19,7 +19,7 @@
 - Philippine peso only for now; the data model stays currency-aware for a later update
 - Erase-all-data control; nothing leaves the device unless you opt in
 - Installable PWA with offline reopening and Add Expense / Records shortcuts
-- Native Android long-press shortcuts and spending summary Home Screen widget
+- Native Android long-press shortcuts, spending summary widget, and optional daily reminder
 - **Optional Google sign-in** for cross-device sync — off by default, app is fully usable without it
 
 ## Project layout

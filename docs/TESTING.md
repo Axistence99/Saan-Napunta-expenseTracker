@@ -84,6 +84,11 @@ cd android && ./gradlew assembleDebug
 6. Settings dialog: budget and currency persist across app restarts.
 8. Rotate the device and reopen — data is intact (it is read from SharedPreferences).
 9. Erase all data → empty state returns.
+10. Enable Daily expense reminder, choose a time a few minutes ahead, and grant notification permission.
+11. With no expense today, the generic reminder appears and Add expense opens the editor.
+12. With an expense today, the scheduled check posts no notification but schedules the next day.
+13. Deny Android 13+ notification permission; the preference turns off and an explanatory toast appears.
+14. Reboot or change timezone with reminders enabled; the next local reminder is restored.
 
 ## View ranges and per-period budgets
 

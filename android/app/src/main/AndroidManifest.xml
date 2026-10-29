@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Notifications are opt-in; reboot access restores a reminder the user already enabled. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <!-- Application-wide backup, launcher icon, localization and theme metadata. -->
     <application
         android:allowBackup="true"
@@ -23,6 +27,23 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
+
+        <!-- Alarm target is private; only this application can trigger the actual reminder check. -->
+        <receiver
+            android:name=".ExpenseReminderReceiver"
+            android:exported="false" />
+
+        <!-- System broadcasts restore a reminder that the user previously enabled. -->
+        <receiver
+            android:name=".ReminderRescheduleReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
 
         <!-- Home Screen widget receiver; updates only through explicit Android widget broadcasts. -->
         <receiver

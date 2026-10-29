@@ -1,9 +1,13 @@
 package com.example.saannapunta
 
+import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.TimePickerDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
@@ -19,7 +23,9 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.Spinner
+import android.widget.Switch
 import android.widget.TextView
+import android.widget.Toast
 import java.util.Calendar
 
 /**
@@ -445,8 +451,35 @@ class MainActivity : Activity() {
             adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, currencies)
             setSelection(currencies.indexOf(store.currency).coerceAtLeast(0))
         }
+        var reminderHour = store.reminderHour
+        var reminderMinute = store.reminderMinute
+        val reminderSwitch = Switch(this).apply {
+            text = getString(R.string.reminder_setting)
+            isChecked = store.reminderEnabled
+            setPadding(0, dp(14), 0, dp(6))
+        }
+        val reminderTime = Button(this).apply {
+            text = "${getString(R.string.reminder_time)}: ${formatReminderTime(reminderHour, reminderMinute)}"
+            isEnabled = reminderSwitch.isChecked
+            setOnClickListener {
+                TimePickerDialog(
+                    this@MainActivity,
+                    { _, hour, minute ->
+                        reminderHour = hour
+                        reminderMinute = minute
+                        text = "${getString(R.string.reminder_time)}: ${formatReminderTime(hour, minute)}"
+                    },
+                    reminderHour,
+                    reminderMinute,
+                    android.text.format.DateFormat.is24HourFormat(this@MainActivity)
+                ).show()
+            }
+        }
+        reminderSwitch.setOnCheckedChangeListener { _, checked -> reminderTime.isEnabled = checked }
         layout.addView(budgetField)
         layout.addView(currencySpinner)
+        layout.addView(reminderSwitch)
+        layout.addView(reminderTime)
 
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.settings))
@@ -454,11 +487,51 @@ class MainActivity : Activity() {
             .setPositiveButton("Save") { _, _ ->
                 store.budget = budgetField.text.toString().toDoubleOrNull() ?: 0.0
                 store.currency = currencies[currencySpinner.selectedItemPosition]
+                saveReminderSettings(reminderSwitch.isChecked, reminderHour, reminderMinute)
                 refresh()
             }
             .setNeutralButton(getString(R.string.erase_all)) { _, _ -> confirmErase() }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+
+    /** Persists reminder preferences and schedules only after notification permission exists. */
+    private fun saveReminderSettings(enabled: Boolean, hour: Int, minute: Int) {
+        store.reminderEnabled = enabled
+        store.reminderHour = hour
+        store.reminderMinute = minute
+        if (!enabled) {
+            ExpenseReminderScheduler.cancel(this)
+            return
+        }
+        if (Build.VERSION.SDK_INT >= 33 &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), NOTIFICATION_PERMISSION_REQUEST)
+        } else {
+            ExpenseReminderScheduler.scheduleNext(this, hour, minute)
+        }
+    }
+
+    /** Formats the chosen reminder time according to the user's 12/24-hour device setting. */
+    private fun formatReminderTime(hour: Int, minute: Int): String {
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
+        }
+        return java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT).format(calendar.time)
+    }
+
+    /** Completes scheduling after Android 13+ returns the notification permission result. */
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, results: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, results)
+        if (requestCode != NOTIFICATION_PERMISSION_REQUEST) return
+        if (results.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
+            ExpenseReminderScheduler.scheduleNext(this, store.reminderHour, store.reminderMinute)
+        } else {
+            store.reminderEnabled = false
+            Toast.makeText(this, R.string.reminder_permission_denied, Toast.LENGTH_LONG).show()
+        }
     }
 
     /** Requires confirmation before permanently clearing the Android ledger. */
@@ -534,6 +607,7 @@ class MainActivity : Activity() {
     companion object {
         const val ACTION_ADD_EXPENSE = "com.example.saannapunta.ADD_EXPENSE"
         const val ACTION_OPEN_RECORDS = "com.example.saannapunta.OPEN_RECORDS"
+        private const val NOTIFICATION_PERMISSION_REQUEST = 1300
         private const val MATCH = ViewGroup.LayoutParams.MATCH_PARENT
         private const val WRAP = ViewGroup.LayoutParams.WRAP_CONTENT
     }
